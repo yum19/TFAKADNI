@@ -58,7 +58,7 @@ Key differentiators: end-to-end journey, Tunisian-first design, **96.9% accuracy
     </td>
     <td align="center" width="50%">
       <img src="assets/screenshot-partner.png" alt="Partner support notes"/>
-      <br/><b>EvoCare (Partner)</b> · support notes between partners
+      <br/><b>Partner</b> · support notes between partners
     </td>
   </tr>
 </table>
