@@ -1,0 +1,977 @@
+<section class="baby-detail-page" [class.edit-mode-open]="isEditMode || isCareScoreModalOpen">
+
+  <div class="panel" *ngIf="loading">Loading baby profile...</div>
+  <div class="panel error" *ngIf="!loading && error">{{ error }}</div>
+
+  <ng-container *ngIf="!loading && !error && baby">
+
+    <!-- ── TOP DASHBOARD ── -->
+    <div class="top-dashboard">
+
+      <!-- Main Profile Card -->
+      <div class="main-profile-card">
+
+        <!-- Avatar Column -->
+        <div class="avatar-col">
+          <div class="avatar-wrap"
+            [class.boy-glow]="baby.gender === 'MALE'"
+            [class.girl-glow]="baby.gender === 'FEMALE'">
+            <img *ngIf="baby.photoUrl" [src]="baby.photoUrl" alt="baby photo">
+            <div class="photo-placeholder" *ngIf="!baby.photoUrl">
+              {{ getInitials(baby.firstName, baby.lastName) }}
+            </div>
+            <button type="button" class="edit-photo-btn" (click)="photoInput.click()" title="Change photo">
+              <mat-icon>camera_alt</mat-icon>
+            </button>
+            <input type="file" #photoInput hidden (change)="onPhotoSelected($event)" accept="image/*">
+          </div>
+          <p class="photo-msg" *ngIf="isUpdatingPhoto">Updating...</p>
+          <p class="photo-msg error" *ngIf="photoError">{{ photoError }}</p>
+        </div>
+
+        <!-- Info Column -->
+        <div class="info-col">
+          <div class="profile-header-row">
+            <span class="active-badge"><span class="dot"></span> ACTIVE PROFILE</span>
+            <button class="modify-btn" (click)="openEditProfile()">
+              <mat-icon class="sm-icon">edit</mat-icon> Modify
+            </button>
+          </div>
+          <h1 class="baby-name">{{ baby.firstName }} {{ baby.lastName }}</h1>
+          <p class="baby-subtitle">
+            <span class="gender-text"
+              [class.boy]="baby.gender === 'MALE'"
+              [class.girl]="baby.gender === 'FEMALE'">
+              {{ getGenderLabel(baby.gender) }}
+            </span>
+            <span class="dot-separator">•</span>
+            {{ getBabyAgeText(baby.birthDate) }}
+          </p>
+
+          <div class="stats-row">
+            <div class="stat-chip pink" *ngIf="baby.birthWeight">
+              <mat-icon class="sm-icon">scale</mat-icon>
+              {{ baby.birthWeight }} kg
+            </div>
+            <div class="stat-chip green" *ngIf="baby.birthHeight">
+              <mat-icon class="sm-icon">straighten</mat-icon>
+              {{ baby.birthHeight }} cm
+            </div>
+            <div class="stat-chip blue" *ngIf="baby.bloodType">
+              <mat-icon class="sm-icon">bloodtype</mat-icon>
+              {{ baby.bloodType }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Clinical Note Column -->
+        <div class="note-col">
+          <div class="clinical-note-card">
+            <div class="note-header">
+              <mat-icon class="red-icon">description</mat-icon> CLINICAL NOTE
+            </div>
+            <p class="note-text">{{ getShortNote(baby.notes) }}</p>
+          </div>
+        </div>
+
+        <div class="care-col">
+          <div class="care-score-card">
+            <div class="care-score-head">
+              <mat-icon>favorite</mat-icon>
+              <span>CARE SCORE</span>
+            </div>
+
+            <div class="care-progress-wrap">
+              <svg class="care-progress-svg" viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="care-track" cx="60" cy="60" r="46"></circle>
+                <circle
+                  class="care-progress"
+                  cx="60"
+                  cy="60"
+                  r="46"
+                  [attr.stroke-dasharray]="2 * 3.141592653589793 * 46"
+                  [attr.stroke-dashoffset]="careScoreStrokeOffset()">
+                </circle>
+              </svg>
+
+              <div class="care-progress-center">
+                <strong>{{ careScorePercent() }}%</strong>
+                <span>{{ careScoreState() }}</span>
+              </div>
+            </div>
+
+            <button type="button" class="care-view-chip" (click)="openCareScoreDetails()">
+              View details
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Birth Details Card -->
+      <div class="birth-details-card">
+        <div class="bd-header">
+          <div class="icon-circle"><mat-icon>edit_document</mat-icon></div>
+          <h3>Birth details</h3>
+        </div>
+        <div class="bd-list">
+          <div class="bd-item">
+            <span class="bd-label">Birth date</span>
+            <strong class="bd-value">{{ baby.birthDate | date:'mediumDate' }}</strong>
+          </div>
+          <div class="bd-item">
+            <span class="bd-label">Birth place</span>
+            <strong class="bd-value">{{ baby.birthPlace || '-' }}</strong>
+          </div>
+          <div class="bd-item">
+            <span class="bd-label">Delivery</span>
+            <strong class="bd-value text-blue">{{ baby.deliveryType || '-' }}</strong>
+          </div>
+          <div class="bd-item" *ngIf="baby.gestationalAgeAtBirth">
+            <span class="bd-label">Gestational age</span>
+            <strong class="bd-value text-pink">{{ baby.gestationalAgeAtBirth }} wks</strong>
+          </div>
+        </div>
+      </div>
+    </div><!-- /top-dashboard -->
+
+    <!-- ── TAB NAVIGATION ── -->
+    <div class="dashboard-tabs">
+      <div class="main-tabs-row">
+        <div class="main-tabs main-tabs-left">
+          <a class="tab-btn" [routerLink]="['/mother/babies', babyId, 'growth']"
+            routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">
+            <span>Growth</span>
+          </a>
+          <a class="tab-btn" [routerLink]="['/mother/babies', babyId, 'feeding']"
+            routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">
+            <span>Feeding</span>
+          </a>
+          <a class="tab-btn" [routerLink]="['/mother/babies', babyId, 'sleep']"
+            routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">
+            <span>Sleep</span>
+          </a>
+          <a class="tab-btn" [routerLink]="['/mother/babies', babyId, 'teething']"
+            routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">
+            <span>Teething</span>
+          </a>
+          <a class="tab-btn" [routerLink]="['/mother/babies', babyId, 'diapers']"
+            routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">
+            <span>Diapers</span>
+          </a>
+          <a class="tab-btn" [routerLink]="['/mother/babies', babyId, 'vaccines']"
+            routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">
+            <span>Vaccines</span>
+          </a>
+          <a class="tab-btn" [routerLink]="['/mother/babies', babyId, 'appointments']"
+            routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">
+            <span>Appointments</span>
+          </a>
+          <a class="tab-btn" [routerLink]="['/mother/babies', babyId, 'documents']"
+            routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}">
+            <span>Documents</span>
+          </a>
+          <a class="tab-btn tab-btn-rhythm" [routerLink]="['/mother/babies', babyId, 'rhythm']"
+            routerLinkActive="active" [routerLinkActiveOptions]="{exact:false}"
+            title="Want to know your baby's rhythm?">
+            <span class="tab-icon-wrap tab-icon-rhythm">
+              <mat-icon>access_time</mat-icon>
+            </span>
+            <span>Baby rhythm</span>
+          </a>
+        </div>
+
+        <div class="main-tabs main-tabs-right">
+          <a class="tool-btn tool-btn-reminders" [routerLink]="['/mother/babies', babyId, 'reminders']">
+            <mat-icon>notifications</mat-icon> Reminders
+            <span class="badge" *ngIf="dashboard?.pendingRemindersCount">{{dashboard?.pendingRemindersCount}}</span>
+          </a>
+          <a class="tool-btn tool-btn-insights" [routerLink]="['/mother/babies', babyId, 'insights']">
+            <mat-icon>lightbulb</mat-icon> Insights
+            <span class="badge" *ngIf="dashboard?.unreadInsightsCount">{{dashboard?.unreadInsightsCount}}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MORE TOOLS ── -->
+    <div class="more-tools-section">
+      <h4 class="tools-title">More Tracking Tools</h4>
+
+      <div class="more-tools-layout">
+        <div class="growth-summary-column">
+          <div class="growth-metrics-grid">
+            <article class="metric-card">
+              <div class="metric-head">
+                <mat-icon>monitor_weight</mat-icon>
+                <span>Current Weight</span>
+              </div>
+              <p class="metric-value">{{ currentMetricValue('weight') ?? '-' }} <small>kg</small></p>
+              <p class="metric-note">Latest recorded value</p>
+              <div class="metric-bar"><span style="width: 65%"></span></div>
+            </article>
+
+            <article class="metric-card">
+              <div class="metric-head">
+                <mat-icon>straighten</mat-icon>
+                <span>Current Height</span>
+              </div>
+              <p class="metric-value">{{ currentMetricValue('height') ?? '-' }} <small>cm</small></p>
+              <p class="metric-note">Latest recorded value</p>
+              <div class="metric-bar"><span style="width: 72%"></span></div>
+            </article>
+
+            <article class="metric-card">
+              <div class="metric-head">
+                <mat-icon>radio_button_checked</mat-icon>
+                <span>Head Circ.</span>
+              </div>
+              <p class="metric-value">{{ dashboard?.latestHeadCircumference ?? '-' }} <small>cm</small></p>
+              <p class="metric-note">Latest recorded value</p>
+              <div class="metric-bar"><span style="width: 50%"></span></div>
+            </article>
+          </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════
+         GROWTH CHART SECTION — replaces the <section class="growth-chart-card"> block
+         in baby-detail.component.html
+         ═══════════════════════════════════════════════════════════════ -->
+
+<section class="growth-chart-card">
+
+  <!-- ── Header ── -->
+  <div class="growth-chart-header">
+    <div class="chart-title-block">
+      <div class="chart-title-icon">
+        <mat-icon>show_chart</mat-icon>
+      </div>
+      <div>
+        <h3>Growth Curve <span class="chart-title-sub">Birth → Today</span></h3>
+        <p class="chart-subtitle">
+          <span class="chart-metric-pill" [class.pill-weight]="chartMetric === 'weight'"
+                                          [class.pill-height]="chartMetric === 'height'"
+                                          [class.pill-bmi]="chartMetric === 'bmi'">
+            {{ chartMetricTitle }}
+          </span>
+          tracking from birth records
+        </p>
+      </div>
+    </div>
+
+    <div class="chart-legend-tabs">
+      <button type="button" class="legend-btn" [class.active]="chartMetric === 'weight'" (click)="setChartMetric('weight')">
+        <span class="legend-dot dot-weight"></span> Weight
+      </button>
+      <button type="button" class="legend-btn" [class.active]="chartMetric === 'height'" (click)="setChartMetric('height')">
+        <span class="legend-dot dot-height"></span> Height
+      </button>
+      <button type="button" class="legend-btn" [class.active]="chartMetric === 'bmi'" (click)="setChartMetric('bmi')">
+        <span class="legend-dot dot-bmi"></span> BMI
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Chart body ── -->
+  <div class="chart-wrapper">
+
+    <!-- Y-axis labels (outside the svg) -->
+    <div class="chart-y-labels" *ngIf="chartSeries.length > 0">
+      <span *ngFor="let tick of chartYAxisTicks" class="y-tick-label"
+            [style.top.%]="(tick.y / 90) * 100">
+        {{ tick.label }}
+      </span>
+    </div>
+
+    <!-- Main plot area -->
+    <div class="chart-plot-area">
+
+      <!-- Horizontal grid lines (CSS, no SVG needed) -->
+      <div class="grid-lines" *ngIf="chartSeries.length > 0">
+        <div
+          class="grid-line"
+          *ngFor="let tick of chartYAxisTicks"
+          [style.top.%]="(tick.y / 90) * 100">
+        </div>
+      </div>
+
+      <!-- SVG: axes + area fill + line + points -->
+     <svg class="chart-svg"
+     viewBox="0 0 100 90"
+     preserveAspectRatio="none"
+     *ngIf="chartSeries.length > 0">
+
+        <defs>
+          <!-- Gradient fill under the line -->
+          <linearGradient [id]="'areaGrad'" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" [attr.stop-color]="chartColor" stop-opacity="0.18"/>
+            <stop offset="100%" [attr.stop-color]="chartColor" stop-opacity="0.01"/>
+          </linearGradient>
+          <!-- Glow filter for the line -->
+          <filter id="lineGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="0.6" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <!-- Point glow -->
+          <filter id="pointGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.2" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Area under curve (closed polygon) -->
+        <polygon class="chart-area"
+         [attr.points]="chartAreaPoints"
+         [attr.fill]="'url(#areaGrad)'">
+</polygon>
+
+        <!-- Main line -->
+        <polyline class="chart-line"
+                  [attr.points]="chartLinePoints"
+                  [attr.stroke]="chartColor"
+                  filter="url(#lineGlow)">
+        </polyline>
+
+        <!-- Data points -->
+        <g *ngFor="let point of chartSeries; let i = index" class="chart-point-group">
+          <!-- Outer ring (pulse) -->
+          <circle class="chart-point-ring"
+                  [attr.cx]="point.x" [attr.cy]="point.y" r="2"
+                  [attr.fill]="chartColor" fill-opacity="0.10"
+                  [attr.stroke]="chartColor" stroke-opacity="0.3" stroke-width="0.4">
+          </circle>
+          <!-- Inner dot -->
+          <circle class="chart-point"
+                  [attr.cx]="point.x" [attr.cy]="point.y" r="1"
+                  fill="#ffffff"
+                  [attr.stroke]="chartColor" stroke-width="0.5"
+                  filter="url(#pointGlow)">
+            <title>{{ point.label }}</title>
+          </circle>
+        </g>
+
+        <!-- X axis base line -->
+        <line class="axis-baseline" x1="8" y1="82" x2="96" y2="82"/>
+      </svg>
+
+      <!-- Empty state -->
+      <div class="chart-empty-state" *ngIf="chartSeries.length === 0">
+        <div class="empty-icon">📈</div>
+        <p>No growth records yet</p>
+        <span>Add your first record to see the curve</span>
+      </div>
+    </div>
+
+    <!-- X-axis time labels -->
+    <div class="chart-x-axis" *ngIf="chartSeries.length > 0">
+      <span
+        *ngFor="let tick of chartXAxisLabels"
+        class="x-tick-label"
+        [style.left.%]="tick.left">
+        {{ tick.label }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Data summary row ── -->
+  <div class="chart-data-summary" *ngIf="chartSeries.length > 0">
+    <div class="summary-pill">
+      <span class="summary-dot" [style.background]="chartColor"></span>
+      <span class="summary-label">{{ chartSeries.length }} record{{ chartSeries.length > 1 ? 's' : '' }}</span>
+    </div>
+    <div class="summary-pill">
+      <span class="summary-label">First</span>
+      <strong>{{ chartSeries[0]?.label }}</strong>
+    </div>
+    <div class="summary-pill">
+      <span class="summary-label">Latest</span>
+      <strong>{{ chartSeries[chartSeries.length - 1]?.label }}</strong>
+    </div>
+  </div>
+
+</section>
+
+<section class="htl-wrap">
+  <div class="htl-header">
+    <div class="htl-header-left">
+      <span class="htl-header-icon">🗓</span>
+      <div>
+        <h2 class="htl-title">Chronological history</h2>
+        <p class="htl-subtitle">Each moment, from left to right over time</p>
+      </div>
+    </div>
+    <div class="htl-header-actions">
+      <span class="htl-count-pill">{{ htlFiltered.length }} event{{ htlFiltered.length !== 1 ? 's' : '' }}</span>
+      <a class="htl-view-all-btn" [routerLink]="['/mother/babies', babyId, 'timeline']">View all timeline</a>
+    </div>
+  </div>
+
+  <div class="htl-filters">
+    <button
+      type="button"
+      class="htl-chip"
+      [ngClass]="{ 'htl-chip-active': htlActiveType === 'ALL' }"
+      (click)="htlSetType('ALL')"
+    >All</button>
+
+    <button
+      type="button"
+      class="htl-chip"
+      *ngFor="let type of htlAvailableTypes; trackBy: htlTrackByType"
+      [ngClass]="{ 'htl-chip-active': htlActiveType === type }"
+      (click)="htlSetType(type)"
+    >{{ htlGetIcon(type) }} {{ htlFormatType(type) }}</button>
+  </div>
+
+  <div
+    class="htl-scroll"
+    #scrollContainer
+    [class.htl-dragging]="htlIsDragging"
+    (mousedown)="htlOnMouseDown($event, scrollContainer)"
+    (mousemove)="htlOnMouseMove($event, scrollContainer)"
+    (mouseup)="htlOnMouseUp()"
+    (mouseleave)="htlOnMouseLeave()"
+  >
+    <div class="htl-empty" *ngIf="htlFiltered.length === 0">
+      <span class="htl-empty-icon">🌸</span>
+      <span>No events for this filter</span>
+    </div>
+
+    <div class="htl-track" *ngIf="htlFiltered.length > 0">
+      <div class="htl-spine"></div>
+
+      <div
+        class="htl-node-wrap"
+        *ngFor="let event of htlFiltered; let i = index; trackBy: htlTrackBySourceId"
+        [ngClass]="htlIsAbove(i) ? 'htl-above' : 'htl-below'"
+        [style.animation-delay]="(i * 0.05) + 's'"
+      >
+        <div class="htl-node-label">
+          <strong class="htl-node-name">{{ htlTruncate(htlDisplayTitle(event)) }}</strong>
+          <span class="htl-node-date">{{ event.eventDateTime | date:'d MMM yy' : '' : 'en' }}</span>
+        </div>
+
+        <div class="htl-stem"></div>
+
+        <div
+          class="htl-node"
+          [ngClass]="[
+            htlNodeTypeClass(event.eventType),
+            htlIsDone(event) ? 'htl-node-done' : '',
+            htlIsImportant(event) ? 'htl-node-important' : '',
+            htlIsUnusual(event) ? 'htl-node-unusual' : '',
+            htlIsSelected(event) ? 'htl-node-selected' : ''
+          ]"
+          (click)="htlSelectEvent(event)"
+          [attr.title]="event.title"
+        >
+          <span class="htl-node-icon">{{ htlGetIcon(event.eventType) }}</span>
+          <div class="htl-pulse-ring" *ngIf="htlHasHighPriority(event)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="htl-panel" *ngIf="htlSelectedEvent">
+    <div class="htl-panel-bar">
+      <div class="htl-panel-icon-wrap">
+        <span class="htl-panel-big-icon">{{ htlGetIcon(htlSelectedEvent.eventType) }}</span>
+      </div>
+      <div class="htl-panel-meta">
+        <h3 class="htl-panel-title">{{ htlDisplayTitle(htlSelectedEvent) }}</h3>
+        <p class="htl-panel-when">
+          {{ htlSelectedEvent.eventDateTime | date:"EEEE, MMM d, yyyy 'at' HH:mm" : '' : 'en' }}
+          &nbsp;·&nbsp;
+          {{ htlFormatType(htlSelectedEvent.eventType) }}
+        </p>
+      </div>
+      <button type="button" class="htl-panel-close" (click)="htlClosePanel()">&#x2715;</button>
+    </div>
+
+    <div class="htl-panel-badges">
+      <span class="htl-badge" [ngClass]="htlStatusClass(htlSelectedEvent.status)">
+        {{ htlFormatStatus(htlSelectedEvent.status) }}
+      </span>
+      <span
+        class="htl-badge htl-badge-priority"
+        [ngClass]="{
+          'htl-badge-important': htlIsImportant(htlSelectedEvent),
+          'htl-badge-unusual': htlIsUnusual(htlSelectedEvent)
+        }"
+        *ngIf="htlHasHighPriority(htlSelectedEvent)"
+      >
+        {{ htlFormatPriority(htlSelectedEvent.priority) }}
+      </span>
+      <span class="htl-badge htl-badge-type">{{ htlFormatType(htlSelectedEvent.eventType) }}</span>
+      <button type="button" class="htl-badge htl-badge-action" (click)="openHtlEventModal(htlSelectedEvent)">View details</button>
+    </div>
+  </div>
+</section>
+        </div>
+
+        <div class="tools-side-column">
+          <div class="tools-highlight-cards">
+            <div class="mini-info-card">
+              <div class="mini-card-header">
+                <mat-icon>health_and_safety</mat-icon>
+                <h4>Upcoming Health</h4>
+              </div>
+
+              <div class="mini-list">
+                <div class="mini-item" *ngIf="dashboard?.upcomingVaccineName || dashboard?.upcomingVaccineDate">
+                  <div class="mini-item-head">
+                    <div class="mini-item-copy">
+                      <p class="mini-kicker">Vaccine</p>
+                      <p class="mini-title">{{ dashboard?.upcomingVaccineName || 'Upcoming vaccine' }}</p>
+                    </div>
+                    <button type="button" class="mini-see-chip" (click)="openUpcomingHealthDetails('vaccines')">View details</button>
+                  </div>
+                  <p class="mini-sub">
+                    <strong>{{ dashboard?.upcomingVaccineDate ? (dashboard?.upcomingVaccineDate | date:'mediumDate') : 'Date not set' }}</strong>
+                  </p>
+                </div>
+
+                <div class="mini-item" *ngIf="dashboard?.upcomingAppointmentType || dashboard?.upcomingAppointmentDate || dashboard?.upcomingDoctorName">
+                  <div class="mini-item-head">
+                    <div class="mini-item-copy">
+                      <p class="mini-kicker">Appointment</p>
+                      <p class="mini-title">{{ dashboard?.upcomingAppointmentType || 'Upcoming appointment' }}</p>
+                    </div>
+                    <button type="button" class="mini-see-chip" (click)="openUpcomingHealthDetails('appointments')">View details</button>
+                  </div>
+                  <p class="mini-sub">
+                    <strong>{{ dashboard?.upcomingAppointmentDate ? (dashboard?.upcomingAppointmentDate | date:'mediumDate') : 'Date not set' }}</strong>
+                    <span *ngIf="dashboard?.upcomingDoctorName"> - {{ dashboard?.upcomingDoctorName }}</span>
+                  </p>
+                </div>
+
+                <p class="mini-empty" *ngIf="!dashboard?.upcomingVaccineName && !dashboard?.upcomingVaccineDate && !dashboard?.upcomingAppointmentType && !dashboard?.upcomingAppointmentDate && !dashboard?.upcomingDoctorName">
+                  No upcoming vaccine or appointment.
+                </p>
+              </div>
+            </div>
+
+            <div class="mini-info-card">
+              <div class="mini-card-header mini-title-row">
+                <div class="mini-head-left">
+                  <mat-icon>emoji_events</mat-icon>
+                  <h4>Latest Milestone</h4>
+                </div>
+                <a class="mini-link-chip" [routerLink]="['/mother/babies', babyId, 'milestones']">View others</a>
+              </div>
+
+              <div class="mini-list" *ngIf="latestMilestone; else noMilestone">
+                <div class="mini-item latest-milestone-item">
+                  <div class="mini-media-preview" *ngIf="hasLatestMilestoneMedia(); else latestMilestoneFallback">
+                    <img *ngIf="isLatestMilestonePhoto()" [src]="latestMilestone.mediaUrl" [alt]="latestMilestone.title || 'Latest milestone'" class="mini-media-image" />
+                    <video *ngIf="isLatestMilestoneVideo()" [src]="latestMilestone.mediaUrl" controls preload="metadata" class="mini-media-video"></video>
+                    <audio *ngIf="isLatestMilestoneAudio()" [src]="latestMilestone.mediaUrl" controls preload="metadata" class="mini-media-audio"></audio>
+                  </div>
+
+                  <ng-template #latestMilestoneFallback>
+                    <div class="mini-media-fallback">
+                      <mat-icon>auto_stories</mat-icon>
+                      <span>{{ getLatestMilestoneMediaLabel() }}</span>
+                    </div>
+                  </ng-template>
+
+                  <div class="mini-title-meta-row">
+                    <p class="mini-title">{{ latestMilestone.title || 'Milestone' }}</p>
+                    <div class="mini-badges-row">
+                      <p class="mini-tag" *ngIf="latestMilestone.category">{{ latestMilestone.category }}</p>
+                      <p class="mini-tag mini-media-tag">{{ getLatestMilestoneMediaLabel() }}</p>
+                    </div>
+                  </div>
+                  <p class="mini-sub">{{ latestMilestone.milestoneDate ? (latestMilestone.milestoneDate | date:'mediumDate') : 'Date not set' }}</p>
+                </div>
+              </div>
+
+              <ng-template #noMilestone>
+                <p class="mini-empty">No milestone recorded yet.</p>
+              </ng-template>
+            </div>
+
+            <div class="mini-info-card growth-story-card" *ngIf="growthStory">
+              <div class="mini-card-header mini-title-row">
+                <div class="mini-head-left">
+                  <mat-icon>auto_stories</mat-icon>
+                  <h4>Growth Story</h4>
+                </div>
+              </div>
+
+              <div class="mini-list">
+                <div class="mini-item growth-story-item">
+                  <div class="story-block">
+                    <span class="story-label">Story</span>
+                    <p class="story-text" [innerHTML]="formatGrowthStoryHtml(growthStory.story)"></p>
+                  </div>
+
+                  <div class="story-block">
+                    <span class="story-label">Recommendation</span>
+                    <p class="story-text recommendation">{{ formatGrowthStoryText(growthStory.recommendation) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tools-grid">
+          </div>
+
+          <button class="summary-cta" type="button" (click)="openTodaySummaryPopup()">
+            <span class="summary-cta-icon">
+              <mat-icon>today</mat-icon>
+            </span>
+            <span class="summary-cta-copy">
+              <strong>Today Summary</strong>
+              <small>Open a clean visual snapshot</small>
+            </span>
+            <span class="summary-cta-emoji" aria-hidden="true">✨</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+    <!-- ══════════════════════════════════════════════════════════════
+      MODAL — placed directly under <section>, outside ng-container
+      so it uses position:fixed relative to the viewport.
+      ══════════════════════════════════════════════════════════════ -->
+  <div class="profile-modal-overlay" *ngIf="isEditMode" (click)="cancelEditProfile()">
+    <div class="profile-modal-box" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="profile-modal-header">
+        <div>
+          <p class="profile-section-kicker">Profile settings</p>
+          <h3>Modify baby profile</h3>
+        </div>
+        <button class="profile-modal-close-btn" type="button" (click)="cancelEditProfile()" aria-label="Close">✕</button>
+      </div>
+
+      <!-- 👶 Identity -->
+      <p class="profile-modal-section-title">👶 Identity</p>
+      <div class="profile-edit-grid">
+        <label>
+          <span>First name <em class="required">*</em></span>
+          <input type="text" [(ngModel)]="editModel.firstName" placeholder="First name" />
+        </label>
+        <label>
+          <span>Last name <em class="required">*</em></span>
+          <input type="text" [(ngModel)]="editModel.lastName" placeholder="Last name" />
+        </label>
+      </div>
+
+      <!-- ⚧ Gender -->
+      <p class="profile-modal-section-title">⚧ Gender</p>
+      <div class="profile-gender-edit-row">
+        <button type="button" class="profile-gender-chip"
+          [class.girl-selected]="editModel.gender === 'FEMALE'"
+          (click)="editModel.gender = 'FEMALE'">👧 Girl</button>
+        <button type="button" class="profile-gender-chip"
+          [class.boy-selected]="editModel.gender === 'MALE'"
+          (click)="editModel.gender = 'MALE'">👦 Boy</button>
+      </div>
+
+      <!-- 🏥 Birth information -->
+      <p class="profile-modal-section-title">🏥 Birth information</p>
+      <div class="profile-edit-grid">
+        <label>
+          <span>Birth date <em class="required">*</em></span>
+          <input type="date" [(ngModel)]="editModel.birthDate" [max]="todayString" />
+        </label>
+        <label>
+          <span>Birth place</span>
+          <input type="text" [(ngModel)]="editModel.birthPlace" placeholder="e.g. Clinique Pasteur" />
+        </label>
+        <label>
+          <span>Birth weight (kg)</span>
+          <input type="number" [(ngModel)]="editModel.birthWeight" placeholder="e.g. 3.5" min="0.5" max="8" step="0.1" />
+        </label>
+        <label>
+          <span>Birth height (cm)</span>
+          <input type="number" [(ngModel)]="editModel.birthHeight" placeholder="e.g. 50" min="20" max="70" step="0.1" />
+        </label>
+        <label>
+          <span>Gestational age (weeks)</span>
+          <input type="number" [(ngModel)]="editModel.gestationalAgeAtBirth" placeholder="e.g. 39" min="22" max="44" />
+        </label>
+        <label>
+          <span>Blood type</span>
+          <select [(ngModel)]="editModel.bloodType">
+            <option value="">— Select —</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+          </select>
+        </label>
+        <label>
+          <span>Delivery type</span>
+          <select [(ngModel)]="editModel.deliveryType">
+            <option value="">— Select —</option>
+            <option value="NATURAL">Natural</option>
+            <option value="CESAREAN">Cesarean</option>
+            <option value="FORCEPS">Forceps</option>
+            <option value="VACUUM">Vacuum</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- 📝 Notes -->
+      <p class="profile-modal-section-title">📝 Notes</p>
+      <div class="profile-edit-grid">
+        <label class="full">
+          <span>Notes</span>
+          <textarea rows="3" [(ngModel)]="editModel.notes" placeholder="Any additional notes..."></textarea>
+        </label>
+      </div>
+
+      <div class="profile-modal-error" *ngIf="profileError">{{ profileError }}</div>
+
+      <div class="profile-edit-actions">
+        <button class="profile-primary-btn" type="button"
+          (click)="saveProfileChanges()" [disabled]="isSavingProfile">
+          {{ isSavingProfile ? 'Saving...' : 'Save changes' }}
+        </button>
+        <button class="profile-ghost-btn" type="button" (click)="cancelEditProfile()">Cancel</button>
+      </div>
+
+    </div>
+  </div>
+  <!-- /MODAL -->
+
+  <div class="profile-modal-overlay" *ngIf="isCareScoreModalOpen" (click)="closeCareScoreDetails()">
+    <div class="profile-modal-box care-sheet-box" (click)="$event.stopPropagation()">
+      <div class="care-sheet-header">
+        <div>
+          <p class="care-sheet-kicker">Care analytics</p>
+          <h3>Care score details</h3>
+        </div>
+        <button class="care-sheet-close" type="button" (click)="closeCareScoreDetails()" aria-label="Close">✕</button>
+      </div>
+
+      <div *ngIf="careScore; else noCareScoreData">
+        <div class="care-sheet-top-row">
+          <span class="care-sheet-pill">Score: {{ careScorePercent() }}%</span>
+          <span class="care-sheet-pill state">{{ careScoreState() }}</span>
+        </div>
+
+        <p class="care-sheet-expl">{{ careScore.explanation || 'No explanation available.' }}</p>
+
+        <div class="care-sheet-grid">
+          <div class="care-sheet-row"><span>Level</span><strong>{{ careScore.level }}</strong></div>
+          <div class="care-sheet-row"><span>Feeding points</span><strong>{{ careScore.feedingPoints }}</strong></div>
+          <div class="care-sheet-row"><span>Sleep points</span><strong>{{ careScore.sleepPoints }}</strong></div>
+          <div class="care-sheet-row"><span>Diaper points</span><strong>{{ careScore.diaperPoints }}</strong></div>
+          <div class="care-sheet-row"><span>Growth points</span><strong>{{ careScore.growthPoints }}</strong></div>
+          <div class="care-sheet-row"><span>Vaccine points</span><strong>{{ careScore.vaccinePoints }}</strong></div>
+          <div class="care-sheet-row"><span>Reminder points</span><strong>{{ careScore.reminderPoints }}</strong></div>
+        </div>
+      </div>
+
+      <ng-template #noCareScoreData>
+        <p class="care-sheet-empty">Care score data is not available for this baby yet.</p>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="profile-modal-overlay" *ngIf="isTodaySummaryModalOpen" (click)="closeTodaySummaryPopup()">
+    <div class="profile-modal-box today-summary-box" (click)="$event.stopPropagation()">
+      <div class="summary-modal-header">
+        <div>
+          <p class="summary-modal-kicker">Daily snapshot</p>
+          <h3>Today Summary</h3>
+        </div>
+        <button class="summary-modal-close" type="button" (click)="closeTodaySummaryPopup()" aria-label="Close">✕</button>
+      </div>
+
+      <div class="summary-modal-hero">
+        <div class="summary-modal-icon">
+          <mat-icon>today</mat-icon>
+        </div>
+        <div class="summary-modal-copy">
+          <p class="summary-modal-title">{{ todaySummary?.summaryTitle || 'Loading your summary...' }}</p>
+          <p class="summary-modal-text">
+            {{ todaySummary?.summaryText || 'A readable overview of feeding, sleep, diapers, reminders, and insights.' }}
+          </p>
+          <div class="summary-modal-tags">
+            <span class="summary-tag">📅 {{ todaySummary?.date || todayString }}</span>
+            <span class="summary-tag" [class.alert]="todaySummary?.attentionNeeded">
+              {{ todaySummary?.attentionNeeded ? '⚠️ Attention needed' : '🌸 All calm today' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-modal-loading" *ngIf="todaySummaryLoading">
+        <div class="summary-loader"></div>
+        <p>Loading Today Summary...</p>
+      </div>
+
+      <div class="summary-modal-error" *ngIf="!todaySummaryLoading && todaySummaryError">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ todaySummaryError }}</span>
+        <button type="button" class="summary-error-btn" (click)="loadTodaySummary()">Retry</button>
+      </div>
+
+      <ng-container *ngIf="!todaySummaryLoading && !todaySummaryError && todaySummary">
+        <div class="summary-metrics-grid">
+          <article class="summary-metric-card">
+            <div class="summary-metric-head">
+              <mat-icon>restaurant</mat-icon>
+              <span>Feeding</span>
+            </div>
+            <strong>{{ todaySummary.feedingCount }}</strong>
+            <p>🍼 Total quantity: {{ todaySummary.totalFeedingQuantity }}</p>
+          </article>
+
+          <article class="summary-metric-card">
+            <div class="summary-metric-head">
+              <mat-icon>bedtime</mat-icon>
+              <span>Sleep</span>
+            </div>
+            <strong>{{ todaySummary.sleepCount }}</strong>
+            <p>😴 Total minutes: {{ todaySummary.totalSleepMinutes }}</p>
+          </article>
+
+          <article class="summary-metric-card">
+            <div class="summary-metric-head">
+              <mat-icon>baby_changing_station</mat-icon>
+              <span>Diapers</span>
+            </div>
+            <strong>{{ todaySummary.diaperCount }}</strong>
+            <p>💨 Changes tracked today</p>
+          </article>
+
+          <article class="summary-metric-card">
+            <div class="summary-metric-head">
+              <mat-icon>event</mat-icon>
+              <span>Appointments</span>
+            </div>
+            <strong>{{ todaySummary.appointmentCountToday }}</strong>
+            <p>📌 Scheduled today</p>
+          </article>
+
+          <article class="summary-metric-card">
+            <div class="summary-metric-head">
+              <mat-icon>notifications_active</mat-icon>
+              <span>Reminders</span>
+            </div>
+            <strong>{{ todaySummary.reminderCountToday }}</strong>
+            <p>🔔 Needs attention</p>
+          </article>
+
+          <article class="summary-metric-card">
+            <div class="summary-metric-head">
+              <mat-icon>lightbulb</mat-icon>
+              <span>Insights</span>
+            </div>
+            <strong>{{ todaySummary.unreadInsightCount }}</strong>
+            <p>💡 Unread insights</p>
+          </article>
+        </div>
+
+        <div class="summary-highlight-row">
+          <div class="summary-highlight">
+            <span class="summary-highlight-label">Why it matters</span>
+            <p>
+              {{ todaySummary.attentionNeeded ? 'This day contains signals worth reviewing in detail.' : 'The day looks balanced and easy to scan at a glance.' }}
+            </p>
+          </div>
+          <button type="button" class="summary-refresh-btn" (click)="loadTodaySummary()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+      </ng-container>
+
+      <div class="summary-modal-actions">
+        <button type="button" class="summary-close-btn" (click)="closeTodaySummaryPopup()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-modal-overlay" *ngIf="isUpcomingHealthModalOpen && selectedUpcomingHealthEvent" (click)="closeUpcomingHealthDetails()">
+    <div class="profile-modal-box upcoming-health-box" (click)="$event.stopPropagation()">
+      <div class="upcoming-health-header">
+        <div>
+          <p class="upcoming-health-kicker">{{ selectedUpcomingHealthEvent.label }}</p>
+          <h3>{{ selectedUpcomingHealthEvent.title }}</h3>
+        </div>
+        <button class="upcoming-health-close" type="button" (click)="closeUpcomingHealthDetails()" aria-label="Close">✕</button>
+      </div>
+
+      <div class="upcoming-health-hero">
+        <div class="upcoming-health-icon">
+          <mat-icon>{{ selectedUpcomingHealthEvent.icon }}</mat-icon>
+        </div>
+        <div class="upcoming-health-copy">
+          <p class="upcoming-health-date">{{ selectedUpcomingHealthEvent.dateLabel }}</p>
+          <p class="upcoming-health-description">{{ selectedUpcomingHealthEvent.description }}</p>
+        </div>
+      </div>
+
+      <div class="upcoming-health-details">
+        <div class="upcoming-health-detail-row" *ngFor="let detail of selectedUpcomingHealthEvent.details">
+          <span class="upcoming-health-dot"></span>
+          <p>{{ detail }}</p>
+        </div>
+      </div>
+
+      <div class="upcoming-health-actions">
+        <a class="upcoming-health-primary" [routerLink]="selectedUpcomingHealthEvent.route">
+          {{ selectedUpcomingHealthEvent.actionLabel }}
+        </a>
+        <button class="upcoming-health-secondary" type="button" (click)="closeUpcomingHealthDetails()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-modal-overlay" *ngIf="isHtlEventModalOpen && htlModalEvent" (click)="closeHtlEventModal()">
+    <div class="profile-modal-box htl-event-box" (click)="$event.stopPropagation()">
+      <div class="profile-modal-header">
+        <div>
+          <p class="profile-section-kicker">Timeline event</p>
+          <h3>{{ htlDisplayTitle(htlModalEvent) }}</h3>
+        </div>
+        <button class="profile-modal-close-btn" type="button" (click)="closeHtlEventModal()" aria-label="Close">✕</button>
+      </div>
+
+      <div class="htl-modal-meta">
+        <p class="htl-modal-when">
+          {{ htlModalEvent.eventDateTime | date:"EEEE, MMM d, yyyy 'at' HH:mm" : '' : 'en' }}
+          &nbsp;·&nbsp;
+          {{ htlFormatType(htlModalEvent.eventType) }}
+        </p>
+
+        <div class="htl-panel-badges">
+          <span class="htl-badge" [ngClass]="htlStatusClass(htlModalEvent.status)">
+            {{ htlFormatStatus(htlModalEvent.status) }}
+          </span>
+          <span
+            class="htl-badge htl-badge-priority"
+            [ngClass]="{
+              'htl-badge-important': htlIsImportant(htlModalEvent),
+              'htl-badge-unusual': htlIsUnusual(htlModalEvent)
+            }"
+            *ngIf="htlHasHighPriority(htlModalEvent)"
+          >
+            {{ htlFormatPriority(htlModalEvent.priority) }}
+          </span>
+          <span class="htl-badge htl-badge-type">{{ htlFormatType(htlModalEvent.eventType) }}</span>
+        </div>
+      </div>
+
+      <p class="htl-panel-desc" *ngIf="htlDisplayDescription(htlModalEvent)">
+        {{ htlDisplayDescription(htlModalEvent) }}
+      </p>
+    </div>
+  </div>
+
+</section>

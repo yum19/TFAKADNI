@@ -1,0 +1,368 @@
+:host {
+  display: block;
+}
+
+.size-page {
+  min-height: 100vh;
+  width: 100%;
+}
+
+.size-card {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  overflow: hidden;
+}
+
+.back-btn {
+  position: absolute;
+  top: 95px;
+  left: 24px;
+  z-index: 3;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: #7b6ccf;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(123, 108, 207, 0.18);
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 120px 24px 150px;
+  box-sizing: border-box;
+}
+
+.form-panel {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.26);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+}
+
+/* thème fille */
+.theme-girl {
+  border: 2px solid rgba(244, 168, 196, 0.45);
+}
+
+/* thème garçon */
+.theme-boy {
+  border: 2px solid rgba(125, 190, 255, 0.45);
+}
+
+.panel-title {
+  margin: 0 0 22px;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #6f628f;
+  text-shadow: 0 2px 12px rgba(255, 255, 255, 0.35);
+}
+
+.size-form {
+  width: 100%;
+}
+
+.row-fields {
+  display: flex;
+  gap: 22px;
+  margin-bottom: 18px;
+}
+
+.second-row {
+  margin-top: 6px;
+}
+
+.field-block,
+.single-field {
+  flex: 1;
+}
+
+.single-field {
+  margin-top: 18px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #6f628f;
+}
+
+.form-input,
+.form-textarea,
+.upload-box {
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.28s ease;
+}
+
+/* theme girl inputs */
+.theme-girl .form-input,
+.theme-girl .form-textarea,
+.theme-girl .upload-box {
+  border: 2px solid rgba(241, 169, 198, 0.95);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 26px rgba(241, 169, 198, 0.12);
+}
+
+/* theme boy inputs */
+.theme-boy .form-input,
+.theme-boy .form-textarea,
+.theme-boy .upload-box {
+  border: 2px solid rgba(125, 190, 255, 0.95);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 26px rgba(125, 190, 255, 0.12);
+}
+
+.form-input {
+  height: 62px;
+  border-radius: 999px;
+  padding: 0 22px;
+  font-size: 1rem;
+  color: #555;
+}
+
+.form-textarea {
+  min-height: 130px;
+  border-radius: 24px;
+  padding: 16px 18px;
+  font-size: 1rem;
+  color: #555;
+  resize: vertical;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #c8bcc6;
+}
+
+.form-input:hover,
+.form-textarea:hover,
+.upload-box:hover {
+  transform: translateY(-2px);
+}
+
+.theme-girl .form-input:hover,
+.theme-girl .form-textarea:hover,
+.theme-girl .upload-box:hover {
+  box-shadow: 0 16px 30px rgba(241, 169, 198, 0.2);
+}
+
+.theme-boy .form-input:hover,
+.theme-boy .form-textarea:hover,
+.theme-boy .upload-box:hover {
+  box-shadow: 0 16px 30px rgba(125, 190, 255, 0.2);
+}
+
+.theme-girl .form-input:focus,
+.theme-girl .form-textarea:focus {
+  border-color: #df8cb5;
+  box-shadow: 0 0 0 5px rgba(223, 140, 181, 0.16),
+              0 16px 30px rgba(241, 169, 198, 0.2);
+}
+
+.theme-boy .form-input:focus,
+.theme-boy .form-textarea:focus {
+  border-color: #6eb5f8;
+  box-shadow: 0 0 0 5px rgba(110, 181, 248, 0.16),
+              0 16px 30px rgba(125, 190, 255, 0.2);
+}
+
+.form-input.ng-touched.ng-invalid,
+.form-textarea.ng-touched.ng-invalid,
+.upload-box.invalid-upload {
+  border-color: #ea6f8c !important;
+  box-shadow: 0 0 0 4px rgba(234, 111, 140, 0.12) !important;
+}
+
+.form-input.ng-touched.ng-valid,
+.form-textarea.ng-touched.ng-valid {
+  border-color: #65c98e !important;
+  box-shadow: 0 0 0 4px rgba(101, 201, 142, 0.12) !important;
+}
+
+.upload-box {
+  position: relative;
+  min-height: 170px;
+  border-radius: 24px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.upload-placeholder {
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 16px;
+}
+
+.upload-icon {
+  font-size: 2rem;
+}
+
+.upload-text {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #6f628f;
+}
+
+.upload-subtext {
+  font-size: 0.88rem;
+  color: #8a809f;
+}
+
+.preview-wrapper {
+  position: relative;
+  min-height: 220px;
+  padding: 14px;
+}
+
+.preview-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 18px;
+  display: block;
+}
+
+.remove-image-btn {
+  margin-top: 12px;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(135deg, #ff7ea8, #ef6f93);
+}
+
+.theme-boy .remove-image-btn {
+  background: linear-gradient(135deg, #72c7ff, #46b5e7);
+}
+
+.notes-counter {
+  margin-top: 8px;
+  text-align: right;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #7d7391;
+}
+
+.error-msg {
+  margin-top: 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #d94b73;
+}
+
+.bottom-action {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 70px;
+  z-index: 2;
+}
+
+.next-btn {
+  width: 100%;
+  max-width: 900px;
+  display: block;
+  margin: 0 auto;
+  height: 68px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6d73dd, #5d63c9);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 20px 34px rgba(93, 99, 201, 0.28);
+  transition: all 0.3s ease;
+}
+
+.next-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 40px rgba(93, 99, 201, 0.34);
+}
+
+@media (max-width: 900px) {
+  .row-fields {
+    flex-direction: column;
+  }
+
+  .content {
+    padding: 120px 16px 130px;
+  }
+
+  .form-panel {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .back-btn {
+    top: 88px;
+    left: 14px;
+  }
+
+  .panel-title {
+    font-size: 1.7rem;
+  }
+
+  .form-input {
+    height: 56px;
+    font-size: 0.96rem;
+  }
+
+  .form-textarea {
+    min-height: 110px;
+  }
+
+  .preview-image {
+    height: 180px;
+  }
+
+  .next-btn {
+    height: 56px;
+    font-size: 1.05rem;
+  }
+
+  .bottom-action {
+    left: 12px;
+    right: 12px;
+    bottom: 14px;
+  }
+}

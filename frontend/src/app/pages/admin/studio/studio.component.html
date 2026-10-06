@@ -1,0 +1,680 @@
+<!-- studio-canvas.component.html -->
+<section class="studio-canvas">
+  <div class="studio-wrap">
+    <!-- Header -->
+    <header class="studio-header">
+      <div>
+        <div class="header-row">
+          <span class="studio-chip">
+            Admin Console
+            <span class="studio-dot"></span>
+          </span>
+        </div>
+        <h1 class="studio-title">
+          Content <span class="title-accent">Studio.</span>
+        </h1>
+        <p class="studio-lead">
+          Architecting high-value learning paths and partner guidance.
+        </p>
+      </div>
+
+      <div class="header-stats">
+        <div class="header-stat">
+          <span class="stat-val">{{ courses.length }}</span>
+          <span class="stat-lbl">Courses</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="header-stat">
+          <span class="stat-val">{{ guides.length }}</span>
+          <span class="stat-lbl">Guides</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="header-stat">
+          <span class="stat-val">Live</span>
+          <span class="stat-lbl status-live">System Status</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Tab Dock -->
+    <div class="tabs-dock">
+      <button
+        class="tab-pill"
+        [class.active-tab]="activeTab === 'course'"
+        (click)="activeTab = 'course'"
+      >
+        <mat-icon>school</mat-icon>
+        Course
+      </button>
+      <button
+        class="tab-pill"
+        [class.active-tab]="activeTab === 'module'"
+        (click)="activeTab = 'module'"
+      >
+        <mat-icon>view_module</mat-icon>
+        Module
+      </button>
+      <button
+        class="tab-pill"
+        [class.active-tab]="activeTab === 'quiz'"
+        (click)="activeTab = 'quiz'"
+      >
+        <mat-icon>quiz</mat-icon>
+        Quiz
+      </button>
+      <button
+        class="tab-pill"
+        [class.active-tab]="activeTab === 'guide'"
+        (click)="activeTab = 'guide'"
+      >
+        <mat-icon>menu_book</mat-icon>
+        Guide
+      </button>
+    </div>
+
+    <!-- Form Area -->
+    <div class="form-area">
+      @switch (activeTab) {
+        @case ("course") {
+          <div class="glass-card form-card">
+            <div class="form-card-header">
+              <div class="form-icon">
+                <mat-icon>school</mat-icon>
+              </div>
+              <div>
+                <span class="section-label">New Entry</span>
+                <h3 class="form-title">Create Course</h3>
+              </div>
+            </div>
+
+            <div class="studio-sep"></div>
+
+            <div class="fields-grid">
+              <div class="field-group">
+                <label class="field-label">English Title</label>
+                <input
+                  class="glass-input"
+                  placeholder="Primary title"
+                  [(ngModel)]="courseForm.title"
+                />
+              </div>
+              <div class="field-group">
+                <label class="field-label">Arabic Title</label>
+                <input
+                  class="glass-input"
+                  placeholder="Arabic translation"
+                  [(ngModel)]="courseForm.titleAr"
+                  dir="rtl"
+                />
+              </div>
+              <div class="field-group">
+                <label class="field-label">Category</label>
+                <input
+                  class="glass-input"
+                  placeholder="e.g., Nutrition"
+                  [(ngModel)]="courseForm.category"
+                />
+              </div>
+              <div class="field-group field-group--half">
+                <label class="field-label">Duration (Min)</label>
+                <input
+                  class="glass-input"
+                  type="number"
+                  [(ngModel)]="courseForm.durationMin"
+                />
+              </div>
+              <div class="field-group field-group--half">
+                <label class="field-label">Target Level</label>
+                <input
+                  class="glass-input"
+                  placeholder="BEGINNER"
+                  [(ngModel)]="courseForm.level"
+                />
+              </div>
+              <div class="field-group field-group--full">
+                <label class="field-label">Editorial Description</label>
+                <textarea
+                  class="glass-input glass-textarea"
+                  placeholder="Briefly describe the value..."
+                  [(ngModel)]="courseForm.description"
+                ></textarea>
+              </div>
+              <div class="field-group field-group--full">
+                <label class="field-label">Media Asset URL</label>
+                <div class="input-with-icon">
+                  <mat-icon class="input-icon">image</mat-icon>
+                  <input
+                    class="glass-input"
+                    placeholder="Unsplash or Cloudinary URL"
+                    [(ngModel)]="courseForm.thumbnail"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <button class="deploy-btn" (click)="saveCourse()">
+                <mat-icon>rocket_launch</mat-icon>
+                Deploy Course
+              </button>
+              <span class="form-hint"
+                >Changes go live immediately after deploy</span
+              >
+            </div>
+          </div>
+        }
+
+        @case ("module") {
+          <div class="glass-card form-card">
+            <div class="form-card-header">
+              <div class="form-icon">
+                <mat-icon>view_module</mat-icon>
+              </div>
+              <div>
+                <span class="section-label">New Entry</span>
+                <h3 class="form-title">Add Module</h3>
+              </div>
+            </div>
+
+            <div class="studio-sep"></div>
+
+            <div class="fields-grid">
+              <div class="field-group field-group--third">
+                <label class="field-label">Parent Course ID</label>
+                <input
+                  class="glass-input"
+                  type="number"
+                  [(ngModel)]="moduleForm.courseId"
+                />
+              </div>
+              <div class="field-group" style="grid-column: span 2">
+                <label class="field-label">Module Heading</label>
+                <input
+                  class="glass-input"
+                  placeholder="Focus topic"
+                  [(ngModel)]="moduleForm.title"
+                />
+              </div>
+              <div class="field-group">
+                <label class="field-label">Content Meta Type</label>
+                <input
+                  class="glass-input"
+                  placeholder="TEXT / VIDEO"
+                  [(ngModel)]="moduleForm.contentType"
+                />
+              </div>
+              <div class="field-group field-group--half">
+                <label class="field-label">Order Index</label>
+                <input
+                  class="glass-input"
+                  type="number"
+                  [(ngModel)]="moduleForm.orderIndex"
+                />
+              </div>
+              <div class="field-group field-group--half">
+                <label class="field-label">Read Time (Min)</label>
+                <input
+                  class="glass-input"
+                  type="number"
+                  [(ngModel)]="moduleForm.durationMin"
+                />
+              </div>
+              <div class="field-group field-group--full">
+                <label class="field-label">Full Content Body</label>
+                <textarea
+                  class="glass-input glass-textarea glass-textarea--tall"
+                  placeholder="Markdown or plain text..."
+                  [(ngModel)]="moduleForm.contentText"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="form-footer form-footer--split">
+              <button class="deploy-btn" (click)="saveModule()">
+                <mat-icon>rocket_launch</mat-icon>
+                Deploy Module
+              </button>
+              <div class="secondary-actions">
+                <label class="upload-btn">
+                  <mat-icon>upload_file</mat-icon>
+                  Upload PDF
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    (change)="onFileSelected($event)"
+                    hidden
+                  />
+                </label>
+                <button class="video-btn" (click)="generateNotebookLmVideo()">
+                  <mat-icon>videocam</mat-icon>
+                  Create Video
+                </button>
+              </div>
+            </div>
+
+            @if (videoStatus) {
+              <div class="video-progress-panel">
+                <div class="progress-header">
+                  <div class="progress-status">
+                    <span class="progress-dot"></span>
+                    {{ videoStatus }}
+                  </div>
+                  <span class="gen-badge">{{ videoProgress }}%</span>
+                </div>
+                <div class="progress-track">
+                  <div
+                    class="progress-fill"
+                    [style.width.%]="videoProgress"
+                  ></div>
+                </div>
+                @if (videoUrl) {
+                  <div class="video-success">
+                    <mat-icon>check_circle</mat-icon>
+                    <span>Video generated and linked successfully.</span>
+                    <a [href]="videoUrl" target="_blank" class="preview-link">
+                      Preview MP4 <mat-icon>open_in_new</mat-icon>
+                    </a>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @case ("quiz") {
+          <div class="row w-100 m-0">
+            <div class="col-md-4 ps-0 pe-2">
+              <div class="glass-card form-card mb-4">
+                <div class="form-card-header">
+                  <div class="form-icon"><mat-icon>auto_awesome</mat-icon></div>
+                  <div>
+                    <span class="section-label">Gemini AI</span>
+                    <h3 class="form-title">Auto-Generate</h3>
+                  </div>
+                </div>
+                <div class="studio-sep"></div>
+
+                <form
+                  [formGroup]="aiForm"
+                  (ngSubmit)="generateWithAI()"
+                  class="fields-grid"
+                >
+                  <div class="field-group field-group--full">
+                    <label class="field-label">Target Module ID</label>
+                    <input
+                      class="glass-input"
+                      type="number"
+                      formControlName="courseModuleId"
+                      placeholder="Module ID"
+                    />
+                  </div>
+                  <div class="field-group field-group--full">
+                    <label class="field-label">Topic Description</label>
+                    <textarea
+                      class="glass-input glass-textarea"
+                      formControlName="topic"
+                      placeholder="e.g., Breathing exercises during labor..."
+                    ></textarea>
+                  </div>
+                  <div class="field-group field-group--half">
+                    <label class="field-label">Questions</label>
+                    <input
+                      class="glass-input"
+                      type="number"
+                      formControlName="numberOfQuestions"
+                    />
+                  </div>
+                  <div class="field-group field-group--half">
+                    <label class="field-label">Pass Score %</label>
+                    <input
+                      class="glass-input"
+                      type="number"
+                      formControlName="passScore"
+                    />
+                  </div>
+                  <div class="field-group field-group--full mt-2">
+                    <button
+                      type="submit"
+                      class="deploy-btn w-100 justify-content-center"
+                      [disabled]="aiForm.invalid || isGenerating"
+                    >
+                      @if (isGenerating) {
+                        <mat-icon class="spinner">sync</mat-icon> Generating...
+                      } @else {
+                        <mat-icon>bolt</mat-icon> Generate Quiz
+                      }
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="col-md-8 pe-0 ps-2">
+              <div class="glass-card form-card">
+                <div
+                  class="form-card-header d-flex justify-content-between align-items-center w-100"
+                >
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="form-icon"><mat-icon>quiz</mat-icon></div>
+                    <div>
+                      <span class="section-label">Manual Editor</span>
+                      <h3 class="form-title">Build Quiz</h3>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-light d-flex align-items-center gap-1 question-btn"
+                    (click)="addQuestion()"
+                    style="border-radius: 8px"
+                  >
+                    <mat-icon style="font-size: 18px; width: 18px; height: 18px"
+                      >add</mat-icon
+                    >
+                    Add Question
+                  </button>
+                </div>
+                <div class="studio-sep"></div>
+
+                <form
+                  [formGroup]="quizReactiveForm"
+                  (ngSubmit)="saveReactiveQuiz()"
+                >
+                  <div class="fields-grid mb-4">
+                    <div class="field-group field-group--half">
+                      <label class="field-label">Course Module ID</label>
+                      <input
+                        class="glass-input"
+                        type="number"
+                        formControlName="courseModuleId"
+                      />
+                    </div>
+                    <div class="field-group field-group--half">
+                      <label class="field-label">Pass Score (%)</label>
+                      <input
+                        class="glass-input"
+                        type="number"
+                        formControlName="passScore"
+                      />
+                    </div>
+                  </div>
+
+                  <div formArrayName="questions">
+                    @for (q of questions.controls; track q; let i = $index) {
+                      <div
+                        [formGroupName]="i"
+                        class="p-3 mb-3"
+                        style="
+                          background: rgba(255, 255, 255, 0.05);
+                          border-radius: 12px;
+                          border: 1px solid rgba(255, 255, 255, 0.1);
+                        "
+                      >
+                        <div
+                          class="d-flex justify-content-between align-items-center mb-3"
+                        >
+                          <strong style="color: #fff"
+                            >Question {{ i + 1 }}</strong
+                          >
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-danger py-0 px-2 remove-btn"
+                            (click)="removeQuestion(i)"
+                            style="border-radius: 6px"
+                          >
+                            Remove
+                          </button>
+                        </div>
+
+                        <div class="fields-grid">
+                          <div class="field-group" style="grid-column: span 2">
+                            <input
+                              class="glass-input"
+                              formControlName="questionText"
+                              placeholder="Enter question text..."
+                            />
+                          </div>
+                          <div class="field-group">
+                            <select
+                              title="question-type"
+                              class="glass-input"
+                              formControlName="questionType"
+                            >
+                              @for (type of questionTypes; track type) {
+                                <option [value]="type" style="color: #000">
+                                  {{ type }}
+                                </option>
+                              }
+                            </select>
+                          </div>
+                        </div>
+
+                        @if (q.get("questionType")?.value !== "OPEN_ENDED") {
+                          <div
+                            class="mt-3 ms-3 ps-3"
+                            style="
+                              border-left: 2px solid rgba(255, 255, 255, 0.2);
+                            "
+                          >
+                            <div class="d-flex justify-content-between mb-2">
+                              <span class="field-label mb-0">Answers</span>
+                              <a
+                                href="javascript:void(0)"
+                                (click)="addChoice(i)"
+                                style="
+                                  color: #8bb4ff;
+                                  font-size: 0.85rem;
+                                  text-decoration: none;
+                                "
+                                >+ Add Option</a
+                              >
+                            </div>
+                            <div formArrayName="choices">
+                              @for (
+                                c of getChoices(i).controls;
+                                track c;
+                                let j = $index
+                              ) {
+                                <div
+                                  [formGroupName]="j"
+                                  class="d-flex gap-2 mb-2 align-items-center"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    formControlName="correct"
+                                    style="width: 20px; height: 20px"
+                                    title="Mark as correct answer"
+                                  />
+                                  <input
+                                    class="glass-input py-1"
+                                    formControlName="choiceText"
+                                    placeholder="Choice text..."
+                                  />
+                                  <mat-icon
+                                    (click)="removeChoice(i, j)"
+                                    style="color: #ff6b6b; cursor: pointer"
+                                    >close</mat-icon
+                                  >
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        } @else {
+                          <div
+                            class="mt-3 p-2 rounded"
+                            style="
+                              background: rgba(139, 180, 255, 0.1);
+                              color: #8bb4ff;
+                              font-size: 0.85rem;
+                            "
+                          >
+                            <mat-icon
+                              style="
+                                vertical-align: middle;
+                                font-size: 16px;
+                                width: 16px;
+                                height: 16px;
+                                margin-right: 4px;
+                              "
+                              >auto_awesome</mat-icon
+                            >
+                            Users will provide a text answer. Gemini AI will
+                            evaluate it.
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <div class="form-footer mt-4">
+                    <button
+                      type="submit"
+                      class="deploy-btn"
+                      [disabled]="quizReactiveForm.invalid"
+                    >
+                      <mat-icon>save</mat-icon> Save Quiz to Database
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        }
+
+        @case ("guide") {
+          <div class="glass-card form-card">
+            <div class="form-card-header">
+              <div class="form-icon">
+                <mat-icon>menu_book</mat-icon>
+              </div>
+              <div>
+                <span class="section-label">New Entry</span>
+                <h3 class="form-title">Partner Guide</h3>
+              </div>
+            </div>
+
+            <div class="studio-sep"></div>
+
+            <div class="fields-grid">
+              <div class="field-group">
+                <label class="field-label">Guide Headline</label>
+                <input
+                  class="glass-input"
+                  placeholder="e.g., Supporting the Glow"
+                  [(ngModel)]="guideForm.title"
+                />
+              </div>
+              <div class="field-group">
+                <label class="field-label">Arabic Headline</label>
+                <input
+                  class="glass-input"
+                  placeholder="Arabic translation"
+                  [(ngModel)]="guideForm.titleAr"
+                  dir="rtl"
+                />
+              </div>
+              <div class="field-group field-group--half">
+                <label class="field-label">Target Week</label>
+                <input
+                  class="glass-input"
+                  type="number"
+                  [(ngModel)]="guideForm.targetWeek"
+                />
+              </div>
+              <div class="field-group field-group--half">
+                <label class="field-label">Topic Category</label>
+                <input
+                  class="glass-input"
+                  placeholder="Emotional Support"
+                  [(ngModel)]="guideForm.category"
+                />
+              </div>
+              <div class="field-group field-group--full">
+                <label class="field-label">Guide Insight Content</label>
+                <textarea
+                  class="glass-input glass-textarea glass-textarea--tall"
+                  placeholder="Write practical partner advice..."
+                  [(ngModel)]="guideForm.content"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <button class="deploy-btn" (click)="saveGuide()">
+                <mat-icon>rocket_launch</mat-icon>
+                Deploy Guide
+              </button>
+              <span class="form-hint"
+                >Guide will be visible to all partners immediately</span
+              >
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Live Feed -->
+    <div class="feeds-grid">
+      <div class="glass-card feed-card">
+        <div class="feed-header">
+          <div>
+            <span class="section-label">Published Content</span>
+            <h4 class="feed-title">Live Courses</h4>
+          </div>
+          <span class="feed-count">{{ courses.length }}</span>
+        </div>
+        <div class="feed-list">
+          @for (course of courses; track course.id) {
+            <div class="feed-item">
+              <div class="feed-icon">
+                <mat-icon>school</mat-icon>
+              </div>
+              <div class="feed-item-body">
+                <div class="feed-item-title">{{ course.title }}</div>
+                <div class="feed-item-meta">
+                  {{ course.category }} · {{ course.level }}
+                </div>
+              </div>
+              <div class="feed-item-badge">Live</div>
+            </div>
+          } @empty {
+            <div class="feed-empty">
+              <mat-icon>inbox</mat-icon>
+              <p>No courses published yet.</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="glass-card feed-card">
+        <div class="feed-header">
+          <div>
+            <span class="section-label">Published Content</span>
+            <h4 class="feed-title">Partner Guides</h4>
+          </div>
+          <span class="feed-count">{{ guides.length }}</span>
+        </div>
+        <div class="feed-list">
+          @for (guide of guides; track guide.id) {
+            <div class="feed-item">
+              <div class="feed-icon">
+                <mat-icon>menu_book</mat-icon>
+              </div>
+              <div class="feed-item-body">
+                <div class="feed-item-title">{{ guide.title }}</div>
+                <div class="feed-item-meta">
+                  Week {{ guide.targetWeek }} · {{ guide.category }}
+                </div>
+              </div>
+              <div class="feed-item-badge">Week {{ guide.targetWeek }}</div>
+            </div>
+          } @empty {
+            <div class="feed-empty">
+              <mat-icon>inbox</mat-icon>
+              <p>No guides available.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

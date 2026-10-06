@@ -1,0 +1,114 @@
+<!-- invite-center.component.html -->
+<section class="invite-center">
+  <div class="studio-wrap">
+    <header class="studio-header">
+      <div class="header-row">
+        <span class="studio-chip">
+          Collaboration Center
+          <span class="invite-dot"></span>
+        </span>
+      </div>
+      <h1 class="studio-title">
+        Partner <span class="title-accent">Invites.</span>
+      </h1>
+      <p class="studio-lead">
+        Accept only the collaboration you are ready to support responsibly. Each
+        invitation clarifies your role in the support relationship.
+      </p>
+    </header>
+
+    <!-- Empty State -->
+    <div class="empty-full" *ngIf="invites.length === 0">
+      <div class="glass-card empty-card">
+        <div class="bot-ring">
+          <mat-icon>mail_outline</mat-icon>
+        </div>
+        <h3>Your inbox is clear</h3>
+        <p>
+          No pending invitations at the moment. Take this time to read the
+          latest guides.
+        </p>
+        <a routerLink="/front/partner/guides" class="studio-btn">
+          <mat-icon>menu_book</mat-icon>
+          Browse Guides
+        </a>
+      </div>
+    </div>
+
+    <!-- Invite Grid -->
+    <div class="invites-grid" *ngIf="invites.length > 0">
+      <article
+        class="glass-card invite-slab"
+        *ngFor="let invite of invites"
+        [class.status-pending]="invite.status === 'PENDING'"
+        [class.status-answered]="invite.status !== 'PENDING'"
+      >
+        <!-- Card top accent is handled by glass-card::before -->
+
+        <div class="slab-header">
+          <div>
+            <h2 class="invite-title">Pregnancy #{{ invite.pregnancyId }}</h2>
+            <div class="invite-meta">
+              From: Mother {{ invite.motherId }} · {{ invite.status }}
+            </div>
+          </div>
+          <span class="gen-badge"
+            >{{ invite.permissions.length }} Access Points</span
+          >
+        </div>
+
+        <div class="perm-pills">
+          <div
+            class="perm-pill"
+            *ngFor="let perm of invite.permissions"
+            [class.allowed]="perm.allowed"
+          >
+            <span class="perm-icon">
+              <mat-icon>{{
+                perm.allowed ? "check_circle" : "cancel"
+              }}</mat-icon>
+            </span>
+            {{ permissionService.humanize(perm.permissionType) }}
+          </div>
+        </div>
+
+        <div class="slab-footer">
+          <div
+            class="action-row"
+            *ngIf="invite.status === 'PENDING'; else answered"
+          >
+            <button class="studio-btn accept-btn" (click)="accept(invite.id)">
+              <mat-icon>handshake</mat-icon>
+              Accept Collaboration
+            </button>
+            <button class="studio-btn reject-btn" (click)="reject(invite.id)">
+              Reject
+            </button>
+          </div>
+          <ng-template #answered>
+            <div class="answered-box">
+              <mat-icon>event_available</mat-icon>
+              <p>
+                Processed on
+                {{ invite.updatedAt || invite.createdAt | date: "mediumDate" }}
+              </p>
+            </div>
+          </ng-template>
+        </div>
+      </article>
+    </div>
+
+    <!-- Footer -->
+    <footer class="studio-footer">
+      <div class="glass-card footer-card">
+        <mat-icon class="footer-icon">privacy_tip</mat-icon>
+        <h6>Why Pregnancy IDs?</h6>
+        <p>
+          We use unique IDs to ensure privacy and clinical accuracy.
+          Double-check the ID with the Mother if you are unsure about the
+          request.
+        </p>
+      </div>
+    </footer>
+  </div>
+</section>

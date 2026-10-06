@@ -1,0 +1,263 @@
+<div class="lp-wrap">
+
+  <!-- ══ TOAST ════════════════════════════════════════════════ -->
+  <div class="lp-toast" *ngIf="toast"
+    [class.success]="toast.type === 'success'"
+    [class.error]="toast.type === 'error'">
+    <mat-icon>{{ toast.type === 'success' ? 'check_circle' : 'error_outline' }}</mat-icon>
+    {{ toast.message }}
+  </div>
+
+  <!-- ══ CONFIRM DIALOG ═══════════════════════════════════════ -->
+  <div class="lp-backdrop" *ngIf="confirmTarget" (click)="cancelDelete()">
+    <div class="lp-dialog" (click)="$event.stopPropagation()">
+      <div class="lp-dialog-icon">
+        <mat-icon>delete_forever</mat-icon>
+      </div>
+      <h3 class="lp-dialog-title">Delete product?</h3>
+      <p class="lp-dialog-body">
+        You are about to permanently delete
+        <strong>{{ confirmTarget.nom }}</strong>.
+        This action cannot be undone.
+      </p>
+      <div class="lp-dialog-actions">
+        <button class="lp-dialog-cancel" (click)="cancelDelete()" [disabled]="deleting">
+          Cancel
+        </button>
+        <button class="lp-dialog-confirm" (click)="confirmDelete()" [disabled]="deleting">
+          <span class="lp-mini-spinner" *ngIf="deleting"></span>
+          <mat-icon *ngIf="!deleting">delete_outline</mat-icon>
+          {{ deleting ? 'Deleting...' : 'Yes, delete' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ HEADER ══════════════════════════════════════════════ -->
+  <div class="lp-header">
+    <div class="lp-header-left">
+      <div class="lp-header-icon">
+        <mat-icon>inventory_2</mat-icon>
+      </div>
+      <div>
+        <h1 class="lp-title">Product Catalogue</h1>
+        <p class="lp-subtitle">Manage and organise your products</p>
+      </div>
+    </div>
+    <button class="lp-add-btn" routerLink="/admin/shop/creer-produit">
+      <mat-icon>add</mat-icon>
+      Add product
+    </button>
+  </div>
+
+  <!-- ══ STATS ════════════════════════════════════════════════ -->
+  <div class="lp-stats">
+    <div class="lp-stat-card lp-stat-pink">
+      <div class="lp-stat-ico"><mat-icon>inventory_2</mat-icon></div>
+      <div class="lp-stat-body">
+        <div class="lp-stat-value">{{ totalProduits }}</div>
+        <div class="lp-stat-label">Products</div>
+      </div>
+      <div class="lp-stat-bg-ico"><mat-icon>inventory_2</mat-icon></div>
+    </div>
+    <div class="lp-stat-card lp-stat-teal">
+      <div class="lp-stat-ico"><mat-icon>warehouse</mat-icon></div>
+      <div class="lp-stat-body">
+        <div class="lp-stat-value">{{ totalStock }}</div>
+        <div class="lp-stat-label">Items in stock</div>
+      </div>
+      <div class="lp-stat-bg-ico"><mat-icon>warehouse</mat-icon></div>
+    </div>
+    <div class="lp-stat-card lp-stat-purple">
+      <div class="lp-stat-ico"><mat-icon>payments</mat-icon></div>
+      <div class="lp-stat-body">
+        <div class="lp-stat-value">{{ valeurStock | number:'1.0-0' }}</div>
+        <div class="lp-stat-label">Stock value (TND)</div>
+      </div>
+      <div class="lp-stat-bg-ico"><mat-icon>payments</mat-icon></div>
+    </div>
+    <div class="lp-stat-card lp-stat-red">
+      <div class="lp-stat-ico"><mat-icon>warning_amber</mat-icon></div>
+      <div class="lp-stat-body">
+        <div class="lp-stat-value">{{ ruptures }}</div>
+        <div class="lp-stat-label">Out of stock</div>
+      </div>
+      <div class="lp-stat-bg-ico"><mat-icon>warning_amber</mat-icon></div>
+    </div>
+  </div>
+
+  <!-- ══ TOOLBAR ══════════════════════════════════════════════ -->
+  <div class="lp-toolbar">
+    <div class="lp-search-wrap">
+      <mat-icon class="lp-search-ico">search</mat-icon>
+      <input
+        class="lp-search-input"
+        placeholder="Search by name, category..."
+        [(ngModel)]="searchQuery"
+        (input)="search()"
+      />
+      <button *ngIf="searchQuery" class="lp-clear-btn" (click)="searchQuery=''; search()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="lp-view-toggle">
+      <button class="lp-view-btn" [class.active]="viewMode === 'grid'"
+        (click)="viewMode = 'grid'" matTooltip="Grid view">
+        <mat-icon>grid_view</mat-icon>
+      </button>
+      <button class="lp-view-btn" [class.active]="viewMode === 'table'"
+        (click)="viewMode = 'table'" matTooltip="Table view">
+        <mat-icon>table_rows</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ LOADING ══════════════════════════════════════════════ -->
+  <div *ngIf="loading" class="lp-loading">
+    <span></span><span></span><span></span>
+  </div>
+
+  <!-- ══ EMPTY ════════════════════════════════════════════════ -->
+  <div *ngIf="!loading && filteredProduits.length === 0" class="lp-empty">
+    <div class="lp-empty-circle">
+      <mat-icon>inventory_2</mat-icon>
+    </div>
+    <h3>{{ searchQuery ? 'No results found' : 'No products yet' }}</h3>
+    <p>{{ searchQuery ? 'Try a different keyword.' : 'Start by adding your first product.' }}</p>
+    <button *ngIf="!searchQuery" class="lp-add-btn" routerLink="/admin/shop/creer-produit">
+      <mat-icon>add</mat-icon> Add product
+    </button>
+  </div>
+
+  <!-- ══ GRID VIEW ════════════════════════════════════════════ -->
+  <div *ngIf="!loading && filteredProduits.length > 0 && viewMode === 'grid'" class="lp-grid">
+    <div
+      *ngFor="let p of filteredProduits; let i = index"
+      class="lp-card"
+      [style.animation-delay]="(i * 45) + 'ms'"
+      (click)="viewProduct(p)">
+
+      <div class="lp-card-img-wrap">
+        <img *ngIf="p.images && p.images.length > 0"
+          [src]="p.images[0]" [alt]="p.nom" class="lp-card-img" />
+        <div *ngIf="!p.images || p.images.length === 0" class="lp-card-no-img">
+          <mat-icon>image_not_supported</mat-icon>
+        </div>
+        <span class="lp-stock-chip" [attr.data-s]="stockBadge(p.stock)">
+          {{ stockLabel(p.stock) }}
+        </span>
+
+        <div class="lp-card-overlay">
+          <button class="lp-ov-btn" (click)="$event.stopPropagation(); editProduct(p)" matTooltip="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button class="lp-ov-btn lp-ov-eye" (click)="$event.stopPropagation(); viewProduct(p)" matTooltip="View details">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button class="lp-ov-btn lp-ov-del" (click)="$event.stopPropagation(); requestDelete(p)" matTooltip="Delete">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+
+        <span *ngIf="p.images && p.images.length > 1" class="lp-img-count">
+          <mat-icon>photo_library</mat-icon> {{ p.images.length }}
+        </span>
+      </div>
+
+      <div class="lp-card-body">
+        <div class="lp-card-tags">
+          <span *ngIf="p.categorie" class="lp-cat-chip">{{ p.categorie.nom }}</span>
+        </div>
+        <h3 class="lp-card-name">{{ p.nom }}</h3>
+        <p class="lp-card-desc">
+          {{ p.description | slice:0:85 }}{{ (p.description?.length ?? 0) > 85 ? '…' : '' }}
+        </p>
+        <div class="lp-card-foot">
+          <span class="lp-card-price">{{ p.prix | number:'1.2-2' }} <small>TND</small></span>
+          <span class="lp-card-qty">
+            <mat-icon>inventory</mat-icon> {{ p.stock }}
+          </span>
+        </div>
+      </div>
+
+      <div class="lp-card-actions">
+        <button class="lp-act-view" (click)="$event.stopPropagation(); viewProduct(p)">
+          <mat-icon>visibility</mat-icon> View
+        </button>
+        <button class="lp-act-edit" (click)="$event.stopPropagation(); editProduct(p)">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        <button class="lp-act-del" (click)="$event.stopPropagation(); requestDelete(p)">
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TABLE VIEW ═══════════════════════════════════════════ -->
+  <div *ngIf="!loading && filteredProduits.length > 0 && viewMode === 'table'" class="lp-table-wrap">
+    <table class="lp-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let p of filteredProduits; let i = index"
+          class="lp-tr"
+          [style.animation-delay]="(i * 30) + 'ms'"
+          (click)="viewProduct(p)"
+          style="cursor:pointer">
+          <td>
+            <div class="lp-tbl-prod">
+              <div class="lp-tbl-thumb">
+                <img *ngIf="p.images && p.images.length > 0" [src]="p.images[0]" [alt]="p.nom" />
+                <mat-icon *ngIf="!p.images || p.images.length === 0">image_not_supported</mat-icon>
+              </div>
+              <div>
+                <div class="lp-tbl-name">{{ p.nom }}</div>
+                <div class="lp-tbl-desc">
+                  {{ p.description | slice:0:50 }}{{ (p.description?.length ?? 0) > 50 ? '…' : '' }}
+                </div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span *ngIf="p.categorie" class="lp-cat-chip">{{ p.categorie.nom }}</span>
+            <span *ngIf="!p.categorie" class="lp-tbl-none">—</span>
+          </td>
+          <td class="lp-tbl-price">{{ p.prix | number:'1.2-2' }} TND</td>
+          <td class="lp-tbl-stock">{{ p.stock }}</td>
+          <td>
+            <span class="lp-stock-chip" [attr.data-s]="stockBadge(p.stock)">
+              {{ stockLabel(p.stock) }}
+            </span>
+          </td>
+          <td>
+            <div class="lp-tbl-acts">
+              <button class="lp-tbl-btn lp-tbl-view"
+                (click)="$event.stopPropagation(); viewProduct(p)" matTooltip="View details">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button class="lp-tbl-btn lp-tbl-edit"
+                (click)="$event.stopPropagation(); editProduct(p)" matTooltip="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="lp-tbl-btn lp-tbl-del"
+                (click)="$event.stopPropagation(); requestDelete(p)" matTooltip="Delete">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

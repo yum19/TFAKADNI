@@ -1,0 +1,23 @@
+{
+  "features": [
+    "systolic_bp",
+    "diastolic_bp",
+    "heart_rate",
+    "oxygen_pct",
+    "glucose_mmol",
+    "temperature_c",
+    "weight_kg",
+    "pregnancy_week",
+    "trimester"
+  ],
+  "label_names": {
+    "0": "Low",
+    "1": "Moderate",
+    "2": "High",
+    "3": "Critical"
+  },
+  "model_type": "Gradient Boosting",
+  "accuracy": 0.9895,
+  "n_train": 40000,
+  "dataset": "MAMAAI custom synthetic dataset \u2014 17 clinical profiles, weighted multi-vital scoring"
+}

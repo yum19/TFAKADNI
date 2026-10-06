@@ -1,0 +1,344 @@
+<div class="container fade-in py-3 py-lg-4">
+  <div class="hero-card mb-4">
+    <div class="row gx-3 align-items-center">
+      <div class="col-12 col-lg mb-3 mb-lg-0">
+        <p class="hero-kicker">Admin analytics</p>
+        <h3 class="hero-title mb-2">Follow-up Analytics</h3>
+        <p class="hero-subtitle mb-0">
+          Analyze how postpartum screening risk translates into real psychological follow-up.
+          This dashboard highlights high-risk cases, appointment conversion, delay to care,
+          and the relationship between AI predictions and psych support action.
+        </p>
+      </div>
+
+      <div class="col-12 col-lg-auto mb-3 mb-lg-0">
+        <div class="export-actions">
+          <button
+            mat-stroked-button
+            class="secondary-action"
+            [disabled]="!overview || exportingCsv"
+            (click)="exportCsv()"
+            [title]="!overview ? 'Load data first' : 'Download CSV spreadsheet'">
+            <mat-icon class="material-icons-outlined">
+              {{ exportingCsv ? 'hourglass_empty' : 'table_view' }}
+            </mat-icon>
+            {{ exportingCsv ? 'Exporting…' : 'Export CSV' }}
+          </button>
+
+          <button
+            mat-flat-button
+            class="primary-action"
+            [disabled]="!overview || exportingPdf"
+            (click)="exportPdf()"
+            [title]="!overview ? 'Load data first' : 'Download PDF report'">
+            <mat-icon class="material-icons-outlined">
+              {{ exportingPdf ? 'hourglass_empty' : 'picture_as_pdf' }}
+            </mat-icon>
+            {{ exportingPdf ? 'Generating…' : 'Export PDF' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="state-card mb-4">
+      <mat-spinner diameter="42"></mat-spinner>
+      <div>
+        <h4 class="mb-1">Loading follow-up analytics...</h4>
+        <p class="mb-0 text-secondary">Please wait while we fetch the latest postpartum follow-up data.</p>
+      </div>
+    </div>
+  }
+
+  @if (!loading && error) {
+    <div class="state-card error-state mb-4">
+      <mat-icon class="material-icons-outlined">error</mat-icon>
+      <div>
+        <h4 class="mb-1">Unable to load the dashboard</h4>
+        <p class="mb-2 text-secondary">{{ error }}</p>
+        <button mat-flat-button class="primary-action" (click)="loadAnalytics()">
+          <mat-icon class="material-icons-outlined">refresh</mat-icon>
+          Retry
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (!loading && !error && overview) {
+    <div class="row gx-3 gx-lg-4 mb-1">
+      @for (metric of metrics; track metric.label) {
+        <div class="col-12 col-sm-6 col-lg-3">
+          <mat-card class="metric-card" [ngClass]="metric.tone">
+            <mat-card-content>
+              <div class="metric-head">
+                <div class="metric-icon">
+                  <mat-icon class="material-icons-outlined">{{ metric.icon }}</mat-icon>
+                </div>
+                <p class="metric-label mb-0">{{ metric.label }}</p>
+              </div>
+              <h1 class="metric-value mb-1">{{ metric.value }}</h1>
+              <p class="metric-helper mb-0">{{ metric.helper }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12 col-xl-6 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Risk distribution</h3>
+              <p class="text-secondary small mb-0">
+                Visual breakdown of postpartum predictions by AI risk level.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <apx-chart
+              [series]="riskDistributionChart.series!"
+              [chart]="riskDistributionChart.chart!"
+              [xaxis]="riskDistributionChart.xaxis!"
+              [yaxis]="riskDistributionChart.yaxis!"
+              [stroke]="riskDistributionChart.stroke!"
+              [tooltip]="riskDistributionChart.tooltip!"
+              [dataLabels]="riskDistributionChart.dataLabels!"
+              [plotOptions]="riskDistributionChart.plotOptions!"
+              [colors]="riskDistributionChart.colors!">
+            </apx-chart>
+            <div class="note-box mt-3">
+              <mat-icon class="material-icons-outlined">info</mat-icon>
+              <p class="mb-0">
+                This chart shows the number of AI predictions classified as low, moderate, or high risk.
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-xl-6 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">High-risk follow-up status</h3>
+              <p class="text-secondary small mb-0">
+                Interactive donut chart showing how many high-risk mothers booked a psych appointment.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <apx-chart
+              [series]="followUpDonutChart.series!"
+              [chart]="followUpDonutChart.chart!"
+              [labels]="followUpDonutChart.labels!"
+              [legend]="followUpDonutChart.legend!"
+              [tooltip]="followUpDonutChart.tooltip!"
+              [stroke]="followUpDonutChart.stroke!"
+              [dataLabels]="followUpDonutChart.dataLabels!"
+              [colors]="followUpDonutChart.colors!"
+              [responsive]="followUpDonutChart.responsive!"
+              [plotOptions]="followUpDonutChart.plotOptions!">
+            </apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12 col-xl-8 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Appointment outcomes by risk level</h3>
+              <p class="text-secondary small mb-0">
+                Compare planned, completed, and cancelled appointments across low, moderate, and high-risk groups.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <apx-chart
+              [series]="appointmentStatusChart.series!"
+              [chart]="appointmentStatusChart.chart!"
+              [xaxis]="appointmentStatusChart.xaxis!"
+              [yaxis]="appointmentStatusChart.yaxis!"
+              [stroke]="appointmentStatusChart.stroke!"
+              [tooltip]="appointmentStatusChart.tooltip!"
+              [dataLabels]="appointmentStatusChart.dataLabels!"
+              [plotOptions]="appointmentStatusChart.plotOptions!"
+              [colors]="appointmentStatusChart.colors!"
+              [legend]="appointmentStatusChart.legend!">
+            </apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-xl-4 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Follow-up performance</h3>
+              <p class="text-secondary small mb-0">
+                Fast executive view of the psych conversion rate for high-risk cases.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <apx-chart
+              [series]="followUpProgressChart.series!"
+              [chart]="followUpProgressChart.chart!"
+              [labels]="followUpProgressChart.labels!"
+              [plotOptions]="followUpProgressChart.plotOptions!"
+              [colors]="followUpProgressChart.colors!"
+              [stroke]="followUpProgressChart.stroke!"
+              [dataLabels]="followUpProgressChart.dataLabels!">
+            </apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12 col-xl-7 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Coverage comparison</h3>
+              <p class="text-secondary small mb-0">
+                Compare how many mothers got linked to care versus how many still have no appointment.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <apx-chart
+              [series]="coverageComparisonChart.series!"
+              [chart]="coverageComparisonChart.chart!"
+              [xaxis]="coverageComparisonChart.xaxis!"
+              [yaxis]="coverageComparisonChart.yaxis!"
+              [stroke]="coverageComparisonChart.stroke!"
+              [tooltip]="coverageComparisonChart.tooltip!"
+              [dataLabels]="coverageComparisonChart.dataLabels!"
+              [plotOptions]="coverageComparisonChart.plotOptions!"
+              [colors]="coverageComparisonChart.colors!"
+              [legend]="coverageComparisonChart.legend!">
+            </apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-xl-5 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Executive insight</h3>
+              <p class="text-secondary small mb-0">
+                Quick interpretation of the most important follow-up indicators.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="insight-box mb-3">
+              <mat-icon class="material-icons-outlined">priority_high</mat-icon>
+              <div>
+                <h4 class="mb-1">Priority case note</h4>
+                <p class="mb-0">{{ priorityMessage }}</p>
+              </div>
+            </div>
+
+            <div class="insight-box mb-3">
+              <mat-icon class="material-icons-outlined">insights</mat-icon>
+              <div>
+                <h4 class="mb-1">Performance insight</h4>
+                <p class="mb-0">{{ strongestInsight }}</p>
+              </div>
+            </div>
+
+            <div class="mini-kpi-list">
+              <div class="mini-kpi">
+                <span>Total predictions</span>
+                <strong>{{ overview.totalPredictions }}</strong>
+              </div>
+              <div class="mini-kpi">
+                <span>Average delay</span>
+                <strong>{{ formatDecimal(overview.averageDelayDays) }} days</strong>
+              </div>
+              <div class="mini-kpi">
+                <span>Completed linked appointments</span>
+                <strong>{{ overview.completedAppointmentsLinkedToPrediction }}</strong>
+              </div>
+              <div class="mini-kpi">
+                <span>Cancelled linked appointments</span>
+                <strong>{{ overview.cancelledAppointmentsLinkedToPrediction }}</strong>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12">
+        <mat-card class="panel-card mb-4">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Risk / appointment matrix</h3>
+              <p class="text-secondary small mb-0">
+                Detailed table explaining the relationship between prediction level and psychological follow-up.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="table-shell">
+              <table class="analytics-table">
+                <thead>
+                  <tr>
+                    <th>Risk level</th>
+                    <th>Total predictions</th>
+                    <th>Linked appointments</th>
+                    <th>No appointment</th>
+                    <th>Planned</th>
+                    <th>Completed</th>
+                    <th>Cancelled</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of matrix; track row.riskLevel) {
+                    <tr>
+                      <td>
+                        <span class="risk-tag" [ngClass]="getToneClass(row.riskLevel)">
+                          {{ row.riskLevel }}
+                        </span>
+                      </td>
+                      <td>{{ row.totalPredictions }}</td>
+                      <td>{{ row.linkedAppointments }}</td>
+                      <td>{{ row.noAppointment }}</td>
+                      <td>{{ row.plannedCount }}</td>
+                      <td>{{ row.completedCount }}</td>
+                      <td>{{ row.cancelledCount }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="note-grid mt-4">
+              <div class="note-box">
+                <mat-icon class="material-icons-outlined">campaign</mat-icon>
+                <p class="mb-0">
+                  <strong>Why this matters:</strong> this table helps the admin understand whether high-risk mothers are truly entering the care pathway.
+                </p>
+              </div>
+              <div class="note-box">
+                <mat-icon class="material-icons-outlined">schedule</mat-icon>
+                <p class="mb-0">
+                  <strong>Average delay:</strong> the lower the delay, the faster the response between detected postpartum risk and psych intervention.
+                </p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

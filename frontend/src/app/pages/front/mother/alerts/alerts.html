@@ -1,0 +1,299 @@
+<!-- ░░ BACKGROUND ░░ -->
+<div class="alerts-page-bg">
+  <div class="alerts-bg-img" style="background-image: url('assets/img/bg-pregnancy.jpg')"></div>
+  <div class="alerts-bg-overlay"></div>
+</div>
+
+<!-- ░░ HERO ░░ -->
+<section class="alerts-hero fade-in">
+  <div class="alerts-hero__left">
+    <span class="alerts-hero__eyebrow">🔔 Medical notifications</span>
+    <h1 class="alerts-hero__title">
+      My <span style="font-style:italic; background:linear-gradient(135deg,#e91e63,#9c27b0,#3a8fb5); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; background-size:200% auto; display:inline-block;">Alerts</span>
+    </h1>
+    <p class="alerts-hero__sub">Stay informed about your health status throughout your pregnancy.</p>
+    <div class="alerts-hero__actions">
+      @if(totalUnread > 0) {
+      <button class="alerts-btn alerts-btn--primary" (click)="markAllAsRead()">
+        <span class="material-symbols-outlined">done_all</span>
+        Mark all as read
+      </button>
+      }
+    </div>
+  </div>
+  <div class="alerts-hero__right">
+    <div class="alerts-hero__ring" [class.alerts-hero__ring--pulse]="totalUnread > 0">
+      <span class="material-symbols-outlined alerts-ring-icon">notifications</span>
+      <span class="alerts-ring-value">{{ totalUnread }}</span>
+      <span class="alerts-ring-unit">unread</span>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ LOADING ░░ -->
+@if(loading) {
+<div class="alerts-loading">
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
+}
+
+<!-- ░░ STATS RIBBON ░░ -->
+@if(!loading) {
+<section class="alerts-stats fade-in-delay-1">
+
+  <div class="alerts-stat-card alerts-stat--sky">
+    <div class="alerts-stat__icon">
+      <span class="material-symbols-outlined">notifications</span>
+    </div>
+    <div class="alerts-stat__body">
+      <span class="alerts-stat__value">{{ alerts.length }}</span>
+      <span class="alerts-stat__label">Total alerts</span>
+    </div>
+    <div class="alerts-stat__deco">🔔</div>
+  </div>
+
+  <div class="alerts-stat-card alerts-stat--gold">
+    <div class="alerts-stat__icon">
+      <span class="material-symbols-outlined">mark_email_unread</span>
+    </div>
+    <div class="alerts-stat__body">
+      <span class="alerts-stat__value">{{ totalUnread }}</span>
+      <span class="alerts-stat__label">Unread</span>
+    </div>
+    <div class="alerts-stat__deco">✉</div>
+  </div>
+
+  <div class="alerts-stat-card alerts-stat--purple">
+    <div class="alerts-stat__icon">
+      <span class="material-symbols-outlined">crisis_alert</span>
+    </div>
+    <div class="alerts-stat__body">
+      <span class="alerts-stat__value">{{ totalCritical }}</span>
+      <span class="alerts-stat__label">Critical</span>
+    </div>
+    <div class="alerts-stat__deco">⚠</div>
+  </div>
+
+  <div class="alerts-stat-card alerts-stat--green">
+    <div class="alerts-stat__icon">
+      <span class="material-symbols-outlined">check_circle</span>
+    </div>
+    <div class="alerts-stat__body">
+      <span class="alerts-stat__value">{{ alerts.length - totalUnread }}</span>
+      <span class="alerts-stat__label">Read</span>
+    </div>
+    <div class="alerts-stat__deco">✓</div>
+  </div>
+
+</section>
+
+<!-- ░░ NO ALERTS ░░ -->
+@if(alerts.length === 0) {
+<section class="alerts-empty fade-in-delay-1">
+  <div class="alerts-empty__card">
+    <span class="material-symbols-outlined alerts-empty__icon">notifications_off</span>
+    <h2 class="alerts-empty__title">All clear!</h2>
+    <p class="alerts-empty__sub">No alerts at the moment. Everything looks great.</p>
+  </div>
+</section>
+}
+
+<!-- ░░ ALERTS LIST ░░ -->
+@if(alerts.length > 0) {
+<section class="alerts-bento fade-in-delay-2">
+
+  <!-- LEFT: unread alerts -->
+  <div class="alerts-bento__col">
+    @if(totalUnread > 0) {
+    <div class="alerts-section-header">
+      <span class="alerts-section-dot alerts-section-dot--rose"></span>
+      <span class="alerts-section-title">New · {{ totalUnread }}</span>
+    </div>
+    }
+
+    @for(alert of alerts; track alert.id) {
+    @if(!alert.isRead) {
+    <div class="alerts-card alerts-card--unread" (click)="markAsRead(alert)">
+      <div class="alerts-card__left">
+        <div class="alerts-card__severity-icon"
+             [style.background]="getSeverityColor(alert.severity) + '20'"
+             [style.border]="'2px solid ' + getSeverityColor(alert.severity) + '50'">
+          <span class="material-symbols-outlined" [style.color]="getSeverityColor(alert.severity)">
+            {{ getSeverityIcon(alert.severity) }}
+          </span>
+        </div>
+        <div class="alerts-card__line" [style.background]="getSeverityColor(alert.severity) + '30'"></div>
+      </div>
+      <div class="alerts-card__body">
+        <div class="alerts-card__badges">
+          <span class="alerts-badge-severity"
+                [style.background]="getSeverityColor(alert.severity) + '18'"
+                [style.color]="getSeverityColor(alert.severity)"
+                [style.border]="'1px solid ' + getSeverityColor(alert.severity) + '40'">
+            {{ alert.severity }}
+          </span>
+          <span class="alerts-badge-type">{{ getTypeLabel(alert.alertType) }}</span>
+          <span class="alerts-badge-new">● New</span>
+        </div>
+        <p class="alerts-card__message">{{ alert.message }}</p>
+        @if(alert.recommendation) {
+        <div class="alerts-card__rec">
+          <span class="material-symbols-outlined">lightbulb</span>
+          {{ alert.recommendation }}
+        </div>
+        }
+        <span class="alerts-card__date">
+          <span class="material-symbols-outlined">schedule</span>
+          {{ alert.triggeredAt | date:'MMMM dd, yyyy · HH:mm' }}
+        </span>
+      </div>
+      <div class="alerts-card__actions">
+        <button class="alerts-action-btn alerts-action-btn--read" title="Mark as read"
+                (click)="markAsRead(alert); $event.stopPropagation()">
+          <span class="material-symbols-outlined">done</span>
+        </button>
+        <button class="alerts-action-btn alerts-action-btn--dismiss" title="Dismiss"
+                (click)="dismissAlert(alert); $event.stopPropagation()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+    }
+    }
+
+    <!-- READ alerts -->
+    @if(alerts.length - totalUnread > 0) {
+    <div class="alerts-section-header" style="margin-top: 1.5rem">
+      <span class="alerts-section-dot alerts-section-dot--green"></span>
+      <span class="alerts-section-title">Read · {{ alerts.length - totalUnread }}</span>
+    </div>
+    }
+
+    @for(alert of alerts; track alert.id) {
+    @if(alert.isRead) {
+    <div class="alerts-card alerts-card--read">
+      <div class="alerts-card__left">
+        <div class="alerts-card__severity-icon alerts-card__severity-icon--read">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+      </div>
+      <div class="alerts-card__body">
+        <div class="alerts-card__badges">
+          <span class="alerts-badge-severity"
+                [style.background]="getSeverityColor(alert.severity) + '10'"
+                [style.color]="getSeverityColor(alert.severity) + 'aa'"
+                [style.border]="'1px solid ' + getSeverityColor(alert.severity) + '25'">
+            {{ alert.severity }}
+          </span>
+          <span class="alerts-badge-type">{{ getTypeLabel(alert.alertType) }}</span>
+        </div>
+        <p class="alerts-card__message alerts-card__message--read">{{ alert.message }}</p>
+        <span class="alerts-card__date">
+          <span class="material-symbols-outlined">schedule</span>
+          {{ alert.triggeredAt | date:'MMMM dd, yyyy · HH:mm' }}
+        </span>
+      </div>
+      <div class="alerts-card__actions">
+        <button class="alerts-action-btn alerts-action-btn--dismiss" title="Dismiss"
+                (click)="dismissAlert(alert); $event.stopPropagation()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+    }
+    }
+  </div>
+
+  <!-- RIGHT: summary card -->
+  <div class="alerts-bento__side">
+    <div class="alerts-summary-card">
+      <div class="alerts-card-tag">📊 Summary</div>
+      <h3 class="alerts-summary-title">Alert overview</h3>
+      <div class="alerts-summary-list">
+
+        <div class="alerts-summary-item">
+          <div class="alerts-summary-icon" style="background:rgba(156,39,176,0.12); color:#9c27b0">
+            <span class="material-symbols-outlined">crisis_alert</span>
+          </div>
+          <div class="alerts-summary-body">
+            <span class="alerts-summary-label">Critical</span>
+            <span class="alerts-summary-value">{{ totalCritical }}</span>
+          </div>
+          <div class="alerts-summary-bar">
+            <div class="alerts-summary-bar__fill" style="background:#9c27b0"
+                 [style.width]="alerts.length ? (totalCritical / alerts.length * 100) + '%' : '0%'"></div>
+          </div>
+        </div>
+
+        <div class="alerts-summary-item">
+          <div class="alerts-summary-icon" style="background:rgba(244,67,54,0.12); color:#f44336">
+            <span class="material-symbols-outlined">error</span>
+          </div>
+          <div class="alerts-summary-body">
+            <span class="alerts-summary-label">Danger</span>
+            <span class="alerts-summary-value">{{ countBySeverity('DANGER') }}</span>
+          </div>
+          <div class="alerts-summary-bar">
+            <div class="alerts-summary-bar__fill" style="background:#f44336"
+                 [style.width]="alerts.length ? (countBySeverity('DANGER') / alerts.length * 100) + '%' : '0%'"></div>
+          </div>
+        </div>
+
+        <div class="alerts-summary-item">
+          <div class="alerts-summary-icon" style="background:rgba(255,152,0,0.12); color:#ff9800">
+            <span class="material-symbols-outlined">warning</span>
+          </div>
+          <div class="alerts-summary-body">
+            <span class="alerts-summary-label">Warning</span>
+            <span class="alerts-summary-value">{{ countBySeverity('WARNING') }}</span>
+          </div>
+          <div class="alerts-summary-bar">
+            <div class="alerts-summary-bar__fill" style="background:#ff9800"
+                 [style.width]="alerts.length ? (countBySeverity('WARNING') / alerts.length * 100) + '%' : '0%'"></div>
+          </div>
+        </div>
+
+        <div class="alerts-summary-item">
+          <div class="alerts-summary-icon" style="background:rgba(3,169,244,0.12); color:#03a9f4">
+            <span class="material-symbols-outlined">info</span>
+          </div>
+          <div class="alerts-summary-body">
+            <span class="alerts-summary-label">Info</span>
+            <span class="alerts-summary-value">{{ countBySeverity('INFO') }}</span>
+          </div>
+          <div class="alerts-summary-bar">
+            <div class="alerts-summary-bar__fill" style="background:#03a9f4"
+                 [style.width]="alerts.length ? (countBySeverity('INFO') / alerts.length * 100) + '%' : '0%'"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tips card -->
+    <div class="alerts-tips-card">
+      <div class="alerts-card-tag">💡 Health tips</div>
+      <div class="alerts-tips-list">
+        <div class="alerts-tip">
+          <span class="alerts-tip__dot"></span>
+          Monitor your blood pressure daily, especially in the 3rd trimester.
+        </div>
+        <div class="alerts-tip">
+          <span class="alerts-tip__dot"></span>
+          Drink at least 2L of water per day to stay hydrated.
+        </div>
+        <div class="alerts-tip">
+          <span class="alerts-tip__dot"></span>
+          Rest if you experience unusual fatigue or dizziness.
+        </div>
+        <div class="alerts-tip">
+          <span class="alerts-tip__dot"></span>
+          Contact your doctor if a critical alert appears.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+}
+}

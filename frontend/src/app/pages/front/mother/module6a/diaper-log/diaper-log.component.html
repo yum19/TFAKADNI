@@ -1,0 +1,151 @@
+<section class="document-page">
+  <div class="document-shell">
+    <header class="topbar">
+      
+    </header>
+
+    <section class="hero-card">
+      <div class="hero-copy">
+        <p class="eyebrow">Diaper logs · daily care</p>
+        <h1>
+          Gentle care,
+          <span>beautifully recorded</span>
+        </h1>
+        <p class="hero-text">Track changes with time, type and notes in a soft timeline.</p>
+      </div>
+
+      <div class="hero-side">
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-number">{{ diaperLogs.length }}</span>
+            <span class="stat-label">Logs</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">{{ babyId }}</span>
+            <span class="stat-label">Baby ID</span>
+          </div>
+        </div>
+
+        <button type="button" class="add-document-btn" (click)="scrollToForm()">
+          <span class="plus">+</span>
+          Add log
+        </button>
+      </div>
+    </section>
+
+    <div class="messages">
+      <div class="status success" *ngIf="successMessage">{{ successMessage }}</div>
+      <div class="status error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    </div>
+
+    <section class="filters-card">
+      <div class="filters-head">
+        <span class="filters-title">Filter logs</span>
+      </div>
+
+      <div class="filters-row">
+        <button type="button" class="filter-chip" [ngClass]="{ active: !showTodayOnly }" (click)="showTodayOnly && toggleTodayFilter()">
+          All
+        </button>
+        <button type="button" class="filter-chip" [ngClass]="{ active: showTodayOnly }" (click)="!showTodayOnly && toggleTodayFilter()">
+          Today
+        </button>
+      </div>
+    </section>
+
+    <section class="gallery-section">
+      <div class="documents-grid two-col">
+        <section class="filters-card" #formCard>
+          <div class="filters-head">
+            <span class="filters-title">{{ isEditMode ? 'Update diaper log' : 'Add diaper log' }}</span>
+          </div>
+
+          <form [formGroup]="diaperForm" (ngSubmit)="onSubmit()" class="inline-form">
+            <div class="form-grid">
+              <label class="field">
+                <span>Date & time</span>
+                <input type="datetime-local" formControlName="changeTime" />
+                <small class="error-text" *ngIf="diaperForm.get('changeTime')?.touched && diaperForm.get('changeTime')?.invalid">
+                  Date & time is required.
+                </small>
+              </label>
+
+              <label class="field">
+                <span>Type</span>
+                <select formControlName="diaperType">
+                  <option value="">-- Select --</option>
+                  <option *ngFor="let type of diaperTypes" [value]="type">{{ type }}</option>
+                </select>
+                <small class="error-text" *ngIf="diaperForm.get('diaperType')?.touched && diaperForm.get('diaperType')?.invalid">
+                  Type is required.
+                </small>
+              </label>
+
+              <label class="field">
+                <span>Color</span>
+                <input type="text" formControlName="color" placeholder="Yellow, brown..." />
+              </label>
+
+              <label class="field">
+                <span>Consistency</span>
+                <input type="text" formControlName="consistency" placeholder="Liquid, pasty..." />
+              </label>
+
+              <label class="field full">
+                <span>Notes</span>
+                <textarea rows="4" formControlName="notes" placeholder="Add remarks..."></textarea>
+              </label>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="secondary-btn" (click)="resetForm()">Reset</button>
+              <button type="submit" class="primary-btn" [disabled]="submitting">
+                {{ submitting ? 'Saving...' : (isEditMode ? 'Update' : 'Add') }}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section class="filters-card">
+          <div class="filters-head">
+            <span class="filters-title">{{ showTodayOnly ? "Today's logs" : 'Logs history' }}</span>
+          </div>
+
+          <div *ngIf="loading" class="empty-state compact">
+            <h3>Loading...</h3>
+          </div>
+
+          <div *ngIf="!loading && diaperLogs.length === 0" class="empty-state compact">
+            <h3>No diaper logs yet</h3>
+            <p>Add the first log to start tracking gently.</p>
+            <button type="button" class="empty-add-btn" (click)="scrollToForm()">Add first log</button>
+          </div>
+
+          <div class="logs-list" *ngIf="!loading && diaperLogs.length > 0">
+            <article class="document-card" *ngFor="let log of diaperLogs; trackBy: trackByLogId">
+              <div class="document-body">
+                <div class="log-head">
+                  <span class="log-badge" [ngClass]="'type-' + (log.diaperType || 'other').toLowerCase()">
+                    {{ log.diaperType }}
+                  </span>
+                  <span class="document-date">{{ log.changeTime | date:'dd MMM yyyy HH:mm' }}</span>
+                </div>
+
+                <p class="document-notes"><strong>Color:</strong> {{ log.color || '-' }}</p>
+                <p class="document-notes"><strong>Consistency:</strong> {{ log.consistency || '-' }}</p>
+                <p class="document-notes"><strong>Notes:</strong> {{ log.notes || '-' }}</p>
+
+                <div class="document-footer">
+                  <div class="card-actions">
+                    <button type="button" class="update-btn" (click)="editLog(log)">Update</button>
+                    <button type="button" class="delete-btn" (click)="deleteLog(log.id)">Remove</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+</section>

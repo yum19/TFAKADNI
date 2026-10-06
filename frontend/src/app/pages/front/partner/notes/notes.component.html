@@ -1,0 +1,137 @@
+<!-- notes-dispatch.component.html -->
+<section class="notes-dispatch">
+  <div class="studio-wrap">
+    <header class="studio-header">
+      <div class="header-row">
+        <span class="studio-chip">
+          Dispatch Center
+          <span class="dispatch-dot"></span>
+        </span>
+        <span class="inbox-count-pill">
+          <mat-icon>inbox</mat-icon>
+          <span>{{ unreadCount }} Unread</span>
+        </span>
+      </div>
+      <h1 class="studio-title">
+        Support <span class="title-accent">Notes.</span>
+      </h1>
+      <p class="studio-lead">
+        Bridge the gap with calm, specific actions. Your words become their
+        peace of mind.
+      </p>
+    </header>
+
+    <div class="studio-grid">
+      <!-- Left: Composer -->
+      <div class="glass-card composer-card">
+        <span class="section-label">
+          <mat-icon>edit_note</mat-icon> New Dispatch
+        </span>
+        <h4 class="section-title">Send a Note</h4>
+        <p class="section-sub">
+          Choose an active link and write something specific and actionable.
+        </p>
+
+        <div class="field-group">
+          <label class="field-label">
+            <mat-icon>link</mat-icon> Active Support Link
+          </label>
+          <select
+            title="selected-link"
+            class="glass-select"
+            [(ngModel)]="selectedLink"
+          >
+            <option *ngFor="let link of links" [ngValue]="link">
+              Partner: {{ link.motherId }} · Pregnancy #{{ link.pregnancyId }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">
+            <mat-icon>chat_bubble_outline</mat-icon> Your Message
+          </label>
+          <textarea
+            class="glass-textarea"
+            [(ngModel)]="draft"
+            placeholder="Write something specific and actionable..."
+          ></textarea>
+        </div>
+
+        <button class="studio-btn send-btn" (click)="send()">
+          <span>Send Dispatch</span>
+          <mat-icon>send</mat-icon>
+        </button>
+
+        <div class="studio-sep"></div>
+
+        <div class="strategy-tip">
+          <div class="tip-header">
+            <mat-icon>auto_awesome</mat-icon>
+            <span>Strategy Tip</span>
+          </div>
+          <p>
+            Specificity reduces mental load. Instead of "I'll help," try "I'll
+            handle the grocery run at 5 PM."
+          </p>
+        </div>
+      </div>
+
+      <!-- Right: Inbox -->
+      <div class="glass-card inbox-card">
+        <div class="result-header">
+          <h4 class="section-title m-0">Recent Inbox</h4>
+          <span class="gen-badge" *ngIf="notes.length > 0">
+            {{ notes.length }} Messages
+          </span>
+        </div>
+
+        <div class="inbox-feed">
+          <div class="empty-state" *ngIf="notes.length === 0">
+            <div class="bot-ring">
+              <mat-icon>inbox</mat-icon>
+            </div>
+            <h5>Peaceful & Quiet</h5>
+            <p>New requests will arrive here as they are generated.</p>
+          </div>
+
+          <article
+            class="message-slab"
+            *ngFor="let note of notes"
+            [class.unread]="!note.isRead"
+          >
+            <div class="unread-dot" *ngIf="!note.isRead"></div>
+
+            <div class="slab-header">
+              <div class="d-flex align-items-center gap-3">
+                <div class="avatar-circle">
+                  {{ (note.authorName || "U")[0] }}
+                </div>
+                <div>
+                  <div class="author-name">
+                    {{ note.authorName || "User #" + note.authorId }}
+                  </div>
+                  <div class="timestamp">
+                    {{ note.createdAt | date: "MMM d · h:mm a" }}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                mat-icon-button
+                *ngIf="!note.isRead"
+                (click)="markRead(note)"
+                title="Mark as Read"
+                class="mark-read-btn"
+              >
+                <mat-icon>done_all</mat-icon>
+              </button>
+            </div>
+
+            <div class="content-body">{{ note.content }}</div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,250 @@
+<!-- ░░ HERO ░░ -->
+<div>
+  <div class="container">
+    <div class="row gx-3 align-items-center py-4">
+      <div class="col">
+        <span class="hero-eyebrow">🔔 Medical Monitoring</span>
+        <h1 class="hero-title">Alerts Admin</h1>
+        <p class="hero-sub">All medical alerts generated across the platform</p>
+      </div>
+      <div class="col-auto">
+        <button mat-raised-button (click)="loadAll()" class="btn-refresh">
+          <mat-icon class="me-1">refresh</mat-icon> Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container fade-in">
+
+  @if(loading) {
+  <mat-progress-bar mode="indeterminate" class="mb-4" style="border-radius:4px"></mat-progress-bar>
+  }
+
+  <!-- ░░ KPI CARDS ░░ -->
+  <div class="row gx-3 gx-lg-4 mb-4">
+
+    <div class="col-6 col-lg-3">
+      <mat-card class="stat-card mb-3">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" style="background:rgba(58,143,181,0.12); color:#3a8fb5">
+              <span class="material-symbols-outlined">notifications</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ totalAlerts }}</h1>
+              <p class="stat-label mb-0">Total alerts</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <mat-card class="stat-card mb-3" style="animation-delay:0.1s">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" style="background:rgba(124,58,237,0.12); color:#7c3aed">
+              <span class="material-symbols-outlined">crisis_alert</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ totalCritical }}</h1>
+              <p class="stat-label mb-0">Critical</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <mat-card class="stat-card mb-3" style="animation-delay:0.2s">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" style="background:rgba(201,77,106,0.12); color:#c94d6a">
+              <span class="material-symbols-outlined">error</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ totalDanger }}</h1>
+              <p class="stat-label mb-0">Danger</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <mat-card class="stat-card mb-3" style="animation-delay:0.3s">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" style="background:rgba(168,114,46,0.12); color:#a8722e">
+              <span class="material-symbols-outlined">mark_email_unread</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ totalUnread }}</h1>
+              <p class="stat-label mb-0">Unread</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </div>
+
+  <!-- ░░ FILTERS ░░ -->
+  <mat-card class="mb-4">
+    <mat-card-content class="py-3">
+      <div class="row gx-3 align-items-center">
+        <div class="col-12 col-md-3 mb-2 mb-md-0">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Severity</mat-label>
+            <mat-select [(ngModel)]="filterSeverity" (ngModelChange)="applyFilters()">
+              <mat-option value="ALL">All severities</mat-option>
+              <mat-option value="CRITICAL">Critical</mat-option>
+              <mat-option value="DANGER">Danger</mat-option>
+              <mat-option value="WARNING">Warning</mat-option>
+              <mat-option value="INFO">Info</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-3 mb-2 mb-md-0">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
+              <mat-option value="ALL">All statuses</mat-option>
+              <mat-option value="UNREAD">Unread</mat-option>
+              <mat-option value="READ">Read</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-3 mb-2 mb-md-0">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Search patient</mat-label>
+            <input matInput [(ngModel)]="filterPatient"
+                   (ngModelChange)="applyFilters()"
+                   placeholder="Patient name..." />
+            <mat-icon matSuffix>person_search</mat-icon>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="result-count">
+            <span class="count-number">{{ filteredAlerts.length }}</span>
+            <span class="count-label">alert(s) found</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ░░ EMPTY STATE ░░ -->
+  @if(!loading && filteredAlerts.length === 0) {
+  <mat-card>
+    <mat-card-content class="text-center py-5">
+      <span class="material-symbols-outlined d-block mb-3"
+            style="font-size:4rem; color:rgba(77,140,82,0.4)">notifications_off</span>
+      <h3 style="font-family:var(--font-display); color:var(--text-dark)" class="mb-2">No alerts</h3>
+      <p style="font-family:var(--font-body); color:var(--text-soft)">
+        No alerts match the selected criteria.
+      </p>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- ░░ PREMIUM TABLE ░░ -->
+  @if(filteredAlerts.length > 0) {
+  <div class="premium-table-wrap mb-5">
+
+    <!-- Table header -->
+    <div class="ptable-head">
+      <div class="ptable-col col-patient">Patient</div>
+      <div class="ptable-col col-severity">Severity</div>
+      <div class="ptable-col col-type">Type</div>
+      <div class="ptable-col col-message">Message</div>
+      <div class="ptable-col col-date">Date</div>
+      <div class="ptable-col col-status">Status</div>
+    </div>
+
+    <!-- Table rows -->
+    <div class="ptable-body">
+      @for(alert of filteredAlerts; track alert.id; let i = $index) {
+      <div class="ptable-row"
+           [class.row-unread]="!alert.isRead"
+           [style.animation-delay]="(i * 0.04) + 's'"
+           [attr.data-severity]="alert.severity">
+
+        <!-- Left accent bar -->
+        <div class="row-accent" [style.background]="getSeverityColor(alert.severity)"></div>
+
+        <!-- Patient -->
+        <div class="ptable-col col-patient">
+          <div class="patient-cell">
+            <div class="patient-avatar"
+                 [style.background]="getSeverityColor(alert.severity) + '20'"
+                 [style.border-color]="getSeverityColor(alert.severity) + '60'"
+                 [style.color]="getSeverityColor(alert.severity)">
+              {{ getPatientInitials(alert) }}
+            </div>
+            <div class="patient-info">
+              <span class="patient-name">{{ getPatientName(alert) }}</span>
+              @if(!alert.isRead) {
+                <span class="new-dot-badge">● new</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Severity -->
+        <div class="ptable-col col-severity">
+          <div class="severity-tag" [attr.data-level]="alert.severity">
+            <span class="sev-icon material-symbols-outlined">{{ getSeverityIcon(alert.severity) }}</span>
+            <span class="sev-label">{{ alert.severity }}</span>
+          </div>
+        </div>
+
+        <!-- Type -->
+        <div class="ptable-col col-type">
+          <span class="type-tag">{{ getTypeLabel(alert.alertType) }}</span>
+        </div>
+
+        <!-- Message -->
+        <div class="ptable-col col-message">
+          <p class="msg-main mb-0">{{ alert.message }}</p>
+          @if(alert.recommendation) {
+          <p class="msg-reco mb-0">
+            <span class="material-symbols-outlined reco-icon">lightbulb</span>
+            {{ alert.recommendation }}
+          </p>
+          }
+        </div>
+
+        <!-- Date -->
+        <div class="ptable-col col-date">
+          <div class="date-wrap">
+            <span class="date-day">{{ alert.triggeredAt | date:'dd MMM yyyy' }}</span>
+            <span class="date-time">{{ alert.triggeredAt | date:'HH:mm' }}</span>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="ptable-col col-status">
+          @if(!alert.isRead) {
+            <div class="status-tag unread">
+              <span class="pulse-ring"></span>
+              Unread
+            </div>
+          } @else {
+            <div class="status-tag read">
+              <span class="material-symbols-outlined check-icon">check_circle</span>
+              Read
+            </div>
+          }
+        </div>
+
+      </div>
+      }
+    </div>
+
+  </div>
+  }
+
+</div>

@@ -1,0 +1,75 @@
+@import '../document/document.component.css';
+
+.documents-grid.two-col {
+  grid-template-columns: 420px 1fr;
+  align-items: start;
+}
+
+.inline-form {
+  margin-top: 6px;
+}
+
+.error-text {
+  color: #b33f61;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 6px;
+  display: block;
+}
+
+.logs-list {
+  display: grid;
+  gap: 14px;
+}
+
+.log-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.log-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: rgba(255, 79, 117, 0.10);
+  color: #ff4f75;
+  border: 1.5px solid rgba(255, 79, 117, 0.18);
+}
+
+.log-badge.type-wet {
+  background: rgba(159, 221, 255, 0.28);
+  color: #2b78a0;
+  border-color: rgba(159, 221, 255, 0.55);
+}
+
+.log-badge.type-dirty {
+  background: rgba(255, 208, 122, 0.22);
+  color: #a0601a;
+  border-color: rgba(255, 208, 122, 0.55);
+}
+
+.log-badge.type-mixed {
+  background: rgba(218, 187, 255, 0.22);
+  color: #7b3da3;
+  border-color: rgba(218, 187, 255, 0.55);
+}
+
+.empty-state.compact {
+  padding: 26px 18px;
+}
+
+@media (max-width: 1100px) {
+  .documents-grid.two-col {
+    grid-template-columns: 1fr;
+  }
+}

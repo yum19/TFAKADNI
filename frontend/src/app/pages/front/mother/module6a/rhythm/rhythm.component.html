@@ -1,0 +1,226 @@
+<section class="feature-page">
+  <header class="feature-header">
+   
+
+     
+  </header>
+
+  <section class="hero-card">
+    <div class="hero-copy">
+      <p class="eyebrow">Baby rhythm · daily pattern</p>
+      <h1>
+        Daily rhythm,
+        <span>beautifully mapped</span>
+      </h1>
+      <p class="hero-text">
+        See your baby's feeding, sleep, and next predictions in one clear and calm view.
+      </p>
+    </div>
+
+    <div class="hero-side">
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span class="stat-number">{{ rhythm?.rhythmStabilityScore ?? 0 }}</span>
+          <span class="stat-label">Stability score</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-number">{{ nextFeeding ? 1 : 0 }} + {{ nextSleep ? 1 : 0 }}</span>
+          <span class="stat-label">Live predictions</span>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <button type="button" class="hero-primary-btn" (click)="refresh()" [disabled]="loading || recalculating">
+          <mat-icon>refresh</mat-icon>
+          Refresh rhythm
+        </button>
+
+        <button type="button" class="hero-secondary-btn" (click)="recalculate()" [disabled]="loading || recalculating">
+          <mat-icon>auto_fix_high</mat-icon>
+          Recalculate
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div *ngIf="loading" class="status">Loading data...</div>
+  <div *ngIf="errorMessage" class="status error">{{ errorMessage }}</div>
+  <div *ngIf="feedingWarning" class="status warning">{{ feedingWarning }}</div>
+  <div *ngIf="sleepWarning" class="status warning">{{ sleepWarning }}</div>
+
+  <section class="details-card" *ngIf="!loading && rhythm">
+    <h2>Rhythm profile</h2>
+
+    <div class="details-grid">
+      <div class="detail-row">
+        <span>Label</span>
+        <strong>{{ rhythm.rhythmLabel || 'N/A' }}</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Average feeding interval</span>
+        <strong>
+          {{
+            rhythm.averageFeedingIntervalMinutes != null
+              ? (rhythm.averageFeedingIntervalMinutes + ' min')
+              : 'N/A'
+          }}
+        </strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Average sleep duration</span>
+        <strong>
+          {{
+            rhythm.averageSleepDurationMinutes != null
+              ? (rhythm.averageSleepDurationMinutes + ' min')
+              : 'N/A'
+          }}
+        </strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Night wake frequency</span>
+        <strong>{{ rhythm.nightWakeFrequency ?? 'N/A' }}</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Morning wake</span>
+        <strong>{{ rhythm.usualMorningWakeTime || 'N/A' }}</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Nap time</span>
+        <strong>{{ rhythm.usualNapTime || 'N/A' }}</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Bedtime</span>
+        <strong>{{ rhythm.usualBedtime || 'N/A' }}</strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Next feeding</span>
+        <strong>
+          {{
+            rhythm.predictedNextFeeding
+              ? (rhythm.predictedNextFeeding | date:'dd/MM/yyyy HH:mm')
+              : 'N/A'
+          }}
+        </strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Next sleep</span>
+        <strong>
+          {{
+            rhythm.predictedNextSleep
+              ? (rhythm.predictedNextSleep | date:'dd/MM/yyyy HH:mm')
+              : 'N/A'
+          }}
+        </strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Last calculated</span>
+        <strong>
+          {{
+            rhythm.lastCalculatedAt
+              ? (rhythm.lastCalculatedAt | date:'dd/MM/yyyy HH:mm')
+              : 'N/A'
+          }}
+        </strong>
+      </div>
+
+      <div class="detail-row full-width">
+        <span>Explanation</span>
+        <strong>{{ rhythm.explanation || 'No explanation available.' }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="records-wrap" *ngIf="!loading">
+    <h2>Predictions</h2>
+
+    <div class="records-grid">
+      <article class="record-card">
+        <h3>Next feeding</h3>
+
+        <div class="record-fields">
+          <div class="detail-row">
+            <span>Type</span>
+            <strong>{{ nextFeeding?.predictionType || 'NEXT_FEEDING' }}</strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Date</span>
+            <strong>
+              {{
+                nextFeeding?.predictedDateTime
+                  ? (nextFeeding?.predictedDateTime | date:'dd/MM/yyyy HH:mm')
+                  : 'N/A'
+              }}
+            </strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Confidence</span>
+            <strong>{{ nextFeeding?.confidenceScore ?? 'N/A' }}</strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Based on days</span>
+            <strong>{{ nextFeeding?.basedOnDays ?? 'N/A' }}</strong>
+          </div>
+
+          <div class="detail-row full-width">
+            <span>Explanation</span>
+            <strong>
+              {{ nextFeeding?.explanation || 'No feeding prediction available.' }}
+            </strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="record-card">
+        <h3>Next sleep</h3>
+
+        <div class="record-fields">
+          <div class="detail-row">
+            <span>Type</span>
+            <strong>{{ nextSleep?.predictionType || 'NEXT_SLEEP' }}</strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Date</span>
+            <strong>
+              {{
+                nextSleep?.predictedDateTime
+                  ? (nextSleep?.predictedDateTime | date:'dd/MM/yyyy HH:mm')
+                  : 'N/A'
+              }}
+            </strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Confidence</span>
+            <strong>{{ nextSleep?.confidenceScore ?? 'N/A' }}</strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Based on days</span>
+            <strong>{{ nextSleep?.basedOnDays ?? 'N/A' }}</strong>
+          </div>
+
+          <div class="detail-row full-width">
+            <span>Explanation</span>
+            <strong>
+              {{ nextSleep?.explanation || 'No sleep prediction available.' }}
+            </strong>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+</section>

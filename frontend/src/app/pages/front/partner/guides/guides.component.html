@@ -1,0 +1,182 @@
+<!-- guides-sanctuary.component.html -->
+<section class="guides-sanctuary">
+  <div class="studio-wrap">
+    <header class="studio-header">
+      <div class="header-left">
+        <div class="header-row">
+          <span class="studio-chip">
+            Support Academy
+            <span class="guide-dot"></span>
+          </span>
+        </div>
+        <h1 class="studio-title">
+          Partner <span class="title-accent">Guides.</span>
+        </h1>
+        <p class="studio-lead">
+          Practical reading for the moments that matter. Built to help you act
+          with kindness and specificity.
+        </p>
+      </div>
+
+      <div class="search-studio">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          [(ngModel)]="keyword"
+          placeholder="Search by trimester or topic..."
+          (keyup.enter)="reload()"
+        />
+        <button class="studio-btn search-btn" (click)="reload()">Search</button>
+      </div>
+    </header>
+
+    <div class="studio-grid">
+      <!-- Left: Guide Feed -->
+      <div class="guide-feed">
+        <div class="empty-feed" *ngIf="guides.length === 0">
+          <div class="glass-card empty-card">
+            <div class="bot-ring">
+              <mat-icon>menu_book</mat-icon>
+            </div>
+            <h4>No guides found</h4>
+            <p>Try a different keyword or browse all topics.</p>
+          </div>
+        </div>
+
+        <article class="glass-card guide-slab" *ngFor="let guide of guides">
+          <div class="slab-top">
+            <span class="week-tag">Week {{ guide.targetWeek }}</span>
+            <span class="category-label">{{
+              guide.category || "Strategic Support"
+            }}</span>
+          </div>
+
+          <h2 class="guide-title">{{ guide.title }}</h2>
+          <p class="guide-excerpt">{{ guide.content | slice: 0 : 220 }}...</p>
+
+          <div class="slab-actions">
+            <button class="studio-btn ai-btn" (click)="summarize(guide)">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                />
+              </svg>
+              Summarize with AI
+            </button>
+            <button class="studio-btn ghost-btn" (click)="openReader(guide)">
+              Explore Guide
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <!-- Right: AI Briefing Panel -->
+      <aside class="glass-card briefing-panel">
+        <span class="section-label">
+          <span class="briefing-dot"></span>
+          AI Briefing System
+        </span>
+
+        <div class="selected-resource" *ngIf="selectedGuide">
+          <div class="resource-eyebrow">Selected Resource</div>
+          <div class="resource-title">{{ selectedGuide.title }}</div>
+        </div>
+
+        <div class="result-content" *ngIf="aiResult; else guidePlaceholder">
+          {{ aiResult }}
+        </div>
+
+        <ng-template #guidePlaceholder>
+          <div class="result-placeholder">
+            <div class="bot-ring small">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                />
+              </svg>
+            </div>
+            <h6>Pick a guide to generate<br />an actionable summary.</h6>
+            <p>
+              AI summaries are optimized for quick reading before clinical
+              appointments or support conversations.
+            </p>
+          </div>
+        </ng-template>
+
+        <div class="briefing-note" *ngIf="aiResult">
+          <mat-icon>info_outline</mat-icon>
+          <p>
+            AI summaries are optimized for quick reading before clinical
+            appointments or support conversations.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- Reader Overlay -->
+<div class="reader-overlay" *ngIf="isReading && selectedGuide">
+  <div class="reader-backdrop" (click)="closeReader()"></div>
+
+  <div class="reader-surface">
+    <header class="reader-header">
+      <div class="reader-header-meta">
+        <span class="week-tag">Week {{ selectedGuide.targetWeek }}</span>
+        <span class="category-label">{{ selectedGuide.category }}</span>
+      </div>
+      <button
+        mat-icon-button
+        (click)="closeReader()"
+        aria-label="Close Guide"
+        class="close-btn"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="reader-body">
+      <h1 class="reader-title">{{ selectedGuide.title }}</h1>
+      <div class="reader-sep"></div>
+      <div class="reader-content">{{ selectedGuide.content }}</div>
+    </div>
+
+    <footer class="reader-footer">
+      <button
+        class="studio-btn ai-btn"
+        (click)="summarize(selectedGuide); closeReader()"
+      >
+        <svg
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <polygon
+            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+          />
+        </svg>
+        Summarize This Guide
+      </button>
+      <button class="studio-btn ghost-btn" (click)="closeReader()">
+        Done Reading
+      </button>
+    </footer>
+  </div>
+</div>

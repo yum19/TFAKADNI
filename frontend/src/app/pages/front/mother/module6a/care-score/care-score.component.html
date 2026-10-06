@@ -1,0 +1,38 @@
+<section class="feature-page">
+  <header class="feature-header">
+    <div class="header-links">
+      <a [routerLink]="'/mother/baby-profiles'">Back to profiles</a>
+      <a [routerLink]="['/mother/babies', babyId]">Back to baby profile</a>
+    </div>
+    <button type="button" class="ghost-btn" (click)="loadCareScore()">Refresh</button>
+  </header>
+
+  <section class="hero-card">
+    <div>
+      <p class="eyebrow">Module 6A</p>
+      <h1>Care Score</h1>
+      <p>Overview score for routine consistency and baby care quality.</p>
+    </div>
+    <div class="hero-metrics">
+      <span class="chip">Baby ID: {{ babyId }}</span>
+      <span class="chip secondary">Score: {{ careScore?.score ?? 0 }}</span>
+    </div>
+  </section>
+
+  <div *ngIf="loading" class="status">Loading data...</div>
+  <div class="status error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <section class="details-card" *ngIf="!loading && careScore">
+    <h2>Care score details</h2>
+    <div class="details-grid">
+      <div class="detail-row"><span>Level</span><strong>{{ careScore.level }}</strong></div>
+      <div class="detail-row"><span>Explanation</span><strong>{{ careScore.explanation }}</strong></div>
+      <div class="detail-row"><span>Feeding points</span><strong>{{ careScore.feedingPoints }}</strong></div>
+      <div class="detail-row"><span>Sleep points</span><strong>{{ careScore.sleepPoints }}</strong></div>
+      <div class="detail-row"><span>Diaper points</span><strong>{{ careScore.diaperPoints }}</strong></div>
+      <div class="detail-row"><span>Growth points</span><strong>{{ careScore.growthPoints }}</strong></div>
+      <div class="detail-row"><span>Vaccine points</span><strong>{{ careScore.vaccinePoints }}</strong></div>
+      <div class="detail-row"><span>Reminder points</span><strong>{{ careScore.reminderPoints }}</strong></div>
+    </div>
+  </section>
+</section>

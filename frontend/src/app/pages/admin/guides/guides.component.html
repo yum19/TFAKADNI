@@ -1,0 +1,162 @@
+<!-- admin-guides.component.html -->
+<section class="guides-library-canvas">
+  <div class="library-wrap">
+    <!-- ── Header ── -->
+    <header class="library-header">
+      <div class="header-left">
+        <div class="header-row">
+          <span class="studio-chip">
+            Admin Console
+            <span class="studio-dot"></span>
+          </span>
+        </div>
+        <h1 class="library-title">
+          Partner <span class="title-accent">Guides.</span>
+        </h1>
+        <p class="library-lead">
+          Review and update weekly insights for partners.
+        </p>
+      </div>
+
+      <div class="header-stats">
+        <div class="header-stat">
+          <span class="stat-val">{{ guides.length }}</span>
+          <span class="stat-lbl">Guides</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="header-stat">
+          <span class="stat-val">{{
+            guides.length > 0 ? "Live" : "Empty"
+          }}</span>
+          <span class="stat-lbl status-live">Status</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Guides List ── -->
+    <div class="glass-card library-card">
+      @if (guides.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <mat-icon>menu_book</mat-icon>
+          </div>
+          <h4 class="empty-title">No guides deployed yet</h4>
+          <p class="empty-sub">
+            Go to the Studio to create your first partner guide.
+          </p>
+        </div>
+      }
+
+      <div class="guide-list">
+        @for (guide of guides; track guide.id) {
+          <div
+            class="guide-row"
+            [class.is-editing]="editingGuide?.id === guide.id"
+          >
+            <!-- ── View mode ── -->
+            @if (editingGuide?.id !== guide.id) {
+              <div class="guide-row-main">
+                <div class="guide-week-badge">
+                  <span class="week-num">{{ guide.targetWeek }}</span>
+                  <span class="week-lbl">Wk</span>
+                </div>
+
+                <div class="guide-meta">
+                  <h5 class="guide-title">{{ guide.title }}</h5>
+                  <div class="guide-pills">
+                    <span class="meta-pill">ID: {{ guide.id }}</span>
+                    <span class="meta-pill pill-week"
+                      >Week {{ guide.targetWeek }}</span
+                    >
+                    <span class="meta-pill pill-cat">{{ guide.category }}</span>
+                  </div>
+                </div>
+
+                <div class="guide-actions">
+                  <button
+                    class="action-btn action-btn--edit"
+                    (click)="startEditGuide(guide)"
+                    title="Edit guide"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    class="action-btn action-btn--delete"
+                    (click)="deleteGuide(guide.id)"
+                    title="Delete guide"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- ── Edit mode ── -->
+            @if (editingGuide?.id === guide.id) {
+              <div class="edit-panel">
+                <div class="edit-panel-header">
+                  <div class="edit-panel-label">
+                    <mat-icon>edit</mat-icon>
+                    Editing — <strong>{{ guide.title }}</strong>
+                  </div>
+                </div>
+
+                <div class="edit-fields">
+                  <div class="edit-field edit-field--wide">
+                    <label class="field-label">Title</label>
+                    <input
+                      class="glass-input"
+                      type="text"
+                      [(ngModel)]="editingGuide.title"
+                      placeholder="Guide headline"
+                    />
+                  </div>
+                  <div class="edit-field edit-field--narrow">
+                    <label class="field-label">Target Week</label>
+                    <input
+                      class="glass-input"
+                      type="number"
+                      [(ngModel)]="editingGuide.targetWeek"
+                    />
+                  </div>
+                  <div class="edit-field edit-field--narrow">
+                    <label class="field-label">Category</label>
+                    <input
+                      class="glass-input"
+                      type="text"
+                      [(ngModel)]="editingGuide.category"
+                      placeholder="e.g., Emotional Support"
+                    />
+                  </div>
+                  <div class="edit-field edit-field--full">
+                    <label class="field-label">Content</label>
+                    <textarea
+                      class="glass-input glass-textarea"
+                      rows="4"
+                      [(ngModel)]="editingGuide.content"
+                      placeholder="Write practical partner advice..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="edit-footer">
+                  <button
+                    class="action-btn action-btn--cancel"
+                    (click)="editingGuide = null"
+                  >
+                    <mat-icon>close</mat-icon>
+                    Cancel
+                  </button>
+                  <button class="deploy-btn" (click)="saveGuide()">
+                    <mat-icon>save</mat-icon>
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>

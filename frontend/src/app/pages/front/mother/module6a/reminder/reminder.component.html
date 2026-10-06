@@ -1,0 +1,279 @@
+<section class="tl-page">
+
+  <header class="tl-topbar">
+   
+  </header>
+
+  <section class="tl-hero">
+    <div class="tl-hero-copy">
+      <p class="tl-eyebrow">Baby · Care</p>
+      <h1>Reminders <span>for baby</span></h1>
+      <p class="tl-hero-sub">Manage auto and manual reminders chronologically.</p>
+    </div>
+
+    <div class="tl-hero-right">
+      <div class="tl-stats-row">
+        <div class="tl-stat">
+          <span class="tl-stat-num">{{ reminders.length }}</span>
+          <span class="tl-stat-lbl">Items</span>
+        </div>
+        <div class="tl-stat accent-important">
+          <span class="tl-stat-num">{{ pendingCount }}</span>
+          <span class="tl-stat-lbl">Pending</span>
+        </div>
+        <div class="tl-stat accent-overdue">
+          <span class="tl-stat-num">{{ overdueCount }}</span>
+          <span class="tl-stat-lbl">Overdue</span>
+        </div>
+      </div>
+
+      <div class="tl-hero-tools">
+        <div class="tl-day-filters">
+          <button type="button" class="tl-day-chip" [ngClass]="{ active: selectedDays === 7 }" (click)="setDays(7)">7d</button>
+          <button type="button" class="tl-day-chip" [ngClass]="{ active: selectedDays === 14 }" (click)="setDays(14)">14d</button>
+          <button type="button" class="tl-day-chip" [ngClass]="{ active: selectedDays === 30 }" (click)="setDays(30)">30d</button>
+          <button type="button" class="tl-day-chip" [ngClass]="{ active: selectedDays === 0 }" (click)="setDays(0)">All</button>
+        </div>
+
+        <button type="button" class="tl-refresh-btn tl-add-reminder-btn" (click)="openAddModal()">
+          + Add manual reminder
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="tl-messages">
+    <div class="tl-status loading" *ngIf="loading">
+      <span class="tl-spinner"></span> Loading reminders...
+    </div>
+    <div class="tl-status error" *ngIf="errorMessage">⚠ {{ errorMessage }}</div>
+    <div class="tl-status success" *ngIf="successMessage">{{ successMessage }}</div>
+  </div>
+
+  <div class="tl-type-filters" *ngIf="!loading && reminders.length > 0">
+    <div class="tl-filter-left">
+      <button type="button" class="tl-type-chip" [ngClass]="{ active: activeType === 'ALL' }" (click)="setType('ALL')">All</button>
+      <button type="button" class="tl-type-chip type-vaccine" [ngClass]="{ active: activeType === 'VACCINE' }" (click)="setType('VACCINE')">💉 Vaccines</button>
+      <button type="button" class="tl-type-chip type-appointment" [ngClass]="{ active: activeType === 'APPOINTMENT' }" (click)="setType('APPOINTMENT')">🩺 Appointments</button>
+      <button type="button" class="tl-type-chip type-reminder" [ngClass]="{ active: activeType === 'CUSTOM' }" (click)="setType('CUSTOM')">🔔 Custom</button>
+    </div>
+
+    <div class="tl-filter-right">
+      <input
+        class="tl-input tl-search"
+        type="search"
+        placeholder="Search reminders..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+      />
+    </div>
+  </div>
+
+  <div class="tl-modal" *ngIf="showAddModal" (click)="closeAddModal()">
+    <div class="tl-modal-dialog" (click)="$event.stopPropagation()">
+      <div class="tl-card tl-form-card">
+        <div class="tl-card-top">
+          <div class="tl-card-head">
+            <span class="tl-type-badge badge-reminder">MANUAL</span>
+            <span class="tl-priority-badge pri-normal">{{ editingReminderId ? 'Edit' : 'Create' }}</span>
+          </div>
+
+          <button type="button" class="tl-modal-close" (click)="closeAddModal()">✕</button>
+        </div>
+
+        <h3 class="tl-card-title">
+          {{ editingReminderId ? 'Edit manual reminder' : 'Add manual reminder' }}
+        </h3>
+
+        <form class="tl-form" [formGroup]="reminderForm" (ngSubmit)="onSubmit()">
+          <div class="tl-form-grid">
+            <label class="tl-field">
+              <span class="tl-field-label">Type</span>
+              <select class="tl-input" formControlName="type">
+                <option *ngFor="let type of reminderTypes" [value]="type">{{ type }}</option>
+              </select>
+            </label>
+
+            <label class="tl-field">
+              <span class="tl-field-label">Reminder date</span>
+              <input class="tl-input" type="datetime-local" formControlName="reminderDate" />
+            </label>
+
+            <label class="tl-field tl-field-full">
+              <span class="tl-field-label">Message</span>
+              <textarea class="tl-input" rows="3" formControlName="message"></textarea>
+            </label>
+          </div>
+
+          <div class="tl-form-actions">
+            <button type="submit" class="tl-refresh-btn" [disabled]="submitting">
+              {{ submitting ? 'Saving...' : (editingReminderId ? 'Update reminder' : 'Create entry') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <section class="tl-body" *ngIf="!loading">
+
+    <div *ngIf="totalFilteredCount === 0" class="tl-empty">
+      <div class="tl-empty-icon">🔔</div>
+      <h3>No reminders for this period</h3>
+      <p>Try expanding the date range or changing the filter.</p>
+    </div>
+
+    <div class="tl-track" *ngIf="totalFilteredCount > 0">
+      <ng-container *ngFor="let group of groupedReminders; trackBy: trackByDate">
+
+        <div class="tl-date-sep">
+          <div class="tl-date-line"></div>
+          <div class="tl-date-badge">
+            <span class="tl-date-day">{{ group.label }}</span>
+          </div>
+          <div class="tl-date-line"></div>
+        </div>
+
+        <div
+          class="tl-event type-reminder"
+          *ngFor="let reminder of group.reminders; trackBy: trackByReminderId; let i = index"
+          [ngClass]="{
+            'is-done': reminder.status === 'SENT',
+            'priority-important': reminder.status === 'PENDING',
+            'is-overdue': isOverdue(reminder)
+          }"
+          [style.animation-delay]="(i * 0.07) + 's'"
+        >
+          <div class="tl-event-left">
+            <span class="tl-event-time">{{ parseReminderDateTime(reminder) | date:'HH:mm' }}</span>
+            <div class="tl-dot-wrap">
+              <div class="tl-dot-ring"></div>
+              <div class="tl-dot">
+                <span class="tl-dot-icon">{{ getIcon(reminder.type) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-connector"></div>
+
+          <div class="tl-card">
+            <div class="tl-card-top">
+              <div class="tl-card-head">
+                <span class="tl-type-badge" [ngClass]="getTypeBadgeClass(reminder)">
+                  {{ reminder.type }}
+                </span>
+
+                <span class="tl-priority-badge" [ngClass]="priorityClass(reminder)">
+                  {{ formatPriority(reminder) }}
+                </span>
+
+                <span class="tl-type-badge badge-auto" *ngIf="isAutoReminder(reminder)">AUTO</span>
+                <span class="tl-type-badge badge-reminder" *ngIf="isManualReminder(reminder)">MANUAL</span>
+              </div>
+
+              <span class="tl-status-pill" [ngClass]="getStatusClass(reminder.status)">
+                <span class="tl-status-dot"></span>{{ reminder.status || '—' }}
+              </span>
+            </div>
+
+            <h3 class="tl-card-title">{{ reminder.type }} reminder</h3>
+
+            <ng-container *ngIf="isInlineEditing(reminder); else reminderView">
+              <div class="tl-inline-edit" [formGroup]="inlineForm">
+                <div class="tl-form-grid tl-inline-grid">
+                  <label class="tl-field">
+                    <span class="tl-field-label">Type</span>
+                    <select class="tl-input" formControlName="type">
+                      <option *ngFor="let type of reminderTypes" [value]="type">{{ type }}</option>
+                    </select>
+                  </label>
+
+                  <label class="tl-field">
+                    <span class="tl-field-label">Reminder date</span>
+                    <input class="tl-input" type="datetime-local" formControlName="reminderDate" />
+                  </label>
+
+                  <label class="tl-field tl-field-full">
+                    <span class="tl-field-label">Message</span>
+                    <textarea class="tl-input" rows="3" formControlName="message"></textarea>
+                  </label>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-template #reminderView>
+              <p class="tl-card-desc">{{ reminder.message }}</p>
+
+              <div class="tl-meta-block">
+                <div class="tl-meta-line">
+                  <strong>Source:</strong> {{ reminder.sourceType || 'MANUAL' }}
+                </div>
+                <div class="tl-meta-line">
+                  <strong>When:</strong> {{ parseReminderDateTime(reminder) | date:'dd/MM/yyyy HH:mm' }}
+                </div>
+                <div class="tl-meta-line" *ngIf="isOverdue(reminder)">
+                  <strong>State:</strong> This reminder is overdue.
+                </div>
+              </div>
+            </ng-template>
+
+            <div class="tl-card-actions">
+              <a
+                *ngIf="getSourceRoute(reminder)"
+                [routerLink]="getSourceRoute(reminder)!"
+                class="tl-action-btn"
+              >
+                {{ getSourceLabel(reminder) }} →
+              </a>
+
+              <button
+                type="button"
+                class="tl-action-btn"
+                *ngIf="canEdit(reminder)"
+                (click)="onCardUpdate(reminder)"
+                [disabled]="inlineSubmitting && isInlineEditing(reminder)"
+              >
+                {{ isInlineEditing(reminder) ? (inlineSubmitting ? 'Updating...' : 'Update') : 'Update' }}
+              </button>
+
+              <button
+                type="button"
+                class="tl-action-btn success"
+                *ngIf="canMarkSent(reminder)"
+                (click)="updateStatus(reminder.id, 'SENT')"
+              >
+                Mark sent
+              </button>
+
+              <button
+                type="button"
+                class="tl-action-btn muted"
+                *ngIf="canDismiss(reminder)"
+                (click)="updateStatus(reminder.id, 'DISMISSED')"
+              >
+                Dismiss
+              </button>
+
+              <button
+                type="button"
+                class="tl-action-btn danger"
+                *ngIf="canDelete(reminder)"
+                (click)="deleteReminder(reminder.id)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+    </div>
+
+    <div class="tl-pagination" *ngIf="hasPagination">
+      <button type="button" class="tl-action-btn" (click)="prevPage()" [disabled]="currentPage === 1">Prev</button>
+      <div class="tl-page-indicator">Page {{ currentPage }} / {{ totalPages }}</div>
+      <button type="button" class="tl-action-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+    </div>
+  </section>
+
+</section>

@@ -1,0 +1,222 @@
+<!-- notifications.component.html -->
+<section class="notif-root">
+  <!-- ── Ambient background grid ── -->
+  <div class="grid-canvas" aria-hidden="true">
+    <div class="grid-line" *ngFor="let i of [1, 2, 3, 4, 5, 6]"></div>
+  </div>
+
+  <div class="notif-shell">
+    <!-- ── Masthead ── -->
+    <header class="masthead">
+      <div class="masthead-left">
+        <div class="signal-cluster" aria-hidden="true">
+          <span class="sig sig-1"></span>
+          <span class="sig sig-2"></span>
+          <span class="sig sig-3"></span>
+        </div>
+        <div class="masthead-copy">
+          <p class="masthead-overline">Inbox · Live Feed</p>
+          <h1 class="masthead-title">Notifications</h1>
+        </div>
+      </div>
+
+      <div class="masthead-stats">
+        <div class="stat-block">
+          <span class="stat-num">{{ notifications.length }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-block accent">
+          <span class="stat-num">{{ unreadCount }}</span>
+          <span class="stat-label">Unread</span>
+        </div>
+        <div
+          class="live-dot"
+          *ngIf="unreadCount > 0"
+          aria-label="You have unread notifications"
+        >
+          <span class="live-ring"></span>
+          <span class="live-core"></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Ticker bar ── -->
+    <div class="ticker-bar" *ngIf="unreadCount > 0">
+      <span class="ticker-label">NEW</span>
+      <span class="ticker-text"
+        >{{ unreadCount }} unread message{{
+          unreadCount !== 1 ? "s" : ""
+        }}
+        waiting for you</span
+      >
+      <span class="ticker-arrow">→</span>
+    </div>
+
+    <!-- ── Timeline feed ── -->
+    <div class="timeline-wrap">
+      <!-- Empty state -->
+      <div class="empty-panel" *ngIf="notifications.length === 0">
+        <div class="empty-icon-wrap">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+        </div>
+        <p class="empty-headline">Signal clear</p>
+        <p class="empty-sub">No notifications yet. You're all caught up.</p>
+      </div>
+
+      <!-- Timeline items -->
+      <div class="timeline" *ngIf="notifications.length > 0">
+        <div class="timeline-track"></div>
+
+        <div
+          class="tl-item"
+          *ngFor="let item of notifications; let i = index"
+          [class.tl-unread]="!item.isRead"
+        >
+          <!-- Node on timeline -->
+          <div class="tl-node-wrap">
+            <div class="tl-node" [class.node-unread]="!item.isRead">
+              <span class="node-icon">
+                <svg
+                  *ngIf="item.title.toLowerCase().includes('partner')"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <svg
+                  *ngIf="item.title.toLowerCase().includes('course')"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path
+                    d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                  />
+                </svg>
+                <svg
+                  *ngIf="item.title.toLowerCase().includes('remind')"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <svg
+                  *ngIf="
+                    !item.title.toLowerCase().includes('partner') &&
+                    !item.title.toLowerCase().includes('course') &&
+                    !item.title.toLowerCase().includes('remind')
+                  "
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                  />
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- Card body -->
+          <article class="tl-card">
+            <div class="card-row-top">
+              <div class="card-heading">
+                <span class="unread-pip" *ngIf="!item.isRead"></span>
+                <h5 class="card-title">{{ item.title }}</h5>
+              </div>
+              <div class="card-badges">
+                <span class="badge-time">
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
+                  </svg>
+                  {{ item.createdAt | date: "MMM d · h:mm a" }}
+                </span>
+                <span class="badge-status" [class.badge-new]="!item.isRead">
+                  {{ item.isRead ? "Read" : "New" }}
+                </span>
+              </div>
+            </div>
+
+            <p class="card-body-text">{{ item.message }}</p>
+
+            <div class="card-actions" *ngIf="!item.isRead">
+              <button class="btn-mark-read" (click)="markRead(item.id)">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                Mark as read
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Footer rule ── -->
+    <footer class="notif-footer">
+      <span class="footer-rule"></span>
+      <span class="footer-text">
+        <svg
+          width="11"
+          height="11"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        Notifications older than 30 days are cleared automatically
+      </span>
+      <span class="footer-rule"></span>
+    </footer>
+  </div>
+</section>

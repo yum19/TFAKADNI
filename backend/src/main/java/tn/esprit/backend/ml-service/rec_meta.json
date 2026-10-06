@@ -1,0 +1,1 @@
+{"features": ["trimester", "is_twin", "baby_count", "min_baby_age", "has_girl", "has_boy", "has_stock", "price_bucket", "domain_score", "cat_encoded", "prix"], "categories": ["baby", "femme", "maman", "nn"], "label_encoder_classes": ["baby", "femme", "maman", "nn"]}

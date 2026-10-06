@@ -1,0 +1,740 @@
+<div class="method-page">
+  <div class="method-shell">
+
+    <section class="method-hero">
+      <div class="hero-content">
+        <div class="hero-kicker">
+          <mat-icon>favorite</mat-icon>
+          <span>Contraception care</span>
+        </div>
+
+        <h1 class="hero-title">Method <span>tracker</span> hub</h1>
+
+        <p class="hero-lead">
+          Review your active method, add a new one in a clean form, and keep a well-organized contraception history.
+        </p>
+
+        <div class="hero-actions">
+          <a routerLink="/mother/postpartum/contraception" class="hero-secondary-btn">
+            <mat-icon>arrow_back</mat-icon>
+            Back to contraception home
+          </a>
+
+          <a routerLink="/mother/postpartum/contraception/recommandation" class="hero-primary-btn">
+            <mat-icon>auto_awesome</mat-icon>
+            Open recommendation hub
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-decoration" aria-hidden="true">
+        <span class="flower flower-1"><mat-icon>local_florist</mat-icon></span>
+        <span class="flower flower-2"><mat-icon>spa</mat-icon></span>
+        <span class="flower flower-3"><mat-icon>local_florist</mat-icon></span>
+        <span class="flower flower-4"><mat-icon>spa</mat-icon></span>
+        <span class="flower flower-5"><mat-icon>eco</mat-icon></span>
+        <span class="pulse-orb orb-1"></span>
+        <span class="pulse-orb orb-2"></span>
+        <span class="pulse-orb orb-3"></span>
+      </div>
+    </section>
+
+    <div class="top-actions-bar">
+      <div class="top-actions-left">
+        <button class="tab-btn" [class.active]="activeTab === 'tracking'" (click)="activeTab = 'tracking'">
+          <mat-icon>track_changes</mat-icon>
+          <span>Tracking & History</span>
+        </button>
+
+        <button class="tab-btn" [class.active]="activeTab === 'stats'" (click)="activeTab = 'stats'">
+          <mat-icon>insights</mat-icon>
+          <span>Statistics & Insights</span>
+          <span class="tab-count" *ngIf="logs.length">{{ logs.length }}</span>
+        </button>
+      </div>
+
+      <button class="add-method-btn" (click)="openAddMethodModal()">
+        <mat-icon>add_circle</mat-icon>
+        Add method
+      </button>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'tracking'">
+      <div class="glass-card card-active compact-active" [class.has-active]="activeLog">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon-wrap icon-green">
+              <mat-icon>verified</mat-icon>
+            </div>
+            <div>
+              <h3>Current method</h3>
+              <p class="card-sub">Contraception currently under tracking</p>
+            </div>
+          </div>
+
+          <span class="badge badge-green" *ngIf="activeLog">
+            <span class="badge-dot"></span>
+            Active
+          </span>
+        </div>
+
+        <div class="active-loader" *ngIf="loadingActive">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line short"></div>
+        </div>
+
+        <ng-container *ngIf="!loadingActive">
+          <div *ngIf="activeLog; else noActiveMethod" class="active-method-body">
+            <div class="active-top-row">
+              <div class="active-method-name">
+                <div class="method-icon-circle">
+                  <mat-icon>medication</mat-icon>
+                </div>
+                <div>
+                  <h4>{{ getMethodLabel(activeLog.method) }}</h4>
+                  <span class="status-pill" [ngClass]="getStatusClass(activeLog.status)">
+                    {{ getStatusLabel(activeLog.status) }}
+                  </span>
+                </div>
+              </div>
+
+              <button class="stop-btn" (click)="stopCurrentLog(activeLog.id)">
+                <mat-icon>pause_circle</mat-icon>
+                Stop this method
+              </button>
+            </div>
+
+            <div class="active-meta-grid">
+              <div class="meta-chip">
+                <mat-icon>calendar_today</mat-icon>
+                <div>
+                  <span class="meta-label">Start</span>
+                  <span class="meta-val">{{ formatDate(activeLog.startDate) }}</span>
+                </div>
+              </div>
+
+              <div class="meta-chip" *ngIf="activeLog.sideEffects">
+                <mat-icon>warning_amber</mat-icon>
+                <div>
+                  <span class="meta-label">Side effects</span>
+                  <span class="meta-val">{{ activeLog.sideEffects }}</span>
+                </div>
+              </div>
+
+              <div class="meta-chip" *ngIf="activeLog.notes">
+                <mat-icon>notes</mat-icon>
+                <div>
+                  <span class="meta-label">Notes</span>
+                  <span class="meta-val">{{ activeLog.notes }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noActiveMethod>
+            <div class="empty-state">
+              <div class="empty-icon">
+                <mat-icon>info_outline</mat-icon>
+              </div>
+              <p>No active method at the moment.</p>
+              <span>Add a method to start tracking.</span>
+            </div>
+          </ng-template>
+        </ng-container>
+      </div>
+
+      <div class="glass-card card-history">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon-wrap icon-pink">
+              <mat-icon>timeline</mat-icon>
+            </div>
+            <div>
+              <h3>Method history</h3>
+              <p class="card-sub">
+                {{ logs.length }} recorded method{{ logs.length !== 1 ? 's' : '' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="pagination-top" *ngIf="totalPages > 1">
+            <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
+          </div>
+        </div>
+
+        <div class="search-bar-wrap">
+          <div class="search-bar">
+            <mat-icon>search</mat-icon>
+            <input
+              type="text"
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="onSearchChange()"
+              placeholder="Search by method, status, notes..."
+              class="search-input"
+            />
+            <button class="search-clear-btn" *ngIf="searchQuery" (click)="searchQuery = ''; onSearchChange()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="loadingLogs && !logs.length" class="empty-state">
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+        </div>
+
+        <div *ngIf="!loadingLogs && logs.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <mat-icon>calendar_month</mat-icon>
+          </div>
+          <p>No records yet.</p>
+          <span>Start by adding a method.</span>
+        </div>
+
+        <div *ngIf="!loadingLogs && logs.length > 0 && filteredLogs.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <mat-icon>search_off</mat-icon>
+          </div>
+          <p>No results found.</p>
+          <span>Try a different search term.</span>
+        </div>
+
+        <div class="timeline-list" *ngIf="filteredLogs.length">
+          <div
+            class="timeline-item"
+            *ngFor="let log of pagedLogs; let i = index"
+            [style.animation-delay]="i * 0.08 + 's'"
+          >
+            <div class="timeline-connector">
+              <div class="timeline-dot" [ngClass]="getStatusClass(log.status)"></div>
+              <div class="timeline-line" *ngIf="i < pagedLogs.length - 1"></div>
+            </div>
+
+            <div class="timeline-card">
+              <div class="timeline-card-header">
+                <div class="timeline-method-info">
+                  <div class="timeline-method-icon">
+                    <mat-icon>medication</mat-icon>
+                  </div>
+                  <div>
+                    <h4>{{ getMethodLabel(log.method) }}</h4>
+                    <span class="status-pill" [ngClass]="getStatusClass(log.status)">
+                      {{ getStatusLabel(log.status) }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="timeline-card-actions">
+                  <button class="edit-log-btn" (click)="openUpdateMethodModal(log)" title="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button class="delete-btn" (click)="deleteLog(log.id)" title="Delete">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div class="timeline-dates">
+                <div class="date-range">
+                  <mat-icon>calendar_today</mat-icon>
+                  <span>{{ formatDate(log.startDate) }}</span>
+                  <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                  <span>{{ formatDate(log.endDate) }}</span>
+                </div>
+              </div>
+
+              <div class="timeline-details" *ngIf="log.sideEffects || log.notes">
+                <div class="detail-chip" *ngIf="log.sideEffects">
+                  <mat-icon>warning_amber</mat-icon>
+                  <span>{{ log.sideEffects }}</span>
+                </div>
+
+                <div class="detail-chip" *ngIf="log.notes">
+                  <mat-icon>notes</mat-icon>
+                  <span>{{ log.notes }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="page-btn nav-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          <button
+            class="page-btn"
+            *ngFor="let p of pageNumbers"
+            [class.active]="p === currentPage"
+            (click)="goToPage(p)">
+            {{ p }}
+          </button>
+
+          <button class="page-btn nav-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'stats'">
+      <div class="kpi-grid" *ngIf="logs.length; else noStatsYet">
+        <div class="kpi-card kpi-days">
+          <div class="kpi-icon"><mat-icon>calendar_today</mat-icon></div>
+          <div class="kpi-value">{{ totalDaysTracked }}</div>
+          <div class="kpi-label">Days tracked</div>
+        </div>
+
+        <div class="kpi-card kpi-methods">
+          <div class="kpi-icon"><mat-icon>medication</mat-icon></div>
+          <div class="kpi-value">{{ methodStats.length }}</div>
+          <div class="kpi-label">Different methods</div>
+        </div>
+
+        <div class="kpi-card kpi-changes">
+          <div class="kpi-icon"><mat-icon>swap_horiz</mat-icon></div>
+          <div class="kpi-value">{{ totalChanges }}</div>
+          <div class="kpi-label">Changes</div>
+        </div>
+
+        <div class="kpi-card kpi-longest" *ngIf="longestMethod">
+          <div class="kpi-icon"><mat-icon>emoji_events</mat-icon></div>
+          <div class="kpi-value kpi-text">{{ getMethodLabel(longestMethod.method) }}</div>
+          <div class="kpi-label">Longest method</div>
+        </div>
+      </div>
+
+      <ng-template #noStatsYet>
+        <div class="glass-card">
+          <div class="empty-state tall">
+            <div class="empty-icon large">
+              <mat-icon>insights</mat-icon>
+            </div>
+            <p>No statistics yet.</p>
+            <span>Add a few methods to see insights here.</span>
+          </div>
+        </div>
+      </ng-template>
+
+      <div class="glass-card" *ngIf="logs.length">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon-wrap icon-blue">
+              <mat-icon>donut_large</mat-icon>
+            </div>
+            <div>
+              <h3>Method breakdown</h3>
+              <p class="card-sub">Time spent with each contraceptive</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="methods-chart">
+          <div class="chart-bar-list">
+            <div class="chart-bar-item" *ngFor="let stat of methodStats">
+              <div class="chart-bar-label">
+                <div class="chart-dot" [style.background]="stat.color"></div>
+                <span>{{ stat.method }}</span>
+                <span class="chart-days">{{ getDurationLabel(stat.totalDays) }}</span>
+              </div>
+
+              <div class="chart-bar-track">
+                <div
+                  class="chart-bar-fill"
+                  [style.width]="getBarWidth(stat)"
+                  [style.background]="stat.color">
+                </div>
+              </div>
+
+              <div class="chart-bar-pct">{{ getBarPercent(stat) }}%</div>
+            </div>
+          </div>
+
+          <div class="stacked-bar">
+            <div
+              class="stacked-segment"
+              *ngFor="let stat of methodStats"
+              [style.width]="getBarWidth(stat)"
+              [style.background]="stat.color"
+              [title]="getMethodLabel(stat.method) + ' — ' + stat.totalDays + ' days'">
+            </div>
+          </div>
+
+          <div class="stacked-legend">
+            <div class="legend-item" *ngFor="let stat of methodStats">
+              <span class="legend-dot" [style.background]="stat.color"></span>
+              <span>{{ getMethodLabel(stat.method) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD METHOD POPUP -->
+  <div class="modal-backdrop" *ngIf="showAddMethodModal" (click)="closeAddMethodModal()">
+    <div class="form-modal" (click)="$event.stopPropagation()">
+      <div class="form-modal-header">
+        <div class="card-header-left">
+          <div class="card-icon-wrap icon-purple">
+            <mat-icon>add_circle</mat-icon>
+          </div>
+          <div>
+            <h3>Add method</h3>
+            <p class="card-sub">Record a new contraceptive method</p>
+          </div>
+        </div>
+
+        <button class="close-modal-btn" (click)="closeAddMethodModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="form-grid compact-form-grid">
+        <div class="form-group">
+          <label>
+            <mat-icon>medication</mat-icon>
+            Method *
+          </label>
+          <select [(ngModel)]="logForm.method" class="input-field">
+            <option value="" disabled selected hidden>Choose a method</option>
+            <option *ngFor="let method of availableMethods" [value]="method">
+              {{ getMethodLabel(method) }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group date-row-group full-width">
+          <div class="date-row">
+            <div class="form-sub-group">
+              <label>
+                <mat-icon>event</mat-icon>
+                Start date
+              </label>
+              <input type="date" [(ngModel)]="logForm.startDate" class="input-field" />
+            </div>
+            <div class="form-sub-group">
+              <label>
+                <mat-icon>event_busy</mat-icon>
+                End date
+              </label>
+              <input type="date" [(ngModel)]="logForm.endDate" class="input-field" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>
+            <mat-icon>warning_amber</mat-icon>
+            Side effects
+          </label>
+          <textarea
+            rows="2"
+            [(ngModel)]="logForm.sideEffects"
+            placeholder="Describe any side effects..."
+            class="input-field"
+          ></textarea>
+        </div>
+
+        <div class="form-group full-width">
+          <label>
+            <mat-icon>notes</mat-icon>
+            Personal notes
+          </label>
+          <textarea
+            rows="3"
+            [(ngModel)]="logForm.notes"
+            placeholder="Add any helpful notes..."
+            class="input-field"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="secondary-modal-btn" (click)="closeAddMethodModal()">
+          Cancel
+        </button>
+
+        <button class="submit-btn" (click)="createLog()" [disabled]="loadingLogs || !logForm.method.trim()">
+          <mat-icon>{{ loadingLogs ? 'hourglass_empty' : 'add_circle' }}</mat-icon>
+          {{ loadingLogs ? 'Saving...' : 'Add to tracking' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATE METHOD MODAL -->
+  <div class="modal-backdrop" *ngIf="showUpdateMethodModal" (click)="closeUpdateMethodModal()">
+    <div class="form-modal" (click)="$event.stopPropagation()">
+      <div class="form-modal-header">
+        <div class="card-header-left">
+          <div class="card-icon-wrap icon-blue">
+            <mat-icon>edit_note</mat-icon>
+          </div>
+          <div>
+            <h3>Edit method</h3>
+            <p class="card-sub">Update your contraceptive method record</p>
+          </div>
+        </div>
+
+        <button class="close-modal-btn" (click)="closeUpdateMethodModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="form-grid compact-form-grid">
+        <div class="form-group">
+          <label>
+            <mat-icon>medication</mat-icon>
+            Method *
+          </label>
+          <select [(ngModel)]="updateForm.method" class="input-field">
+            <option value="" disabled selected hidden>Choose a method</option>
+            <option *ngFor="let method of availableMethods" [value]="method">
+              {{ getMethodLabel(method) }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <mat-icon>swap_horiz</mat-icon>
+            Status
+          </label>
+          <select [(ngModel)]="updateForm.status" class="input-field">
+            <option value="ACTIVE">Active</option>
+            <option value="STOPPED">Stopped</option>
+            <option value="CHANGED">Changed</option>
+          </select>
+        </div>
+
+        <div class="form-group date-row-group full-width">
+          <div class="date-row">
+            <div class="form-sub-group">
+              <label>
+                <mat-icon>event</mat-icon>
+                Start date
+              </label>
+              <input type="date" [(ngModel)]="updateForm.startDate" class="input-field" />
+            </div>
+            <div class="form-sub-group">
+              <label>
+                <mat-icon>event_busy</mat-icon>
+                End date
+              </label>
+              <input type="date" [(ngModel)]="updateForm.endDate" class="input-field" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>
+            <mat-icon>warning_amber</mat-icon>
+            Side effects
+          </label>
+          <textarea
+            rows="2"
+            [(ngModel)]="updateForm.sideEffects"
+            placeholder="Describe any side effects..."
+            class="input-field"
+          ></textarea>
+        </div>
+
+        <div class="form-group full-width">
+          <label>
+            <mat-icon>notes</mat-icon>
+            Personal notes
+          </label>
+          <textarea
+            rows="3"
+            [(ngModel)]="updateForm.notes"
+            placeholder="Add any helpful notes..."
+            class="input-field"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="secondary-modal-btn" (click)="closeUpdateMethodModal()">
+          Cancel
+        </button>
+
+        <button class="submit-btn update-submit-btn" (click)="saveUpdate()" [disabled]="loadingLogs || !updateForm.method.trim()">
+          <mat-icon>{{ loadingLogs ? 'hourglass_empty' : 'save' }}</mat-icon>
+          {{ loadingLogs ? 'Saving...' : 'Save changes' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHATBOT FLOATING -->
+  <div class="ai-helper-wrapper">
+    <div class="helper-label">Do you need help in contraception?</div>
+
+    <button class="ai-avatar-btn" (click)="openChatWidget()">
+      <div class="ai-avatar-core">
+        <mat-icon>support_agent</mat-icon>
+      </div>
+    </button>
+  </div>
+
+  <!-- CHAT WIDGET -->
+  <div class="chat-widget" *ngIf="showChatWidget">
+    <div class="chat-widget-header">
+      <div class="chat-header-left">
+        <div class="mini-avatar">
+          <mat-icon>support_agent</mat-icon>
+        </div>
+        <div>
+          <h3>AI Contraception Help</h3>
+          <p>Soft guidance, session by session</p>
+        </div>
+      </div>
+
+      <button class="close-btn" (click)="closeChatWidget()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="session-choice" *ngIf="showSessionChoice">
+      <div class="choice-intro">
+        <h4>How would you like to continue?</h4>
+        <p>Select a previous session or begin a new conversation.</p>
+      </div>
+
+      <button class="new-session-btn" (click)="chooseNewSession()">
+        <mat-icon>add_comment</mat-icon>
+        Start a new session
+      </button>
+
+      <div class="previous-sessions" *ngIf="groupedSessions.length > 0">
+        <h5>Previous sessions</h5>
+
+        <div class="session-card" *ngFor="let session of groupedSessions">
+          <button class="session-main" (click)="chooseExistingSession(session)">
+            <div class="session-icon">
+              <mat-icon>forum</mat-icon>
+            </div>
+
+            <div class="session-text">
+              <strong>Session {{ session | slice:0:8 }}</strong>
+              <p>{{ getSessionPreview(session) }}</p>
+            </div>
+          </button>
+
+          <button class="session-delete-btn" (click)="deleteSession(session)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="no-session" *ngIf="groupedSessions.length === 0">
+        <mat-icon>chat</mat-icon>
+        <p>No previous sessions yet.</p>
+      </div>
+    </div>
+
+    <div class="chat-content" *ngIf="!showSessionChoice">
+      <div class="chat-toolbar">
+        <button class="back-choice-btn" (click)="backToSessionChoice()">
+          <mat-icon>arrow_back</mat-icon>
+          Sessions
+        </button>
+
+        <div class="current-session">
+          {{ currentSessionId ? ('Session ' + (currentSessionId | slice:0:8)) : 'New session' }}
+        </div>
+      </div>
+
+      <div class="chat-box">
+        <div *ngIf="chatMessages.length === 0" class="empty-chat">
+          <mat-icon>support_agent</mat-icon>
+          <p>Ask your first question about contraception.</p>
+        </div>
+
+        <div
+          *ngFor="let msg of chatMessages; trackBy: trackByMessageId"
+          class="message-wrapper"
+          [ngClass]="{
+            'user-wrapper': msg.role.toUpperCase() === 'USER',
+            'assistant-wrapper': msg.role.toUpperCase() === 'ASSISTANT'
+          }"
+        >
+          <div
+            class="message"
+            [ngClass]="{
+              'user-message': msg.role.toUpperCase() === 'USER',
+              'assistant-message': msg.role.toUpperCase() === 'ASSISTANT'
+            }"
+          >
+            <div class="message-head">
+              <span>{{ msg.role.toUpperCase() === 'USER' ? 'You' : 'Assistant' }}</span>
+              <small>{{ formatDateTime(msg.createdAt) }}</small>
+            </div>
+
+            <div *ngIf="editingMessageId !== msg.id; else editTemplate">
+              <p>{{ msg.content }}</p>
+            </div>
+
+            <ng-template #editTemplate>
+              <div class="edit-box" *ngIf="msg.role.toUpperCase() === 'USER'">
+                <textarea
+                  rows="3"
+                  [(ngModel)]="editingText"
+                  placeholder="Edit your message..."
+                ></textarea>
+
+                <div class="edit-actions">
+                  <button class="save-edit-btn" (click)="saveEdit(msg)" [disabled]="loadingChat">
+                    <mat-icon>check</mat-icon>
+                    Save
+                  </button>
+
+                  <button class="cancel-edit-btn" (click)="cancelEdit()">
+                    <mat-icon>close</mat-icon>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="message-actions" *ngIf="editingMessageId !== msg.id">
+            <button
+              class="message-action-btn"
+              *ngIf="msg.role.toUpperCase() === 'USER'"
+              (click)="startEdit(msg)"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button
+              class="message-action-btn delete"
+              (click)="deleteMessage(msg.id)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="loadingChat" class="typing-indicator">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div class="chat-input-row">
+        <input
+          type="text"
+          [(ngModel)]="chatInput"
+          placeholder="Write your question here..."
+          (keyup.enter)="sendMessage()"
+        />
+        <button class="send-btn" (click)="sendMessage()" [disabled]="loadingChat">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

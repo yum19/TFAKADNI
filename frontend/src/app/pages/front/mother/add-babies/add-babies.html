@@ -1,0 +1,200 @@
+<div class="add-baby-page">
+  <div class="form-card">
+    <button class="back-btn" type="button" (click)="goBack()">&#8592;</button>
+
+    <div class="form-overlay">
+      <h1 class="page-title">Let’s add your baby!</h1>
+
+      <form [formGroup]="form" class="baby-form" novalidate>
+        <div class="gender-row floating-card">
+          <button
+            type="button"
+            class="gender-btn girl"
+            [class.selected]="isGenderSelected('FEMALE')"
+            (click)="selectGender('FEMALE')"
+          >
+            Girl
+          </button>
+
+          <button
+            type="button"
+            class="gender-btn boy"
+            [class.selected]="isGenderSelected('MALE')"
+            (click)="selectGender('MALE')"
+          >
+            Boy
+          </button>
+        </div>
+
+        <div
+          class="error-msg"
+          *ngIf="form.get('gender')?.touched && form.get('gender')?.errors?.['required']"
+        >
+          Gender is required
+        </div>
+
+        <div class="input-group floating-field">
+          <input
+            type="text"
+            class="form-input"
+            formControlName="firstName"
+            placeholder="Baby’s first name"
+            (input)="onlyLetters($event, 'firstName')"
+          />
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('firstName')?.touched && form.get('firstName')?.errors?.['required']"
+          >
+            First name is required
+          </div>
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('firstName')?.touched && form.get('firstName')?.errors?.['minlength']"
+          >
+            First name must contain at least 2 characters
+          </div>
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('firstName')?.touched && form.get('firstName')?.errors?.['maxlength']"
+          >
+            First name must not exceed 30 characters
+          </div>
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('firstName')?.touched && form.get('firstName')?.errors?.['pattern']"
+          >
+            First name must contain only letters, spaces, hyphens or apostrophes
+          </div>
+        </div>
+
+        <div class="input-group floating-field">
+          <input
+            type="text"
+            class="form-input"
+            formControlName="lastName"
+            placeholder="Baby’s last name"
+            (input)="onlyLetters($event, 'lastName')"
+          />
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('lastName')?.touched && form.get('lastName')?.errors?.['required']"
+          >
+            Last name is required
+          </div>
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('lastName')?.touched && form.get('lastName')?.errors?.['minlength']"
+          >
+            Last name must contain at least 2 characters
+          </div>
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('lastName')?.touched && form.get('lastName')?.errors?.['maxlength']"
+          >
+            Last name must not exceed 30 characters
+          </div>
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('lastName')?.touched && form.get('lastName')?.errors?.['pattern']"
+          >
+            Last name must contain only letters, spaces, hyphens or apostrophes
+          </div>
+        </div>
+
+        <div class="input-group floating-field">
+          <input
+            type="text"
+            class="form-input place-input"
+            formControlName="birthPlace"
+            placeholder="Birth place"
+            readonly
+            (click)="openMapPopup()"
+          />
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('birthPlace')?.touched && form.get('birthPlace')?.errors?.['required']"
+          >
+            Birth place is required
+          </div>
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('birthPlace')?.touched && form.get('birthPlace')?.errors?.['minlength']"
+          >
+            Must contain at least 2 characters
+          </div>
+
+          <div
+            class="error-msg"
+            *ngIf="form.get('birthPlace')?.touched && form.get('birthPlace')?.errors?.['maxlength']"
+          >
+            Must not exceed 200 characters
+          </div>
+        </div>
+
+        <div class="birthday-block">
+          <label class="birthday-label">Birthday</label>
+
+          <div class="date-wrapper floating-field">
+            <input
+              type="date"
+              class="form-input birthday-input"
+              formControlName="birthDate"
+              [max]="today"
+            />
+          </div>
+
+          <div
+            class="error-msg center-error"
+            *ngIf="form.get('birthDate')?.touched && form.get('birthDate')?.errors?.['required']"
+          >
+            Date of birth is required
+          </div>
+
+          <div
+            class="error-msg center-error"
+            *ngIf="form.get('birthDate')?.touched && form.get('birthDate')?.errors?.['futureDate']"
+          >
+            Date of birth cannot be in the future
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="bottom-action">
+      <button class="next-btn" type="button" (click)="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="map-popup-backdrop" *ngIf="isMapPopupOpen" (click)="closeMapPopup()">
+  <div class="map-popup" (click)="$event.stopPropagation()">
+    <div class="map-popup-header">
+      <h2>Select birth place</h2>
+      <button type="button" class="close-map-btn" (click)="closeMapPopup()">×</button>
+    </div>
+
+    <div class="map-popup-actions">
+      <button type="button" class="location-btn" (click)="useCurrentLocation()">
+        Use my location
+      </button>
+
+      <span class="map-hint">Click on the map to select a place</span>
+    </div>
+
+    <div class="map-loading" *ngIf="isLoadingPlace">
+      Loading selected place...
+    </div>
+
+    <div id="birthPlaceMap" class="map-container"></div>
+  </div>
+</div>

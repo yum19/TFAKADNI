@@ -1,0 +1,450 @@
+<div class="postpartum-page psych-appointment-page">
+  <div class="page-shell">
+
+    <div class="toast-stack">
+      <div
+        class="toast"
+        *ngFor="let toast of toasts"
+        [ngClass]="'toast-' + toast.type"
+      >
+        <div class="toast-content">
+          <mat-icon>
+            {{
+              toast.type === 'success'
+                ? 'check_circle'
+                : toast.type === 'error'
+                ? 'error'
+                : 'info'
+            }}
+          </mat-icon>
+          <span>{{ toast.text }}</span>
+        </div>
+        <button type="button" class="toast-close" (click)="removeToast(toast.id)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <section class="hero-panel">
+      <div class="hero-gradient"></div>
+
+      <div class="hero-layout">
+        <div class="hero-content">
+          <p class="hero-kicker">Postpartum care</p>
+          <h1 class="hero-title">Psychological <span>appointments</span></h1>
+          <p class="hero-lead">
+            Organize, search, filter, and manage every follow-up appointment with a more elegant and interactive experience.
+          </p>
+
+          <div class="hero-actions">
+            <a routerLink="/mother/postpartum" class="secondary-btn">Back to postpartum hub</a>
+            <a routerLink="/mother/postpartum/prediction-results" class="glass-btn">Prediction results</a>
+            <button type="button" class="primary-btn" (click)="openCreateModal()">
+              <mat-icon>add_circle</mat-icon>
+              <span>New appointment</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <article class="hero-stat-card total">
+            <div class="stat-icon"><mat-icon>calendar_month</mat-icon></div>
+            <div>
+              <p>Total</p>
+              <h3>{{ totalCount }}</h3>
+            </div>
+          </article>
+
+          <article class="hero-stat-card planned">
+            <div class="stat-icon"><mat-icon>event</mat-icon></div>
+            <div>
+              <p>Planned</p>
+              <h3>{{ plannedCount }}</h3>
+            </div>
+          </article>
+
+          <article class="hero-stat-card completed">
+            <div class="stat-icon"><mat-icon>task_alt</mat-icon></div>
+            <div>
+              <p>Completed</p>
+              <h3>{{ completedCount }}</h3>
+            </div>
+          </article>
+
+          <article class="hero-stat-card cancelled">
+            <div class="stat-icon"><mat-icon>cancel</mat-icon></div>
+            <div>
+              <p>Cancelled</p>
+              <h3>{{ cancelledCount }}</h3>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="filters-card enhanced-filters">
+      <div class="filter-head">
+        <h2>Smart filters</h2>
+        <p>Refine appointments by keyword, status, and type.</p>
+      </div>
+
+      <div class="toolbar-grid">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            name="searchTerm"
+            placeholder="Search by psychologist, location, notes, status..."
+            (ngModelChange)="onSearchChange()"
+          />
+        </div>
+
+        <div class="toolbar-select">
+          <label>Status</label>
+          <select [(ngModel)]="selectedStatus" name="selectedStatus" (ngModelChange)="onStatusFilterChange($event)">
+            <option value="ALL">All</option>
+            <option value="PLANNED">Planned</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="toolbar-select">
+          <label>Type</label>
+          <select [(ngModel)]="selectedType" name="selectedType" (ngModelChange)="onTypeFilterChange($event)">
+            <option value="ALL">All</option>
+            <option value="IN_PERSON">In person</option>
+            <option value="ONLINE">Online</option>
+            <option value="PHONE">Phone</option>
+            <option value="FOLLOW_UP">Follow up</option>
+          </select>
+        </div>
+
+        <button type="button" class="secondary-btn reset-btn" (click)="clearFilters()">
+          <mat-icon>restart_alt</mat-icon>
+          <span>Reset</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="calendar-card">
+      <div class="calendar-head">
+        <div>
+          <h2>Interactive calendar</h2>
+          <p>Click a future day to create a new appointment.</p>
+        </div>
+
+        <div class="calendar-controls">
+          <button type="button" class="icon-btn" (click)="previousMonth()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <div class="month-label">{{ monthLabel }}</div>
+          <button type="button" class="icon-btn" (click)="nextMonth()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <button type="button" class="secondary-btn small-btn" (click)="goToToday()">Today</button>
+        </div>
+      </div>
+
+      <div class="calendar-weekdays">
+        <div>Sun</div>
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+      </div>
+
+      <div class="calendar-grid">
+        <div
+          class="calendar-day clickable"
+          *ngFor="let day of calendarDays"
+          [class.outside]="!day.inCurrentMonth"
+          [class.today]="day.isToday"
+          [class.past-day]="day.isPastDay"
+          (click)="onDayClick(day)"
+        >
+          <div class="day-header">
+            <span>{{ day.date.getDate() }}</span>
+            <span class="day-count" *ngIf="day.appointments.length > 0">{{ day.appointments.length }}</span>
+          </div>
+
+          <div class="day-items">
+            <div
+              class="day-appointment"
+              *ngFor="let appointment of day.appointments"
+              [ngClass]="getStatusClass(appointment.status)"
+              (click)="$event.stopPropagation()"
+            >
+              <div class="appointment-chip-main" (click)="onAppointmentEdit(appointment, $event)">
+                <span class="time">{{ appointment.appointmentDate | date:'shortTime' }}</span>
+                <span class="title">{{ appointment.psychologistName || getTypeLabel(appointment.type) }}</span>
+              </div>
+
+              <div class="chip-actions">
+                <button type="button" class="mini-icon-btn" (click)="onAppointmentEdit(appointment, $event)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button type="button" class="mini-icon-btn danger" (click)="deleteAppointment(appointment.id, $event)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="state-card" *ngIf="loading">
+      <div class="state-box">
+        <div class="spinner"></div>
+        <p>Loading appointments...</p>
+      </div>
+    </section>
+
+    <section class="lists-layout" *ngIf="!loading">
+
+      <div class="list-card">
+        <div class="list-head">
+          <h2>Upcoming appointments</h2>
+          <span>{{ upcomingAppointments.length }}</span>
+        </div>
+
+        <div class="empty-box" *ngIf="upcomingAppointments.length === 0">
+          No upcoming appointments found.
+        </div>
+
+        <div class="appointment-list" *ngIf="upcomingAppointments.length > 0">
+          <article class="appointment-item" *ngFor="let item of upcomingAppointments; trackBy: trackByAppointmentId">
+            <div class="appointment-main">
+              <div class="appointment-top">
+                <h3>{{ item.psychologistName || getTypeLabel(item.type) }}</h3>
+                <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+                  {{ item.status }}
+                </span>
+              </div>
+
+              <p class="appointment-date">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ formatAppointmentDate(item.appointmentDate) }}</span>
+              </p>
+
+              <p class="appointment-meta" *ngIf="item.location">
+                <mat-icon>location_on</mat-icon>
+                <span>{{ item.location }}</span>
+              </p>
+
+              <p class="appointment-meta" *ngIf="item.predictionResultId">
+                <mat-icon>analytics</mat-icon>
+                <span>Prediction #{{ item.predictionResultId }}</span>
+              </p>
+
+              <p class="appointment-meta" *ngIf="item.type">
+                <mat-icon>category</mat-icon>
+                <span>{{ getTypeLabel(item.type) }}</span>
+              </p>
+
+              <p class="appointment-notes" *ngIf="item.notes">{{ item.notes }}</p>
+            </div>
+
+            <div class="appointment-actions">
+              <button type="button" class="secondary-btn small-btn" (click)="openEditModal(item)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+
+              <button type="button" class="danger-btn small-btn" (click)="deleteAppointment(item.id)">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="list-card">
+        <div class="list-head">
+          <h2>Past appointments</h2>
+          <span>{{ pastAppointments.length }}</span>
+        </div>
+
+        <div class="empty-box" *ngIf="pastAppointments.length === 0">
+          No past appointments found.
+        </div>
+
+        <div class="appointment-list" *ngIf="pastAppointments.length > 0">
+          <article class="appointment-item past" *ngFor="let item of pastAppointments; trackBy: trackByAppointmentId">
+            <div class="appointment-main">
+              <div class="appointment-top">
+                <h3>{{ item.psychologistName || getTypeLabel(item.type) }}</h3>
+                <span class="status-badge" [ngClass]="getStatusClass(item.status)">
+                  {{ item.status }}
+                </span>
+              </div>
+
+              <p class="appointment-date">
+                <mat-icon>history</mat-icon>
+                <span>{{ formatAppointmentDate(item.appointmentDate) }}</span>
+              </p>
+
+              <p class="appointment-meta" *ngIf="item.location">
+                <mat-icon>location_on</mat-icon>
+                <span>{{ item.location }}</span>
+              </p>
+
+              <p class="appointment-meta" *ngIf="item.predictionResultId">
+                <mat-icon>analytics</mat-icon>
+                <span>Prediction #{{ item.predictionResultId }}</span>
+              </p>
+
+              <p class="appointment-meta" *ngIf="item.type">
+                <mat-icon>category</mat-icon>
+                <span>{{ getTypeLabel(item.type) }}</span>
+              </p>
+
+              <p class="appointment-notes" *ngIf="item.notes">{{ item.notes }}</p>
+            </div>
+
+            <div class="appointment-actions">
+              <button type="button" class="secondary-btn small-btn" (click)="openEditModal(item)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+
+              <button type="button" class="danger-btn small-btn" (click)="deleteAppointment(item.id)">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+    </section>
+
+    <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()"></div>
+
+    <section class="appointment-modal" *ngIf="isModalOpen">
+      <div class="appointment-form-card modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div class="card-head">
+            <h2>{{ editingAppointmentId ? 'Edit appointment' : 'Create appointment' }}</h2>
+            <p>
+              {{
+                editingAppointmentId
+                  ? 'Update the appointment and change status if needed.'
+                  : 'New appointments are always created with status PLANNED.'
+              }}
+            </p>
+          </div>
+
+          <button type="button" class="icon-btn" (click)="closeModal()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <form class="appointment-form" (ngSubmit)="submitForm()">
+          <div class="form-grid">
+            <div class="field">
+              <label for="predictionResultId">Prediction result</label>
+              <select
+                id="predictionResultId"
+                [(ngModel)]="form.predictionResultId"
+                name="predictionResultId"
+              >
+                <option [ngValue]="undefined">No linked prediction</option>
+                <option *ngFor="let item of predictionResults" [ngValue]="item.id">
+                  {{ getPredictionLabel(item) }}
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="psychologistName">Psychologist name</label>
+              <input
+                id="psychologistName"
+                type="text"
+                [(ngModel)]="form.psychologistName"
+                name="psychologistName"
+                placeholder="Example: Dr. Amal"
+              />
+            </div>
+
+            <div class="field">
+              <label for="appointmentDate">Appointment date</label>
+              <input
+                id="appointmentDate"
+                type="datetime-local"
+                [(ngModel)]="form.appointmentDate"
+                name="appointmentDate"
+                [min]="getMinDateTime()"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label for="type">Type</label>
+              <select id="type" [(ngModel)]="form.type" name="type">
+                <option value="IN_PERSON">In person</option>
+                <option value="ONLINE">Online</option>
+                <option value="PHONE">Phone</option>
+                <option value="FOLLOW_UP">Follow up</option>
+              </select>
+            </div>
+
+            <div class="field" *ngIf="editingAppointmentId">
+              <label for="status">Status</label>
+              <select id="status" [(ngModel)]="form.status" name="status">
+                <option value="PLANNED">Planned</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+            </div>
+
+            <div class="field" *ngIf="!editingAppointmentId">
+              <label>Status</label>
+              <input type="text" value="PLANNED" disabled />
+            </div>
+
+            <div class="field">
+              <label for="location">Location</label>
+              <input
+                id="location"
+                type="text"
+                [(ngModel)]="form.location"
+                name="location"
+                placeholder="Clinic, room, online link..."
+              />
+            </div>
+          </div>
+
+          <div class="field full">
+            <label for="notes">Notes</label>
+            <textarea
+              id="notes"
+              rows="4"
+              [(ngModel)]="form.notes"
+              name="notes"
+              placeholder="Optional notes about this appointment..."
+            ></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="primary-btn" [disabled]="saving">
+              <mat-icon>{{ editingAppointmentId ? 'edit' : 'add_circle' }}</mat-icon>
+              <span>{{ saving ? 'Saving...' : (editingAppointmentId ? 'Update appointment' : 'Create appointment') }}</span>
+            </button>
+
+            <button type="button" class="secondary-btn" (click)="closeModal()">
+              <mat-icon>close</mat-icon>
+              <span>Close</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </div>
+</div>

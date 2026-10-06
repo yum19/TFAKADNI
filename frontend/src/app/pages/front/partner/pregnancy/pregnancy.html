@@ -1,0 +1,83 @@
+<div class="container fade-in py-3 py-lg-4">
+  <div class="col py-1">
+    <h3 class="mb-1">Pregnancy</h3>
+    <p class="small opacity-50">Information about the shared pregnancy</p>
+  </div>
+</div>
+
+<div class="container fade-in">
+
+  @if(loading) { <mat-progress-bar mode="indeterminate" class="mb-4"></mat-progress-bar> }
+
+  @if(accessDenied) {
+  <mat-card>
+    <mat-card-content class="text-center py-5">
+      <span class="material-symbols-outlined d-block mb-3" style="font-size:4rem; color:rgba(244,67,54,0.4)">lock</span>
+      <h3 class="mb-2">Access Denied</h3>
+      <p class="text-secondary">Partner sharing is not enabled.</p>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  @if(pregnancy && !loading) {
+  <div class="row gx-3 gx-lg-4">
+    <div class="col-12 col-xl-6">
+      <mat-card class="mb-4" style="border-left:4px solid #2196f3">
+        <mat-card-content>
+          <div class="row gx-3 align-items-center mb-4 mt-2">
+            <div class="col">
+              <h1 class="fw-medium mb-1">Week {{ currentWeek }}</h1>
+              <p class="small text-secondary">
+                <span style="color:#2196f3">{{ getTrimester() }}</span>
+                — {{ getTypeLabel(pregnancy.pregnancyType) }}
+              </p>
+            </div>
+            <div class="col-auto">
+              <span class="status-badge"
+                    [style.background]="getStatusColor(pregnancy.status) + '22'"
+                    [style.color]="getStatusColor(pregnancy.status)">
+                {{ getStatusLabel(pregnancy.status) }}
+              </span>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="small fw-medium">Overall progress</span>
+            <span class="small fw-medium" style="color:#2196f3">{{ (currentWeek/40*100).toFixed(0) }}%</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="currentWeek/40*100"></mat-progress-bar>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="col-12 col-xl-6">
+      <mat-card class="mb-4">
+        <mat-card-content>
+          <div class="d-flex align-items-center gap-3 mb-3 mt-2">
+            <div class="date-icon"><span class="material-symbols-outlined" style="color:#2196f3">event</span></div>
+            <div>
+              <p class="small text-secondary mb-0">Last Menstrual Period (LMP)</p>
+              <h4 class="mb-0">{{ pregnancy.lmpDate | date:'MM/dd/yyyy' }}</h4>
+            </div>
+          </div>
+          <mat-divider class="mb-3"></mat-divider>
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="date-icon"><span class="material-symbols-outlined" style="color:#4caf50">child_friendly</span></div>
+            <div>
+              <p class="small text-secondary mb-0">Expected Due Date</p>
+              <h4 class="mb-0" style="color:#2196f3">{{ pregnancy.dueDate | date:'MM/dd/yyyy' }}</h4>
+            </div>
+          </div>
+          <mat-divider class="mb-3"></mat-divider>
+          <div class="d-flex align-items-center gap-3">
+            <div class="date-icon"><span class="material-symbols-outlined" style="color:#ff9800">local_hospital</span></div>
+            <div>
+              <p class="small text-secondary mb-0">Attending Physician</p>
+              <h4 class="mb-0">{{ pregnancy.doctorName || 'Not provided' }}</h4>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+  }
+
+</div>

@@ -1,0 +1,279 @@
+<!-- src/app/features/communaute/mes-matches/mes-matches.component.html -->
+<app-index-header></app-index-header>
+
+<div class="mm-wrap">
+
+  <!-- ── HERO ─────────────────────────────────────────────────── -->
+  <div class="mm-hero">
+    <div class="mm-hero-avatar">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#ff4f75" stroke-width="1.5">
+        <path d="M16 28S5 21.5 5 13a7 7 0 0 1 11-5.76A7 7 0 0 1 27 13c0 8.5-11 15-11 15z"/>
+      </svg>
+    </div>
+    <h1>My Matches</h1>
+    <p>Your AI-powered marrainage connections</p>
+  </div>
+
+  <div class="mm-layout">
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="mm-loading">
+      <div class="mm-spinner"></div>
+      <p>Loading your matches…</p>
+    </div>
+
+    <ng-container *ngIf="!loading">
+
+      <!-- ══ SECTION 0 — MUTUAL (both accepted) ══ -->
+      <section class="mm-section" *ngIf="mutualMatches.length > 0">
+        <div class="mm-section-hdr mm-section-hdr--mutual">
+          <div class="mm-section-icon mm-section-icon--mutual">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#0f6e56" stroke-width="1.5">
+              <path d="M8 13.5S2.5 10 2.5 6a3.5 3.5 0 0 1 5.5-2.88A3.5 3.5 0 0 1 13.5 6c0 4-5.5 7.5-5.5 7.5z"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Connected</h3>
+            <p>You both accepted — you can now message and rate each other</p>
+          </div>
+          <span class="mm-count mm-count--mutual">{{ mutualMatches.length }}</span>
+        </div>
+
+        <div class="mm-cards">
+          <div *ngFor="let m of mutualMatches" class="mm-card mm-card--mutual">
+
+            <!-- Left: avatar + status -->
+            <div class="mm-card-left">
+              <div class="mm-avatar" [style.background]="avatarColor(m.aiScore)">
+                {{ getInitials(m.otherUserName) }}
+              </div>
+              <div class="mm-status-badge mm-status-badge--mutual">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M5 9S1 6.5 1 4a2.5 2.5 0 0 1 4-2A2.5 2.5 0 0 1 9 4c0 2.5-4 5-4 5z"/>
+                </svg>
+                Matched!
+              </div>
+            </div>
+
+            <!-- Body -->
+            <div class="mm-card-body">
+              <div class="mm-card-name">{{ m.otherUserName }}</div>
+              <div class="mm-card-meta">
+                <span *ngIf="m.otherUserCity">📍 {{ m.otherUserCity }}</span>
+                <span *ngIf="m.otherUserWeek">Week {{ m.otherUserWeek }}</span>
+                <span *ngIf="m.otherUserHasBaby">Has baby</span>
+              </div>
+
+              <!-- Their average rating display -->
+              <div class="mm-avg-rating" *ngIf="getAvgStars(m.otherUserId) > 0">
+                <div class="mm-avg-stars">
+                  <span
+                    *ngFor="let filled of starArray(getAvgStars(m.otherUserId)); let i = index"
+                    class="mm-avg-star"
+                    [class.filled]="filled">★</span>
+                </div>
+                <span class="mm-avg-val">{{ getAvgStars(m.otherUserId) | number:'1.1-1' }}</span>
+                <span class="mm-avg-count">({{ getTotalRatings(m.otherUserId) }})</span>
+              </div>
+
+              <div class="mm-bar-track">
+                <div class="mm-bar-fill"
+                     [style.width.%]="m.aiScore"
+                     [style.background]="scoreColor(m.aiScore)">
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: score + actions -->
+            <div class="mm-card-right">
+              <div class="mm-score" [style.color]="scoreColor(m.aiScore)">
+                {{ m.aiScore }}<small>/100</small>
+              </div>
+
+              <button class="mm-msg-btn" (click)="openMessage(m)" type="button">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M2 2h8v7H2z"/><path d="M4 9l-1.5 1.5"/>
+                </svg>
+                Message
+              </button>
+
+              <!-- Rate button — shows stars if already rated -->
+              <button
+                class="mm-rate-btn"
+                [class.mm-rate-btn--rated]="getMyStars(m.matchId) > 0"
+                (click)="openRatingModal(m)"
+                type="button"
+                [title]="getMyStars(m.matchId) > 0 ? 'Update your rating' : 'Rate this match'">
+                <ng-container *ngIf="getMyStars(m.matchId) === 0">
+                  ☆☆☆☆☆ Rate
+                </ng-container>
+                <ng-container *ngIf="getMyStars(m.matchId) > 0">
+                  <span class="mm-my-stars">
+                    <span *ngFor="let s of [1,2,3,4,5]"
+                          [class.on]="s <= getMyStars(m.matchId)">★</span>
+                  </span>
+                  Edit
+                </ng-container>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ SECTION 1 — MY DECISIONS (iAmA=true, not mutual) ══ -->
+      <section class="mm-section">
+        <div class="mm-section-hdr">
+          <div class="mm-section-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.5">
+              <circle cx="8" cy="5.5" r="2.5"/><path d="M3 13.5c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Your decisions</h3>
+            <p>Matches the AI suggested for you — your responses</p>
+          </div>
+          <span class="mm-count">{{ myDecisions.length }}</span>
+        </div>
+
+        <div *ngIf="myDecisions.length === 0" class="mm-empty">
+          <p>No decisions yet — enable AI Match on the feed and start swiping!</p>
+        </div>
+
+        <div class="mm-cards" *ngIf="myDecisions.length > 0">
+          <div *ngFor="let m of myDecisions"
+               class="mm-card"
+               [class.mm-card--accepted]="m.myStatus === 'ACCEPTED'"
+               [class.mm-card--rejected]="m.myStatus === 'REJECTED'"
+               [class.mm-card--pending]="m.myStatus === 'PENDING'">
+
+            <div class="mm-card-left">
+              <div class="mm-avatar" [style.background]="avatarColor(m.aiScore)">
+                {{ getInitials(m.otherUserName) }}
+              </div>
+              <div class="mm-status-badge"
+                   [class.mm-status-badge--accepted]="m.myStatus === 'ACCEPTED'"
+                   [class.mm-status-badge--rejected]="m.myStatus === 'REJECTED'"
+                   [class.mm-status-badge--pending]="m.myStatus === 'PENDING'">
+                <ng-container *ngIf="m.myStatus === 'ACCEPTED'">You accepted</ng-container>
+                <ng-container *ngIf="m.myStatus === 'REJECTED'">You passed</ng-container>
+                <ng-container *ngIf="m.myStatus === 'PENDING'">Pending</ng-container>
+              </div>
+            </div>
+
+            <div class="mm-card-body">
+              <div class="mm-card-name">{{ m.otherUserName }}</div>
+              <div class="mm-card-meta">
+                <span *ngIf="m.otherUserCity">📍 {{ m.otherUserCity }}</span>
+                <span *ngIf="m.otherUserWeek">Week {{ m.otherUserWeek }}</span>
+                <span *ngIf="m.otherUserHasBaby">Has baby</span>
+              </div>
+              <div class="mm-bar-track">
+                <div class="mm-bar-fill"
+                     [style.width.%]="m.aiScore"
+                     [style.background]="scoreColor(m.aiScore)">
+                </div>
+              </div>
+            </div>
+
+            <div class="mm-card-right">
+              <div class="mm-score" [style.color]="scoreColor(m.aiScore)">{{ m.aiScore }}<small>/100</small></div>
+              <div class="mm-status-badge"
+                   [class.mm-status-badge--accepted]="m.theirStatus === 'ACCEPTED'"
+                   [class.mm-status-badge--rejected]="m.theirStatus === 'REJECTED'"
+                   [class.mm-status-badge--awaiting]="m.theirStatus === 'PENDING'">
+                <ng-container *ngIf="m.theirStatus === 'ACCEPTED'">They accepted!</ng-container>
+                <ng-container *ngIf="m.theirStatus === 'REJECTED'">They declined</ng-container>
+                <ng-container *ngIf="m.theirStatus === 'PENDING'">Awaiting them…</ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ SECTION 2 — INCOMING ══ -->
+      <section class="mm-section" *ngIf="incomingMatches.length > 0 || hasShownIncoming">
+        <div class="mm-section-hdr">
+          <div class="mm-section-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.5">
+              <path d="M2 4h12v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4z"/><path d="M2 4l6 5 6-5"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Who matched with you</h3>
+            <p>Someone the AI paired with you — awaiting your decision</p>
+          </div>
+          <span class="mm-count">{{ incomingMatches.length }}</span>
+        </div>
+
+        <div *ngIf="incomingMatches.length === 0" class="mm-empty">
+          <p>No one has been paired with you yet. Check back soon!</p>
+        </div>
+
+        <div class="mm-cards" *ngIf="incomingMatches.length > 0">
+          <div *ngFor="let m of incomingMatches"
+               class="mm-card mm-card--incoming"
+               [class.mm-card--accepted]="m.theirStatus === 'ACCEPTED'">
+
+            <div class="mm-card-left">
+              <div class="mm-avatar" style="background:#6c5ce7">
+                {{ getInitials(m.otherUserName) }}
+              </div>
+              <div class="mm-status-badge"
+                   [class.mm-status-badge--accepted]="m.theirStatus === 'ACCEPTED'"
+                   [class.mm-status-badge--awaiting]="m.theirStatus === 'PENDING'">
+                <ng-container *ngIf="m.theirStatus === 'ACCEPTED'">They accepted you</ng-container>
+                <ng-container *ngIf="m.theirStatus === 'PENDING'">Awaiting their decision</ng-container>
+              </div>
+            </div>
+
+            <div class="mm-card-body">
+              <div class="mm-card-name">{{ m.otherUserName }}</div>
+              <div class="mm-card-meta">
+                <span *ngIf="m.otherUserCity">📍 {{ m.otherUserCity }}</span>
+                <span *ngIf="m.otherUserWeek">Week {{ m.otherUserWeek }}</span>
+              </div>
+              <div class="mm-bar-track">
+                <div class="mm-bar-fill"
+                     [style.width.%]="m.aiScore"
+                     [style.background]="scoreColor(m.aiScore)">
+                </div>
+              </div>
+            </div>
+
+            <div class="mm-card-right">
+              <div class="mm-score" [style.color]="scoreColor(m.aiScore)">{{ m.aiScore }}<small>/100</small></div>
+              <div class="mm-status-badge"
+                   [class.mm-status-badge--accepted]="m.myStatus === 'ACCEPTED'"
+                   [class.mm-status-badge--rejected]="m.myStatus === 'REJECTED'"
+                   [class.mm-status-badge--awaiting]="m.myStatus === 'PENDING'">
+                <ng-container *ngIf="m.myStatus === 'ACCEPTED'">You accepted</ng-container>
+                <ng-container *ngIf="m.myStatus === 'REJECTED'">You declined</ng-container>
+                <ng-container *ngIf="m.myStatus === 'PENDING'">Your response pending</ng-container>
+              </div>
+              <button class="mm-msg-btn" *ngIf="m.mutualMatch" (click)="openMessage(m)" type="button">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M2 2h8v7H2z"/><path d="M4 9l-1.5 1.5"/>
+                </svg>
+                Message
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </ng-container>
+  </div>
+</div>
+
+<!-- ══ STAR RATING MODAL ══ -->
+<app-star-rating-modal
+  *ngIf="ratingModalMatchId !== null"
+  [matchId]="ratingModalMatchId!"
+  [ratedName]="ratingModalName"
+  [ratedId]="ratingModalRatedId"
+  (close)="closeRatingModal()"
+  (rated)="onRated($event)">
+</app-star-rating-modal>
+
+<app-index-footer></app-index-footer>

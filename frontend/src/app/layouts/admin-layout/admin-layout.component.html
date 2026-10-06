@@ -1,0 +1,44 @@
+<mat-sidenav-container class="admin-shell" [hasBackdrop]="false">
+  <!-- Theme drawer (end) -->
+  <mat-sidenav #themeDrawer position="end" mode="over" class="theme-drawer">
+    <app-theme [drawer]="themeDrawer"></app-theme>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="shell-content">
+    <!-- Sidebar column -->
+    <aside
+      class="admin-sidebar-col"
+      [class.sidebar-collapsed]="sidebarCollapsed && !isMobile"
+      [class.mobile-hidden]="isMobile && !mobileSidebarOpen"
+      [class.mobile-visible]="isMobile && mobileSidebarOpen"
+    >
+      <app-admin-sidebar
+        [collapsed]="sidebarCollapsed && !isMobile"
+        (toggleSidebar)="onToggleSidebar()"
+      ></app-admin-sidebar>
+    </aside>
+
+    <!-- Main area -->
+    <div
+      class="admin-main-col"
+      [class.main-expanded]="sidebarCollapsed && !isMobile"
+    >
+      <app-admin-header
+        (openTheme)="themeDrawer.open()"
+        (toggleSidebar)="onToggleSidebar()"
+        [sidebarCollapsed]="isMobile ? !mobileSidebarOpen : sidebarCollapsed"
+      ></app-admin-header>
+
+      <main class="admin-main" [class.no-padding]="noPadding">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<!-- Mobile overlay: only rendered on mobile, blocks clicks on content -->
+<div
+  class="mobile-overlay"
+  [class.visible]="isMobile && mobileSidebarOpen"
+  (click)="closeMobileSidebar()"
+></div>

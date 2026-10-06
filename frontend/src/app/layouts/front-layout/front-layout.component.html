@@ -1,0 +1,46 @@
+<mat-sidenav-container class="front-shell">
+  <mat-sidenav #drawer mode="over" class="mobile-drawer p-3">
+    <div class="mb-3 d-flex align-items-center gap-2">
+      <img src="assets/img/logo.png" class="drawer-logo" alt="logo" />
+      <div>
+        <div class="fw-bold">MAMA-AI</div>
+        <small class="text-secondary">Module 7</small>
+      </div>
+    </div>
+    <mat-nav-list>
+      <a
+        mat-list-item
+        *ngFor="let item of navLinks()"
+        [routerLink]="item.path"
+        (click)="drawer.close()"
+        >{{ item.label }}</a
+      >
+      <a mat-list-item routerLink="/front/profile" (click)="drawer.close()"
+        >Profile</a
+      >
+      <a mat-list-item routerLink="/front/billing" (click)="drawer.close()"
+        >Billing</a
+      >
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <app-front-header
+      [drawer]="drawer"
+      (openTheme)="themeDrawer?.open()"
+    ></app-front-header>
+    <main class="front-main">
+      <router-outlet></router-outlet>
+    </main>
+    <app-front-footer></app-front-footer>
+  </mat-sidenav-content>
+
+  <mat-sidenav
+    #themeDrawer
+    position="end"
+    mode="over"
+    class="theme-drawer bg-light-gradient"
+  >
+    <app-theme [drawer]="themeDrawer"></app-theme>
+  </mat-sidenav>
+</mat-sidenav-container>

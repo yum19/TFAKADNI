@@ -1,0 +1,23 @@
+{
+  "categories": {
+    "SAFE": "Verified / safe content",
+    "DANGEROUS_REMEDY": "Dangerous home remedy",
+    "FALSE_VACCINE_CLAIM": "False vaccine claim",
+    "FAKE_SYMPTOM_ADVICE": "Unverified symptom advice",
+    "HARMFUL_NUTRITION": "Harmful nutrition claim",
+    "FALSE_MEDICATION_CLAIM": "False medication claim",
+    "PSEUDOSCIENCE": "Pseudoscientific claim",
+    "CONSPIRACY_HEALTH": "Health conspiracy theory",
+    "UNVERIFIED_TREATMENT": "Unverified treatment claim"
+  },
+  "label_names": [
+    "SAFE",
+    "FAKE_INFO"
+  ],
+  "thresholds": {
+    "ml_only": 0.65,
+    "keyword": 0.35,
+    "min_words": 6,
+    "fallback": 0.72
+  }
+}

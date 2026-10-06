@@ -1,0 +1,280 @@
+<!-- home.component.html -->
+<section class="mother-home">
+  <div class="home-wrap">
+    <!-- ── Header ── -->
+    <header class="home-header">
+      <div class="header-grid">
+        <div class="header-copy">
+          <div class="greeting-chip">
+            <span class="wave-emoji">👋</span>
+            <span class="greeting-text">Welcome back, dear</span>
+          </div>
+          <h1 class="home-title">
+            <span class="title-line">{{
+              session.user?.firstName || "Mama"
+            }}</span>
+            <span class="title-accent">Your journey, beautifully.</span>
+          </h1>
+          <p class="home-lead">
+            A quiet corner for mindful learning, practical support, and gentle
+            progress. Everything you need, wrapped in calm.
+          </p>
+          <div class="hero-actions">
+            <a
+              class="btn-rose btn-rose--primary"
+              routerLink="/front/mother/courses"
+            >
+              Explore Courses
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+            <a
+              class="btn-rose btn-rose--ghost"
+              routerLink="/front/mother/collaboration"
+            >
+              Collaboration
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="visual-frame">
+            <img
+              src="https://images.unsplash.com/photo-1559734840-f9509ee5677f?q=80&w=1000&auto=format&fit=crop"
+              alt="Mother wellness"
+            />
+            <div class="visual-overlay"></div>
+            <!-- floating decorative elements -->
+            <div class="floating-leaf leaf-1">🌸</div>
+            <div class="floating-leaf leaf-2">🌿</div>
+            <div class="floating-leaf leaf-3">✨</div>
+          </div>
+          <div class="hero-stat-badge">
+            <div class="stat-num">12k+</div>
+            <div class="stat-label">Mothers growing together</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Stats Row ── -->
+    <div class="stats-row">
+      <div class="stat-card" *ngFor="let stat of stats">
+        <div class="stat-icon">{{ stat.icon }}</div>
+        <div class="stat-content">
+          <span class="stat-value">{{ stat.val }}</span>
+          <span class="stat-label">{{ stat.lbl }}</span>
+        </div>
+        <div class="stat-bg-glow"></div>
+      </div>
+    </div>
+
+    <!-- ── Nurture Spotlight (static content) ── -->
+    <div class="nurture-spotlight">
+      <div class="spotlight-card">
+        <div class="spotlight-badge">🌸 today's nurture</div>
+        <h3 class="spotlight-title">"You are doing enough."</h3>
+        <p class="spotlight-text">
+          Small, consistent steps matter more than perfect leaps. Take one
+          breath, one module, one kind thought at a time.
+        </p>
+        <div class="spotlight-author">— Mother Hub Community</div>
+        <div class="spotlight-decoration">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Weekly Rhythm + Smart Habits ── -->
+    <div class="section-meta">
+      <span class="section-chip">Your Dashboard</span>
+      <div class="section-line"></div>
+      <span class="result-count">Weekly overview</span>
+    </div>
+
+    <div class="journal-grid">
+      <!-- Weekly Rhythm -->
+      <article class="journal-card rhythm-card">
+        <div class="card-accent"></div>
+        <div class="journal-card-header">
+          <span class="journal-icon">🗓️</span>
+          <div>
+            <div class="tool-tag">This Week</div>
+            <h3 class="card-heading">Weekly Rhythm</h3>
+          </div>
+        </div>
+        <div class="timeline">
+          <div
+            class="timeline-node"
+            *ngFor="let action of weekActions; let i = index"
+            [style.animation-delay]="i * 0.1 + 's'"
+          >
+            <h6 class="timeline-title">{{ action.title }}</h6>
+            <p class="timeline-text">{{ action.text }}</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Smart Habits -->
+      <article class="journal-card habits-card">
+        <div class="card-accent"></div>
+        <div class="journal-card-header">
+          <span class="journal-icon">⚡</span>
+          <div>
+            <div class="tool-tag">Reminders</div>
+            <h3 class="card-heading">Smart Habits</h3>
+          </div>
+        </div>
+        <div class="habits-list">
+          <div
+            class="habit-pill"
+            *ngFor="let habit of highlights; let i = index"
+            [style.animation-delay]="i * 0.1 + 's'"
+          >
+            <span class="habit-num">0{{ i + 1 }}</span>
+            <p class="habit-text">{{ habit }}</p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- ── Partner Corner (new static content) ── -->
+    <div class="partner-corner">
+      <div class="partner-card">
+        <div class="partner-icon">🤝</div>
+        <div class="partner-content">
+          <h4 class="partner-title">Partner Support Tip</h4>
+          <p class="partner-tip">
+            “Ask for one specific thing today — a meal, a walk, or just quiet
+            presence. Clarity helps both of you.”
+          </p>
+        </div>
+        <div class="partner-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- ── Bento Navigation ── -->
+    <div class="section-meta" style="margin-top: 48px">
+      <span class="section-chip">Quick Access</span>
+      <div class="section-line"></div>
+      <span class="result-count">4 pathways</span>
+    </div>
+
+    <div class="bento-grid">
+      <a
+        routerLink="/front/mother/enrollments"
+        class="bento-card bento-card--rose"
+      >
+        <div class="bento-icon-wrapper">
+          <span class="bento-icon">📈</span>
+          <div class="bento-glow"></div>
+        </div>
+        <div class="tool-tag">Progress</div>
+        <h5 class="bento-title">Learning Path</h5>
+        <p class="bento-desc">
+          Track your progress and keep your momentum visible.
+        </p>
+        <div class="bento-arrow">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </div>
+      </a>
+
+      <a
+        routerLink="/front/mother/recommendations"
+        class="bento-card bento-card--peach"
+      >
+        <div class="bento-icon-wrapper">
+          <span class="bento-icon">✨</span>
+          <div class="bento-glow"></div>
+        </div>
+        <div class="tool-tag">Curated</div>
+        <h5 class="bento-title">Smart Picks</h5>
+        <p class="bento-desc">
+          Lessons curated for your current energy and week.
+        </p>
+        <div class="bento-arrow">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </div>
+      </a>
+
+      <a routerLink="/front/mother/notes" class="bento-card bento-card--gold">
+        <div class="bento-icon-wrapper">
+          <span class="bento-icon">✍️</span>
+          <div class="bento-glow"></div>
+        </div>
+        <div class="tool-tag">Partner</div>
+        <h5 class="bento-title">Support Notes</h5>
+        <p class="bento-desc">
+          Practical reminders for your partner's support tasks.
+        </p>
+        <div class="bento-arrow">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </div>
+      </a>
+
+      <a routerLink="/front/mother/ai" class="bento-card bento-card--sky">
+        <div class="bento-icon-wrapper">
+          <span class="bento-icon">🤖</span>
+          <div class="bento-glow"></div>
+        </div>
+        <div class="tool-tag">AI</div>
+        <h5 class="bento-title">AI Assistant</h5>
+        <p class="bento-desc">
+          Simplify content and generate unique partner tips.
+        </p>
+        <div class="bento-arrow">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </div>
+      </a>
+    </div>
+
+    <!-- ── Footer Note ── -->
+    <div class="footer-note">
+      <p>🌸 Mother Hub — designed with tenderness, built for clarity.</p>
+    </div>
+  </div>
+</section>

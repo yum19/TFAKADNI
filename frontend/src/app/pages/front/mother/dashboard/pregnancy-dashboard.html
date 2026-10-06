@@ -1,0 +1,384 @@
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║   MAMA AI — DASHBOARD FRONT-OFFICE              ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+
+<!-- ░░ BACKGROUND ░░ -->
+<div class="mama-page-bg">
+  <div class="mama-bg-img" style="background-image: url('assets/img/bg-pregnancy.jpg')"></div>
+  <div class="mama-bg-overlay"></div>
+</div>
+
+<!-- ░░ HERO ░░ -->
+<section class="mama-hero fade-in">
+  <div class="mama-hero__left">
+    <span class="mama-hero__eyebrow">✦ Week {{ currentWeek }} · Trimester {{ currentTrimester }}</span>
+    <h1 class="mama-hero__title">
+      Hello,<br>
+      <em>Mama</em> 🌸
+    </h1>
+    <p class="mama-hero__sub">
+      Your baby grows every day. Here is your gentle space to follow this extraordinary journey.
+    </p>
+    <div class="mama-hero__pills">
+      <span class="mama-pill mama-pill--rose">
+        <span class="material-symbols-outlined">favorite</span>
+        {{ pregnancyProgress }}% of the way
+      </span>
+      <span class="mama-pill mama-pill--peach">
+        <span class="material-symbols-outlined">child_care</span>
+        W{{ currentWeek }} / 40
+      </span>
+      @if(pregnancy) {
+      <span class="mama-pill mama-pill--countdown"
+            [style.background]="getCountdownBg()"
+            [style.color]="getCountdownColor()"
+            [style.border-color]="getCountdownColor() + '44'">
+        <span class="material-symbols-outlined">timer</span>
+        {{ daysLeft }}d {{ hoursLeft }}h {{ minutesLeft }}m
+      </span>
+      }
+    </div>
+  </div>
+  <div class="mama-hero__right">
+    <div class="mama-progress-ring">
+      <svg viewBox="0 0 120 120" class="mama-ring-svg">
+        <circle cx="60" cy="60" r="52" class="mama-ring-bg"/>
+        <circle cx="60" cy="60" r="52" class="mama-ring-fill"
+          [style.stroke-dasharray]="'326.7'"
+          [style.stroke-dashoffset]="326.7 - (326.7 * pregnancyProgress / 100)"/>
+      </svg>
+      <div class="mama-ring-inner">
+        <span class="material-symbols-outlined mama-ring-icon">pregnant_woman</span>
+        <span class="mama-ring-pct">{{ pregnancyProgress }}%</span>
+        <span class="mama-ring-label">pregnancy</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ STATS RIBBON ░░ -->
+<section class="mama-stats fade-in-delay-1">
+  <div class="mama-stat-card mama-stat--rose">
+    <div class="mama-stat__icon">
+      <span class="material-symbols-outlined">pregnant_woman</span>
+    </div>
+    <div class="mama-stat__body">
+      <span class="mama-stat__value">W{{ currentWeek }}</span>
+      <span class="mama-stat__label">Current week</span>
+    </div>
+    <div class="mama-stat__deco">T{{ currentTrimester }}</div>
+  </div>
+
+  <div class="mama-stat-card mama-stat--green">
+    <div class="mama-stat__icon">
+      <span class="material-symbols-outlined">favorite</span>
+    </div>
+    <div class="mama-stat__body">
+      <span class="mama-stat__value">{{ bloodPressure }}</span>
+      <span class="mama-stat__label">Blood pressure · {{ currentWeight }} kg</span>
+    </div>
+    <div class="mama-stat__deco">♥</div>
+  </div>
+
+  <div class="mama-stat-card mama-stat--sky">
+    <div class="mama-stat__icon">
+      <span class="material-symbols-outlined">notifications_active</span>
+    </div>
+    <div class="mama-stat__body">
+      <span class="mama-stat__value">{{ unreadAlerts }}</span>
+      <span class="mama-stat__label">Alerts · {{ criticalAlerts }} critical</span>
+    </div>
+    <div class="mama-stat__deco">!</div>
+  </div>
+
+  <div class="mama-stat-card mama-stat--gold">
+    <div class="mama-stat__icon">
+      <span class="material-symbols-outlined">timeline</span>
+    </div>
+    <div class="mama-stat__body">
+      <span class="mama-stat__value">{{ pregnancyProgress }}%</span>
+      <span class="mama-stat__label">Total progress</span>
+    </div>
+    <div class="mama-stat__deco">✦</div>
+  </div>
+</section>
+
+<!-- ░░ BENTO GRID ░░ -->
+<section class="mama-bento fade-in-delay-2">
+
+  <!-- CARD 1 — BABY THIS WEEK -->
+  <div class="mama-bento__card mama-bento__card--baby">
+    <div class="mama-card-tag">🌱 Baby this week</div>
+    <h2 class="mama-card-title">Week {{ currentWeek }}</h2>
+    @if(fetalInfo) {
+    <div class="mama-baby-measures">
+      <div class="mama-measure">
+        <span class="mama-measure__num">{{ fetalInfo.sizeCm }}</span>
+        <span class="mama-measure__unit">cm</span>
+        <span class="mama-measure__lbl">estimated size</span>
+      </div>
+      <div class="mama-measure-divider"></div>
+      <div class="mama-measure">
+        <span class="mama-measure__num">{{ fetalInfo.weightG }}</span>
+        <span class="mama-measure__unit">g</span>
+        <span class="mama-measure__lbl">estimated weight</span>
+      </div>
+    </div>
+    <p class="mama-baby-desc">{{ fetalInfo.description }}</p>
+    <div class="mama-baby-tips">
+      <div class="mama-tip">
+        <span class="mama-tip__dot"></span>
+        {{ fetalInfo.motherSymptoms }}
+      </div>
+      <div class="mama-tip">
+        <span class="mama-tip__dot"></span>
+        {{ fetalInfo.medicalAdvice }}
+      </div>
+    </div>
+    } @else {
+    <div class="mama-loading-state">
+      <span class="material-symbols-outlined">child_friendly</span>
+      <p>Loading fetal data…</p>
+    </div>
+    }
+  </div>
+
+<!-- CARD 2 — COUNTDOWN ACCOUCHEMENT -->
+  @if(pregnancy) {
+  <div class="mama-bento__card mama-bento__card--countdown"
+       [style.border-color]="getCountdownColor() + '30'">
+
+    <!-- Tag -->
+    <div class="mama-card-tag mama-card-tag--countdown"
+         [style.background]="getCountdownBg()"
+         [style.color]="getCountdownColor()">
+      {{ getCountdownEmoji() }} Due date countdown
+    </div>
+
+    <!-- Message -->
+    <p class="countdown-message" [style.color]="getCountdownColor()">
+      {{ getCountdownMessage() }}
+    </p>
+
+    @if(isBirthDay) {
+    <div class="countdown-birthday">
+      <span class="countdown-birthday__emoji">🎉</span>
+      <p class="countdown-birthday__text">Today is your due date!</p>
+    </div>
+    } @else {
+
+    <!-- 4 blocs temps -->
+    <div class="countdown-blocks">
+      <div class="countdown-block" [style.border-color]="getCountdownColor() + '25'">
+        <span class="countdown-block__num" [style.color]="getCountdownColor()">{{ daysLeft | number:'2.0-0' }}</span>
+        <span class="countdown-block__label">DAYS</span>
+      </div>
+      <div class="countdown-sep" [style.color]="getCountdownColor()">:</div>
+      <div class="countdown-block" [style.border-color]="getCountdownColor() + '25'">
+        <span class="countdown-block__num" [style.color]="getCountdownColor()">{{ hoursLeft | number:'2.0-0' }}</span>
+        <span class="countdown-block__label">HRS</span>
+      </div>
+      <div class="countdown-sep" [style.color]="getCountdownColor()">:</div>
+      <div class="countdown-block" [style.border-color]="getCountdownColor() + '25'">
+        <span class="countdown-block__num" [style.color]="getCountdownColor()">{{ minutesLeft | number:'2.0-0' }}</span>
+        <span class="countdown-block__label">MIN</span>
+      </div>
+      <div class="countdown-sep" [style.color]="getCountdownColor()">:</div>
+      <div class="countdown-block countdown-block--sec" [style.border-color]="getCountdownColor() + '25'">
+        <span class="countdown-block__num" [style.color]="getCountdownColor()">{{ secondsLeft | number:'2.0-0' }}</span>
+        <span class="countdown-block__label">SEC</span>
+      </div>
+    </div>
+
+    <!-- Barre progression -->
+    <div class="countdown-progress-wrap">
+      <div class="countdown-progress-track" [style.background]="getCountdownTrack()">
+        <div class="countdown-progress-fill"
+             [style.width]="countdownPct + '%'"
+             [style.background]="getCountdownColor()">
+        </div>
+      </div>
+      <div class="countdown-progress-labels">
+        <span>LMP</span>
+        <span [style.color]="getCountdownColor()">{{ countdownPct }}% elapsed</span>
+        <span>Due date</span>
+      </div>
+    </div>
+
+    <!-- Due date info -->
+    <div class="countdown-due" [style.background]="getCountdownBg()">
+      <span class="material-symbols-outlined" [style.color]="getCountdownColor()">event</span>
+      <div>
+        <p class="countdown-due__label">Expected due date</p>
+        <p class="countdown-due__value" [style.color]="getCountdownColor()">
+          {{ pregnancy.dueDate | date:'MMMM dd, yyyy' }}
+        </p>
+      </div>
+      @if(isUrgent) {
+      <span class="countdown-urgent-badge">Get ready!</span>
+      }
+    </div>
+
+    <!-- ── NOUVEAU : Signe astrologique + Saison ── -->
+    <div class="countdown-astro">
+      <div class="countdown-astro__item">
+        <span class="countdown-astro__emoji">{{ getBabyZodiac().emoji }}</span>
+        <div>
+          <p class="countdown-astro__label">Baby's sign</p>
+          <p class="countdown-astro__value">{{ getBabyZodiac().symbol }} {{ getBabyZodiac().sign }}</p>
+        </div>
+      </div>
+      <div class="countdown-astro__divider"></div>
+      <div class="countdown-astro__item">
+        <span class="countdown-astro__emoji">{{ getBabySeason().emoji }}</span>
+        <div>
+          <p class="countdown-astro__label">Season</p>
+          <p class="countdown-astro__value">{{ getBabySeason().name }} baby</p>
+        </div>
+      </div>
+      <div class="countdown-astro__divider"></div>
+      <div class="countdown-astro__item">
+        <span class="countdown-astro__emoji">📅</span>
+        <div>
+          <p class="countdown-astro__label">Born on a</p>
+          <p class="countdown-astro__value">{{ getBirthDayOfWeek() }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── NOUVEAU : Citation motivante ── -->
+    <div class="countdown-quote" [style.border-color]="getCountdownColor() + '30'">
+      <span class="countdown-quote__icon" [style.color]="getCountdownColor()">❝</span>
+      <p class="countdown-quote__text" [style.color]="getCountdownColor()">
+        {{ getMotivationalQuote() }}
+      </p>
+    </div>
+
+    <!-- ── NOUVEAU : Checklist (si < 30 jours) ── -->
+    @if(isSoon || isUrgent) {
+    <div class="countdown-checklist">
+      <p class="countdown-checklist__title" [style.color]="getCountdownColor()">
+        <span class="material-symbols-outlined">checklist</span>
+        Get ready checklist
+      </p>
+      @for(item of getChecklist(); track item.label) {
+      <div class="countdown-check-item" [class.countdown-check-item--done]="item.done">
+        <span class="material-symbols-outlined countdown-check-icon">
+          {{ item.done ? 'check_circle' : 'radio_button_unchecked' }}
+        </span>
+        <span class="countdown-check-label">{{ item.label }}</span>
+      </div>
+      }
+    </div>
+    }
+
+    }
+  </div>
+  }
+
+  <!-- CARD 3 — TRIMESTER PROGRESS -->
+  <div class="mama-bento__card mama-bento__card--progress">
+    <div class="mama-card-tag">📅 Your journey</div>
+    <h2 class="mama-card-title">{{ currentWeek }} weeks<br><small>out of 40</small></h2>
+    <div class="mama-trimester-list">
+
+      <div class="mama-trimester-item" [class.mama-trimester--done]="currentWeek >= 12">
+        <div class="mama-tri__header">
+          <span class="mama-tri__name">Trimester 1</span>
+          <span class="mama-tri__weeks">W1 – W12</span>
+          <span class="mama-tri__pct">
+            {{ currentWeek >= 12 ? 100 : Math.round((currentWeek / 12) * 100) }}%
+          </span>
+        </div>
+        <div class="mama-tri__bar">
+          <div class="mama-tri__fill"
+               [style.width]="(currentWeek >= 12 ? 100 : Math.round((currentWeek / 12) * 100)) + '%'">
+          </div>
+        </div>
+      </div>
+
+      <div class="mama-trimester-item"
+           [class.mama-trimester--done]="currentWeek >= 26"
+           [class.mama-trimester--active]="currentWeek > 12 && currentWeek < 26">
+        <div class="mama-tri__header">
+          <span class="mama-tri__name">Trimester 2 @if(currentWeek > 12 && currentWeek <= 26) { ✦ }</span>
+          <span class="mama-tri__weeks">W13 – W26</span>
+          <span class="mama-tri__pct">{{ trimester2Progress }}%</span>
+        </div>
+        <div class="mama-tri__bar">
+          <div class="mama-tri__fill" [style.width]="trimester2Progress + '%'"></div>
+        </div>
+      </div>
+
+      <div class="mama-trimester-item"
+           [class.mama-trimester--done]="currentWeek >= 40"
+           [class.mama-trimester--active]="currentWeek > 26 && currentWeek < 40">
+        <div class="mama-tri__header">
+          <span class="mama-tri__name">Trimester 3 @if(currentWeek > 26) { ✦ }</span>
+          <span class="mama-tri__weeks">W27 – W40</span>
+          <span class="mama-tri__pct">
+            {{ currentWeek > 26 ? Math.round(((currentWeek - 26) / 14) * 100) : 0 }}%
+          </span>
+        </div>
+        <div class="mama-tri__bar">
+          <div class="mama-tri__fill"
+               [style.width]="(currentWeek > 26 ? Math.round(((currentWeek - 26) / 14) * 100) : 0) + '%'">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CARD 4 — MILESTONES TIMELINE -->
+  <div class="mama-bento__card mama-bento__card--milestones">
+    <div class="mama-card-tag">🏆 Key milestones</div>
+    <div class="mama-timeline">
+      @for(milestone of milestones; track milestone.week) {
+      <div class="mama-timeline__item" [class.mama-timeline__item--done]="milestone.reached">
+        <div class="mama-timeline__dot">
+          <span class="material-symbols-outlined">
+            {{ milestone.reached ? 'check_circle' : 'radio_button_unchecked' }}
+          </span>
+        </div>
+        <div class="mama-timeline__content">
+          <span class="mama-timeline__week">W{{ milestone.week }}</span>
+          <span class="mama-timeline__title">{{ milestone.title }}</span>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- CARD 5 — PRENATAL EXAMS -->
+  <div class="mama-bento__card mama-bento__card--exams">
+    <div class="mama-card-tag">🩺 My prenatal exams</div>
+    <div class="mama-exams-search">
+      <span class="material-symbols-outlined">search</span>
+      <input placeholder="Search for an exam…" (keyup)="applyFilter($event)" class="mama-search-input"/>
+    </div>
+    <div class="mama-exams-list">
+      @for(exam of dataSource.filteredData || []; track exam.examName) {
+      <div class="mama-exam-row" [class.mama-exam-row--done]="exam.done">
+        <div class="mama-exam__status">
+          <span class="material-symbols-outlined">
+            {{ exam.done ? 'check_circle' : 'schedule' }}
+          </span>
+        </div>
+        <div class="mama-exam__info">
+          <span class="mama-exam__name">{{ exam.examName }}</span>
+          <span class="mama-exam__type">{{ exam.examType }}</span>
+        </div>
+        <div class="mama-exam__week">
+          <span class="mama-week-badge">W{{ exam.recommendedWeek }}</span>
+        </div>
+        <div class="mama-exam__tag" [class.mama-exam__tag--done]="exam.done">
+          {{ exam.done ? 'Done ✓' : 'Upcoming' }}
+        </div>
+      </div>
+      }
+    </div>
+    <mat-paginator [pageSizeOptions]="[5, 10]" class="mama-paginator"></mat-paginator>
+  </div>
+
+</section>

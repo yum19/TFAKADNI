@@ -1,0 +1,141 @@
+<!-- partner-hub.component.html -->
+<section class="partner-hub">
+  <div class="studio-wrap">
+    <!-- Hero -->
+    <div class="hero-studio">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <span class="studio-chip">
+          Partner Command
+          <span class="hub-dot"></span>
+        </span>
+        <h1 class="studio-title">
+          Welcome,
+          <span class="title-accent"
+            >{{ session.user?.firstName || "Back" }}.</span
+          >
+        </h1>
+        <p class="studio-lead">
+          Support starts with clarity. Stay informed, read practical guides, and
+          communicate in a calm, intentional way.
+        </p>
+        <div class="hero-actions">
+          <a routerLink="/partner/invites" class="studio-btn primary-btn">
+            Invite Center
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+          <a routerLink="/partner/guides" class="studio-btn ghost-btn">
+            Browse Guides
+          </a>
+        </div>
+      </div>
+      <div class="hero-visual"></div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div
+        class="stat-widget glass-card"
+        *ngFor="
+          let stat of [
+            { lbl: 'Invitations', val: invites, icon: 'mail_outline' },
+            { lbl: 'Unread Alerts', val: unread, icon: 'notifications_none' },
+            { lbl: 'Resource Guides', val: guides, icon: 'menu_book' },
+            {
+              lbl: 'System Role',
+              val: session.user?.role || 'Partner',
+              icon: 'badge',
+            },
+          ]
+        "
+      >
+        <mat-icon class="stat-icon">{{ stat.icon }}</mat-icon>
+        <div class="stat-val">{{ stat.val }}</div>
+        <div class="stat-lbl">{{ stat.lbl }}</div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+      <!-- Left: Strategic Habits -->
+      <div class="habits-col">
+        <div class="col-header">
+          <span class="section-label">Strategic Habits</span>
+          <h3 class="col-title">Build your practice.</h3>
+        </div>
+        <div class="habit-feed">
+          <div
+            class="glass-card habit-slab"
+            *ngFor="let item of partnerPromises; index as i"
+          >
+            <div class="habit-index">0{{ i + 1 }}</div>
+            <p>{{ item }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Support Toolkit -->
+      <div class="toolkit-col">
+        <div class="col-header">
+          <span class="section-label">Support Toolkit</span>
+          <h3 class="col-title">Your tools.</h3>
+          <span class="pro-badge">Pro Tools</span>
+        </div>
+
+        <div class="bento-grid">
+          <!-- Guides Card -->
+          <a routerLink="/front/partner/guides" class="glass-card bento-card">
+            <div class="bento-icon">
+              <mat-icon>menu_book</mat-icon>
+            </div>
+            <h5>Guides</h5>
+            <p>
+              Practical content written for real clinical and support moments.
+            </p>
+            <div class="bento-arrow">
+              <mat-icon>arrow_forward</mat-icon>
+            </div>
+          </a>
+
+          <!-- Notes Card -->
+          <a routerLink="/front/partner/notes" class="glass-card bento-card">
+            <div class="bento-icon">
+              <mat-icon>edit_note</mat-icon>
+            </div>
+            <h5>Notes</h5>
+            <p>
+              Send practical reminders and respond with clear, useful actions.
+            </p>
+            <div class="bento-arrow">
+              <mat-icon>arrow_forward</mat-icon>
+            </div>
+          </a>
+
+          <!-- AI Featured Card -->
+          <a
+            routerLink="/front/partner/ai"
+            class="glass-card bento-card bento-ai"
+          >
+            <div class="ai-glow"></div>
+            <div class="ai-inner">
+              <div class="bento-icon ai-icon">
+                <mat-icon>psychology</mat-icon>
+              </div>
+              <div class="ai-text">
+                <h5>AI Intelligence Lab</h5>
+                <p>
+                  Summarize long guidance and turn clinical text into supportive
+                  behavior strategies instantly.
+                </p>
+              </div>
+              <div class="ai-launch">
+                <span>Launch Lab</span>
+                <mat-icon>rocket_launch</mat-icon>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

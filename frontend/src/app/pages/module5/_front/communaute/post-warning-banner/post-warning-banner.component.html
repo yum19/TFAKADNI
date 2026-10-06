@@ -1,0 +1,26 @@
+<!-- Shown only under the AUTHOR's own post, directly below the post header -->
+<div
+  *ngIf="visible"
+  class="pwb-wrap"
+  [class.pwb-high]="analysis?.severity === 'HIGH'"
+  [class.pwb-medium]="analysis?.severity === 'MEDIUM'"
+  [class.pwb-low]="analysis?.severity === 'LOW'">
+
+  <span class="pwb-icon">
+    <ng-container *ngIf="analysis?.severity === 'HIGH'">🚨</ng-container>
+    <ng-container *ngIf="analysis?.severity === 'MEDIUM'">💙</ng-container>
+    <ng-container *ngIf="analysis?.severity === 'LOW'">ℹ️</ng-container>
+  </span>
+
+  <div class="pwb-body">
+    <div class="pwb-title">
+      <ng-container *ngIf="analysis?.severity === 'HIGH'">Medical alert</ng-container>
+      <ng-container *ngIf="analysis?.severity === 'MEDIUM'">Support available</ng-container>
+      <ng-container *ngIf="analysis?.severity === 'LOW'">Heads up</ng-container>
+    </div>
+    <p class="pwb-message">{{ analysis?.warningMessage }}</p>
+    <button class="pwb-dismiss" (click)="dismiss()" type="button">
+      I understand, dismiss
+    </button>
+  </div>
+</div>

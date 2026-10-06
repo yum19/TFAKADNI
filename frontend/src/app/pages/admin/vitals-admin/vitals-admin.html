@@ -1,0 +1,270 @@
+<!-- ░░ HERO ░░ -->
+<div>
+  <div class="container">
+    <div class="row gx-3 align-items-center py-4">
+      <div class="col">
+        <span class="hero-eyebrow">💓 Health Monitoring</span>
+        <h1 class="hero-title">Vitals Admin</h1>
+        <p class="hero-sub">
+          All recorded vital measurements across the platform
+        </p>
+      </div>
+      <div class="col-auto d-flex gap-2 align-items-center">
+        <button mat-raised-button (click)="loadAll()" class="btn-refresh">
+          <mat-icon class="me-1">refresh</mat-icon>
+          Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container fade-in">
+  @if(loading) {
+  <mat-progress-bar
+    mode="indeterminate"
+    class="mb-4"
+    style="border-radius: 4px"
+  ></mat-progress-bar>
+  }
+
+  <!-- ░░ KPI CARDS ░░ -->
+  <div class="row gx-3 gx-lg-4 mb-4">
+    <div class="col-12 col-sm-4">
+      <mat-card class="stat-card stat-card--sky mb-3">
+        <mat-card-content>
+          <div class="stat-content">
+            <div
+              class="stat-icon"
+              style="background: rgba(58, 143, 181, 0.12); color: #3a8fb5"
+            >
+              <span class="material-symbols-outlined">monitor_heart</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ totalVitals }}</h1>
+              <p class="stat-label mb-0">Total measurements</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="col-12 col-sm-4">
+      <mat-card
+        class="stat-card stat-card--rose mb-3"
+        style="animation-delay: 0.1s"
+      >
+        <mat-card-content>
+          <div class="stat-content">
+            <div
+              class="stat-icon"
+              style="background: rgba(201, 77, 106, 0.12); color: #c94d6a"
+            >
+              <span class="material-symbols-outlined">favorite</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ totalHypertension }}</h1>
+              <p class="stat-label mb-0">Hypertension detected</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="col-12 col-sm-4">
+      <mat-card
+        class="stat-card stat-card--peach mb-3"
+        style="animation-delay: 0.2s"
+      >
+        <mat-card-content>
+          <div class="stat-content">
+            <div
+              class="stat-icon"
+              style="background: rgba(217, 123, 88, 0.12); color: #d97b58"
+            >
+              <span class="material-symbols-outlined">thermostat</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ totalFever }}</h1>
+              <p class="stat-label mb-0">Fever detected</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- ░░ TABLE ░░ -->
+  <mat-card class="mb-4">
+    <mat-card-header>
+      <div class="w-100 mb-3">
+        <div class="row gx-3 align-items-center">
+          <div class="col-auto">
+            <div
+              class="stat-icon"
+              style="
+                background: rgba(58, 143, 181, 0.1);
+                color: #3a8fb5;
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                animation: none;
+              "
+            >
+              <span class="material-symbols-outlined" style="font-size: 1.2rem"
+                >monitor_heart</span
+              >
+            </div>
+          </div>
+          <div class="col">
+            <span class="table-tag">💓 Records</span>
+            <h3 class="table-title mb-0">All Measurements</h3>
+          </div>
+          <div class="col-12 col-md-4 col-lg-3 mt-2 mt-md-0">
+            <mat-form-field appearance="outline" class="w-100 mb-0">
+              <mat-label>Search</mat-label>
+              <input
+                matInput
+                (keyup)="applyFilter($event)"
+                placeholder="Patient, date..."
+              />
+              <mat-icon matSuffix style="color: #3a8fb5; font-size: 1.1rem"
+                >search</mat-icon
+              >
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        matSort
+        class="w-100 bg-none mb-3"
+      >
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let v" class="py-2">
+            <span class="id-badge">#{{ v.id }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef>Patient</th>
+          <td mat-cell *matCellDef="let v" class="py-2">
+            <div class="d-flex align-items-center gap-2">
+              <div class="patient-avatar">
+                <span class="material-symbols-outlined">person</span>
+              </div>
+              <span class="patient-name"
+                >{{ v.user?.firstName + ' ' + v.user?.lastName || 'User #' +
+                v.user?.id }}</span
+              >
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="measuredAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <td mat-cell *matCellDef="let v" class="py-2">
+            <span
+              style="
+                font-family: var(--font-body);
+                font-size: 0.83rem;
+                color: var(--text-mid);
+              "
+            >
+              {{ v.measuredAt | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="systolicBp">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Blood Pressure
+          </th>
+          <td mat-cell *matCellDef="let v" class="py-2">
+            <span
+              [class]="'tension-badge tension-' + getTensionStatus(v.systolicBp, v.diastolicBp)"
+            >
+              {{ v.systolicBp }}/{{ v.diastolicBp }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="weightKg">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Weight</th>
+          <td mat-cell *matCellDef="let v" class="py-2">
+            <span
+              style="
+                font-family: var(--font-body);
+                font-size: 0.83rem;
+                color: var(--text-dark);
+                font-weight: 500;
+              "
+            >
+              {{ v.weightKg }} kg
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="heartRate">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Heart Rate</th>
+          <td mat-cell *matCellDef="let v" class="py-2">
+            <span
+              style="
+                font-family: var(--font-body);
+                font-size: 0.83rem;
+                color: var(--text-dark);
+              "
+            >
+              {{ v.heartRate }} bpm
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="temperatureC">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Temp.</th>
+          <td mat-cell *matCellDef="let v" class="py-2">
+            @if(v.temperatureC && v.temperatureC > 38) {
+            <span class="fievre-badge">{{ v.temperatureC }}°C 🔥</span>
+            } @else {
+            <span
+              style="
+                font-family: var(--font-body);
+                font-size: 0.83rem;
+                color: var(--text-mid);
+              "
+            >
+              {{ v.temperatureC || '--' }} °C
+            </span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="oxygenPct">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>O₂</th>
+          <td mat-cell *matCellDef="let v" class="py-2">
+            <span
+              style="font-family: var(--font-body); font-size: 0.83rem"
+              [style.color]="v.oxygenPct && v.oxygenPct < 95 ? '#c94d6a' : 'var(--text-dark)'"
+              [style.fontWeight]="v.oxygenPct && v.oxygenPct < 95 ? '700' : '400'"
+            >
+              {{ v.oxygenPct || '--' }} %
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <mat-paginator
+        [pageSizeOptions]="[5, 10, 25]"
+        class="bg-none"
+      ></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

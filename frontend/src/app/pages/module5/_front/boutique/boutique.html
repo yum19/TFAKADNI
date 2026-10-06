@@ -1,0 +1,354 @@
+
+<div class="bq-wrap">
+
+  <!-- HERO -->
+  <section class="bq-hero">
+    <div class="bq-hero-bg" aria-hidden="true">
+      <div class="bq-blob bq-b1"></div>
+      <div class="bq-blob bq-b2"></div>
+      <div class="bq-blob bq-b3"></div>
+      <div class="bq-hero-lines"></div>
+    </div>
+    <div class="bq-petals" aria-hidden="true">
+      <span class="bq-petal p1">✿</span><span class="bq-petal p2">✾</span>
+      <span class="bq-petal p3">✿</span><span class="bq-petal p4">❀</span>
+    </div>
+
+    <div class="bq-hero-body">
+      <div class="bq-hero-eyebrow">
+        <span class="bq-eyebrow-line"></span>
+        <span>Spring Collection 2025</span>
+        <span class="bq-eyebrow-line"></span>
+      </div>
+      <h1 class="bq-hero-title">Beauty that<br><em>reflects you</em></h1>
+      <p class="bq-hero-sub">
+        A refined selection of natural care products, designed to enhance every woman's daily life.
+      </p>
+      <div class="bq-hero-stats">
+        <div class="bq-stat">
+          <span class="bq-stat-num">{{ totalProduits }}</span>
+          <span class="bq-stat-lbl">Products</span>
+        </div>
+        <div class="bq-stat-dot">·</div>
+        <div class="bq-stat">
+          <span class="bq-stat-num">{{ enStock }}</span>
+          <span class="bq-stat-lbl">In stock</span>
+        </div>
+        <div class="bq-stat-dot">·</div>
+        <div class="bq-stat">
+          <span class="bq-stat-num">100%</span>
+          <span class="bq-stat-lbl">Natural</span>
+        </div>
+      </div>
+      <button class="bq-hero-cta" (click)="selectCat(null)" type="button">
+        View full collection
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="bq-hero-visual" aria-hidden="true">
+      <div class="bq-hero-ring bq-ring1"></div>
+      <div class="bq-hero-ring bq-ring2"></div>
+      <div class="bq-hero-orb">
+        <svg viewBox="0 0 80 80" fill="none">
+          <path d="M40 8 C24 8,8 24,8 40 C8 56,24 72,40 72 C56 72,72 56,72 40 C72 24,56 8,40 8Z" fill="rgba(255,255,255,.15)"/>
+          <text x="50%" y="57%" dominant-baseline="middle" text-anchor="middle" font-size="32" fill="rgba(255,255,255,.9)">✿</text>
+        </svg>
+      </div>
+      <div class="bq-hero-float bq-float1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="rgba(255,79,117,.3)"/>
+        </svg>
+        <span>Certified natural</span>
+      </div>
+      <div class="bq-hero-float bq-float2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="rgba(255,79,117,.3)"/>
+        </svg>
+        <span>4.9 ★ reviews</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST BAR -->
+  <div class="bq-trust">
+    <div class="bq-trust-inner">
+      <div class="bq-trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
+        <div><strong>48h Delivery</strong><span>Express shipping</span></div>
+      </div>
+      <div class="bq-trust-sep"></div>
+      <div class="bq-trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <div><strong>Secure payment</strong><span>SSL 256-bit</span></div>
+      </div>
+      <div class="bq-trust-sep"></div>
+      <div class="bq-trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        <div><strong>30-day returns</strong><span>No questions asked</span></div>
+      </div>
+      <div class="bq-trust-sep"></div>
+      <div class="bq-trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.29 6.29l.38-.77a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+        <div><strong>7/7 Support</strong><span>Always available</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN SHOP -->
+  <main class="bq-main">
+    <div class="bq-section-head">
+      <div class="bq-section-label">Our selection</div>
+      <h2 class="bq-section-title">{{ hasActiveFilter ? 'Search results' : 'All products' }}</h2>
+    </div>
+
+    <!-- Controls -->
+    <div class="bq-controls">
+      <label class="bq-search" [class.active]="searchQuery">
+        <svg class="bq-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search" placeholder="Search for a product…"
+          [(ngModel)]="searchQuery" (input)="applyFilter()" aria-label="Search" />
+        <button *ngIf="searchQuery" class="bq-search-clear" (click)="searchQuery=''; applyFilter()" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </label>
+
+      <div class="bq-sort">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/>
+        </svg>
+        <select [(ngModel)]="sortMode" (change)="onSort(sortMode)" aria-label="Sort">
+          <option value="default">Default</option>
+          <option value="prix-asc">Price: low to high</option>
+          <option value="prix-desc">Price: high to low</option>
+          <option value="nom">Name A–Z</option>
+        </select>
+      </div>
+
+      <div class="bq-view-toggle" role="group">
+        <button class="bq-view-btn" [class.active]="viewMode==='grid'" (click)="viewMode='grid'" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+        <button class="bq-view-btn" [class.active]="viewMode==='list'" (click)="viewMode='list'" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="bq-count" aria-live="polite">
+        <strong>{{ filteredProduits.length }}</strong>&nbsp;product(s)
+        <button *ngIf="hasActiveFilter" class="bq-clear" (click)="clearFilters()" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <nav *ngIf="categories.length" class="bq-cats" aria-label="Categories">
+      <button class="bq-cat" [class.active]="selectedCat === null" (click)="selectCat(null)" type="button">All</button>
+      <button *ngFor="let cat of categories" class="bq-cat"
+        [class.active]="selectedCat === cat.id" (click)="selectCat(cat.id!)" type="button">
+        {{ cat.nom }}
+      </button>
+    </nav>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="bq-loading" role="status">
+      <span class="bq-spinner"></span>
+      <p>Loading…</p>
+    </div>
+
+    <!-- Empty -->
+    <div *ngIf="!loading && filteredProduits.length === 0" class="bq-empty">
+      <div class="bq-empty-icon">✿</div>
+      <h3>No products found</h3>
+      <p>{{ hasActiveFilter ? 'Try different criteria.' : 'Our shop is getting ready…' }}</p>
+      <button *ngIf="hasActiveFilter" class="bq-empty-btn" (click)="clearFilters()" type="button">
+        Show all
+      </button>
+    </div>
+
+    <!-- GRID VIEW -->
+    <section *ngIf="!loading && filteredProduits.length > 0 && viewMode === 'grid'"
+      class="bq-grid" aria-label="Product catalog">
+
+      <article *ngFor="let p of filteredProduits; let i = index"
+        class="bq-card" [style.--i]="i"
+        [class.in-cart]="isInCart(p)"
+        (click)="voirProduit(p)" tabindex="0" (keydown.enter)="voirProduit(p)"
+        [attr.aria-label]="'View ' + p.nom">
+
+        <div class="bq-card-media">
+          <img *ngIf="p.images?.length" [src]="p.images![0]" [alt]="p.nom" loading="lazy" />
+          <div *ngIf="!p.images?.length" class="bq-card-no-img" aria-hidden="true">✿</div>
+          <div class="bq-card-gradient" aria-hidden="true"></div>
+          <div *ngIf="isLowStock(p)" class="bq-ribbon">Last items</div>
+          <button class="bq-wish" [class.active]="wishlist.has(p.id!)"
+            (click)="toggleWishlist($event, p.id!)" type="button"
+            [attr.aria-label]="wishlist.has(p.id!) ? 'Remove from wishlist' : 'Add to wishlist'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                [attr.fill]="wishlist.has(p.id!) ? '#ff4f75' : 'none'"/>
+            </svg>
+          </button>
+          <div class="bq-card-hover" aria-hidden="true">
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              View product
+            </span>
+          </div>
+        </div>
+
+        <div class="bq-card-body">
+          <div class="bq-card-meta">
+            <span class="bq-card-cat" *ngIf="p.categorie">{{ p.categorie.nom }}</span>
+            <div class="bq-mini-stars">★★★★<span>★</span></div>
+          </div>
+          <h3 class="bq-card-name">{{ p.nom }}</h3>
+          <p class="bq-card-desc">{{ p.description | slice:0:75 }}{{ descLen(p) > 75 ? '…' : '' }}</p>
+
+          <div class="bq-card-foot">
+            <div class="bq-card-price">
+              <span class="bq-price-int">{{ p.prix | number:'1.2-2' }}</span>
+              <span class="bq-price-cur">TND</span>
+            </div>
+
+            <button *ngIf="alreadyFeedback.has(p.id!)"
+              class="bq-add-btn bq-already"
+              (click)="cartSvc.open()"
+              type="button"
+              aria-label="View cart">
+              <span class="bq-add-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+              </span>
+            </button>
+
+            <button *ngIf="!alreadyFeedback.has(p.id!)"
+              class="bq-add-btn"
+              [class.added]="cartFeedback.has(p.id!)"
+              [class.burst]="cartBurst.has(p.id!)"
+              (click)="addToCart($event, p)" type="button"
+              [attr.aria-label]="cartFeedback.has(p.id!) ? 'Added' : 'Add to cart'">
+              <span class="bq-burst" aria-hidden="true">
+                <span class="bq-particle"></span><span class="bq-particle"></span>
+                <span class="bq-particle"></span><span class="bq-particle"></span>
+                <span class="bq-particle"></span><span class="bq-particle"></span>
+              </span>
+              <span class="bq-add-icon">
+                <svg *ngIf="!cartFeedback.has(p.id!)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <svg *ngIf="cartFeedback.has(p.id!)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </span>
+            </button>
+          </div>
+
+          <div *ngIf="alreadyFeedback.has(p.id!)" class="bq-already-msg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            Already in your cart
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- LIST VIEW -->
+    <section *ngIf="!loading && filteredProduits.length > 0 && viewMode === 'list'"
+      class="bq-list" aria-label="Product catalog">
+
+      <article *ngFor="let p of filteredProduits; let i = index"
+        class="bq-lcard" [style.--i]="i"
+        (click)="voirProduit(p)" tabindex="0" (keydown.enter)="voirProduit(p)">
+
+        <div class="bq-lcard-img">
+          <img *ngIf="p.images?.length" [src]="p.images![0]" [alt]="p.nom" loading="lazy" />
+          <div *ngIf="!p.images?.length" class="bq-lcard-no-img" aria-hidden="true">✿</div>
+          <div *ngIf="isLowStock(p)" class="bq-ribbon bq-ribbon-sm">Last items</div>
+        </div>
+
+        <div class="bq-lcard-body">
+          <div class="bq-lcard-meta">
+            <span class="bq-card-cat" *ngIf="p.categorie">{{ p.categorie.nom }}</span>
+            <div class="bq-mini-stars">★★★★<span>★</span></div>
+          </div>
+          <h3 class="bq-lcard-name">{{ p.nom }}</h3>
+          <p class="bq-lcard-desc">{{ p.description | slice:0:200 }}{{ descLen(p) > 200 ? '…' : '' }}</p>
+        </div>
+
+        <div class="bq-lcard-right">
+          <div class="bq-card-price bq-lcard-price">
+            <span class="bq-price-int">{{ p.prix | number:'1.2-2' }}</span>
+            <span class="bq-price-cur">TND</span>
+          </div>
+
+          <div *ngIf="alreadyFeedback.has(p.id!)" class="bq-lcard-already" (click)="cartSvc.open(); $event.stopPropagation()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            Already in cart — View
+          </div>
+
+          <button *ngIf="!alreadyFeedback.has(p.id!)"
+            class="bq-lcard-cart" [class.added]="cartFeedback.has(p.id!)"
+            (click)="addToCart($event, p)" type="button">
+            <svg *ngIf="!cartFeedback.has(p.id!)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <svg *ngIf="cartFeedback.has(p.id!)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            {{ cartFeedback.has(p.id!) ? 'Added!' : 'Add to cart' }}
+          </button>
+          <button class="bq-lcard-detail" (click)="voirProduit(p)" type="button">
+            View product
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  
+
+</div>
+

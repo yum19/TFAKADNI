@@ -1,0 +1,238 @@
+<section class="milestone-page">
+  <div class="milestone-shell">
+    <header class="topbar">
+     
+
+    </header>
+
+    <section class="hero-card">
+      <div class="hero-copy">
+        <p class="eyebrow">Tender memories · Baby milestones</p>
+        <h1>Little moments, <span>beautifully remembered</span></h1>
+        <p class="hero-text">
+          A warm, vivid and poetic gallery where every memory lives with love.
+        </p>
+      </div>
+
+      <div class="hero-side">
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-number">{{ totalCount }}</span>
+            <span class="stat-label">Memories</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">{{ recentCount }}</span>
+            <span class="stat-label">Recent</span>
+          </div>
+        </div>
+
+        <button type="button" class="add-memory-btn" (click)="openAddModal()">
+          <span class="plus">+</span>
+          Add memory
+        </button>
+      </div>
+    </section>
+
+    <div class="messages">
+      <div class="status error" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="status success" *ngIf="successMessage">{{ successMessage }}</div>
+    </div>
+
+    <section class="filters-card">
+      <div class="filters-row">
+        <button type="button" class="filter-chip" [ngClass]="{ active: activeFilter === 'ALL' }" (click)="applyFilter('ALL')">
+          All <span>{{ totalCount }}</span>
+        </button>
+        <button type="button" class="filter-chip" [ngClass]="{ active: activeFilter === 'PHOTO' }" (click)="applyFilter('PHOTO')">
+          Photo <span>{{ photoCount }}</span>
+        </button>
+        <button type="button" class="filter-chip" [ngClass]="{ active: activeFilter === 'VIDEO' }" (click)="applyFilter('VIDEO')">
+          Video <span>{{ videoCount }}</span>
+        </button>
+        <button type="button" class="filter-chip" [ngClass]="{ active: activeFilter === 'AUDIO' }" (click)="applyFilter('AUDIO')">
+          Audio <span>{{ audioCount }}</span>
+        </button>
+
+        <label class="filters-search" aria-label="Search milestones">
+          <input
+            type="text"
+            class="search-input"
+            [value]="searchTerm"
+            (input)="onSearchChange($any($event.target).value)"
+            placeholder="Search title, category, date..." />
+        </label>
+      </div>
+    </section>
+
+    <section class="gallery-section">
+      <div *ngIf="loading" class="empty-state">
+        <h3>Loading memories...</h3>
+      </div>
+
+      <div *ngIf="!loading && filteredMilestones.length === 0" class="empty-state">
+        <h3>No memories yet in this filter</h3>
+        <button type="button" class="empty-add-btn" (click)="openAddModal()">Add first memory</button>
+      </div>
+
+      <div class="masonry-grid" *ngIf="!loading && filteredMilestones.length > 0">
+        <article class="memory-card" *ngFor="let milestone of paginatedMilestones; trackBy: trackByMilestoneId">
+          <div class="memory-media">
+            <img *ngIf="isPhoto(milestone)" [src]="milestone.mediaUrl" [alt]="milestone.title" class="memory-image clickable" (click)="openMediaViewer(milestone)" />
+            <video *ngIf="isVideo(milestone)" [src]="milestone.mediaUrl" controls preload="metadata" class="memory-video"></video>
+
+          <div *ngIf="isAudio(milestone)" class="audio-placeholder">
+  <div class="audio-waves">
+    <span></span><span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <audio *ngIf="milestone.mediaUrl" [src]="milestone.mediaUrl" controls style="width:100%"></audio>
+
+  <div class="audio-text">Audio memory</div>
+</div>
+
+            <div *ngIf="!isPhoto(milestone) && !isVideo(milestone) && !isAudio(milestone)" class="no-media">
+              <div class="no-media-icon">♡</div>
+              <div class="no-media-text">Sweet memory</div>
+            </div>
+          </div>
+
+          <div class="memory-body">
+            <div class="memory-meta">
+              <span class="category-badge" [ngClass]="'cat-' + (milestone.category || 'OTHER').toLowerCase()">
+                {{ formatCategory(milestone.category) }}
+              </span>
+              <span class="memory-date">{{ milestone.milestoneDate | date:'dd MMM yyyy' }}</span>
+            </div>
+
+            <h2 class="memory-title">{{ milestone.title }}</h2>
+            <p class="memory-description" *ngIf="milestone.description">{{ milestone.description }}</p>
+
+            <div class="memory-footer">
+              <div class="memory-tags">
+                <span class="type-pill">{{ getMediaLabel(milestone.mediaType) }}</span>
+                <span class="recent-pill" *ngIf="milestone.recent">New</span>
+              </div>
+
+              <div class="card-actions">
+                <button type="button" class="update-btn" (click)="openEditModal(milestone)">Update</button>
+                <button type="button" class="delete-btn" (click)="deleteMilestone(milestone.id)">Remove</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="pagination-bar" *ngIf="!loading && filteredMilestones.length > pageSize">
+        <button type="button" class="pagination-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+          Prev
+        </button>
+
+        <div class="pagination-pages">
+          <button
+            type="button"
+            class="pagination-page"
+            *ngFor="let page of pageNumbers"
+            [class.active]="currentPage === page"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </div>
+
+        <button type="button" class="pagination-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          Next
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()"></div>
+
+  <div class="media-viewer-backdrop" *ngIf="showMediaViewer" (click)="closeMediaViewer()">
+    <div class="media-viewer-dialog" (click)="$event.stopPropagation()">
+      <button type="button" class="media-viewer-close" (click)="closeMediaViewer()">×</button>
+      <img [src]="selectedMediaUrl" [alt]="selectedMediaTitle" class="media-viewer-image" />
+      <p class="media-viewer-title">{{ selectedMediaTitle }}</p>
+    </div>
+  </div>
+
+  <section class="add-modal" *ngIf="showModal">
+    <div class="modal-header">
+      <div>
+        <p class="modal-eyebrow">{{ isEditMode ? 'Update milestone' : 'New milestone' }}</p>
+        <h2>{{ isEditMode ? 'Edit this lovely memory' : 'Add a lovely memory' }}</h2>
+      </div>
+      <button type="button" class="close-btn" (click)="closeModal()">×</button>
+    </div>
+
+    <form [formGroup]="milestoneForm" (ngSubmit)="onSubmit()" class="modal-form">
+      <div class="form-grid">
+        <label class="field">
+          <span>Title</span>
+          <input type="text" formControlName="title" placeholder="First smile, first steps..." />
+        </label>
+
+        <label class="field">
+          <span>Category</span>
+          <select formControlName="category">
+            <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Date</span>
+          <input type="date" formControlName="milestoneDate" />
+        </label>
+
+        <label class="field">
+          <span>Media type</span>
+          <select formControlName="mediaType">
+            <option *ngFor="let mediaType of mediaTypes" [value]="mediaType">{{ mediaType }}</option>
+          </select>
+        </label>
+
+        <div class="field full">
+          <span>Upload file</span>
+
+          <label class="upload-box">
+            <input type="file" (change)="onFileSelected($event)" accept="image/*,video/*,audio/*" hidden />
+            <div class="upload-inner">
+              <div class="upload-icon">⬆</div>
+              <div class="upload-title">Click to choose a file</div>
+              <div class="upload-subtitle">
+                Image, video or audio — the file URL will be generated automatically
+              </div>
+            </div>
+          </label>
+
+          <div class="selected-file" *ngIf="selectedFileName">
+            <span>{{ selectedFileName }}</span>
+            <button type="button" class="remove-file-btn" (click)="removeSelectedFile()">Remove file</button>
+          </div>
+        </div>
+
+        <div class="field full" *ngIf="previewUrl">
+          <span>Preview</span>
+
+          <div class="preview-box">
+            <img *ngIf="isPreviewPhoto()" [src]="previewUrl" alt="Preview" class="preview-image" />
+            <video *ngIf="isPreviewVideo()" [src]="previewUrl" controls class="preview-video"></video>
+            <audio *ngIf="isPreviewAudio()" [src]="previewUrl" controls class="preview-audio"></audio>
+          </div>
+        </div>
+
+        <label class="field full">
+          <span>Description</span>
+          <textarea rows="4" formControlName="description" placeholder="Write this memory with warmth and love..."></textarea>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-btn" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="primary-btn" [disabled]="submitting">
+          {{ submitting ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Update milestone' : 'Save memory') }}
+        </button>
+      </div>
+    </form>
+  </section>
+</section>

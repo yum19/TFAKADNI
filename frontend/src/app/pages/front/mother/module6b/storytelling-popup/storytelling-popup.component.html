@@ -1,0 +1,182 @@
+<div class="story-overlay" *ngIf="visible" (click)="close()">
+  <div class="story-modal" (click)="stopPropagation($event)">
+    <div class="story-orb orb-left"></div>
+    <div class="story-orb orb-right"></div>
+
+    <header class="story-header">
+      <div class="story-header-text">
+        <p class="story-eyebrow">Postpartum emotional storytelling</p>
+        <h2 class="story-title">Your healing stories</h2>
+        <p class="story-subtitle">
+          Explore your emotional reflections, listen to your audio stories, and keep a comforting record of your postpartum journey.
+        </p>
+      </div>
+
+      <button type="button" class="story-close-btn" (click)="close()" aria-label="Close popup">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <section class="story-layout">
+      <aside class="story-sidebar glass-card">
+        <div class="sidebar-head">
+          <h3>Create a story</h3>
+          <button type="button" class="ghost-pill" (click)="loadStoryHistory()">Refresh</button>
+        </div>
+
+        <div class="form-group">
+          <label for="periodType">Period</label>
+          <select id="periodType" [(ngModel)]="form.periodType">
+            <option *ngFor="let option of periodOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tone">Tone</label>
+          <select id="tone" [(ngModel)]="form.tone">
+            <option *ngFor="let option of toneOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="voiceType">Voice</label>
+          <select id="voiceType" [(ngModel)]="form.voiceType">
+            <option *ngFor="let option of voiceOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+        </div>
+
+        <button type="button" class="primary-pill full-width" (click)="generateStory()" [disabled]="loading">
+          <span *ngIf="!loading">Generate new story</span>
+          <span *ngIf="loading">Generating...</span>
+        </button>
+
+        <div class="history-block">
+          <div class="history-head">
+            <h3>History</h3>
+            <span class="history-count">{{ storyHistory.length }}</span>
+          </div>
+
+          <div *ngIf="historyLoading" class="history-state">Loading history...</div>
+
+          <div class="history-list" *ngIf="!historyLoading && storyHistory.length > 0; else noStoryHistory">
+            <button
+              type="button"
+              class="history-item"
+              *ngFor="let story of storyHistory; trackBy: trackByStoryId"
+              (click)="selectStory(story.id)"
+              [class.active]="generatedStory?.id === story.id"
+            >
+              <div class="history-item-main">
+                <strong>{{ story.title }}</strong>
+                <span>{{ story.periodType }} • {{ story.tone }}</span>
+              </div>
+
+              <div class="history-item-side">
+                <span class="audio-badge" [class.ready]="story.audioGenerated">
+                  {{ story.audioGenerated ? 'Audio ready' : 'No audio' }}
+                </span>
+              </div>
+            </button>
+          </div>
+
+          <ng-template #noStoryHistory>
+            <div class="history-state">No stories yet.</div>
+          </ng-template>
+        </div>
+      </aside>
+
+      <section class="story-main glass-card">
+        <div *ngIf="detailsLoading" class="detail-loading">Loading selected story...</div>
+
+        <ng-container *ngIf="!detailsLoading && generatedStory; else emptyStoryState">
+          <div class="story-meta-row">
+            <div>
+              <p class="mini-kicker">Selected story</p>
+              <h3 class="story-card-title">{{ generatedStory.title }}</h3>
+              <p class="story-meta">
+                {{ generatedStory.periodType }} · {{ generatedStory.tone }} · {{ generatedStory.createdAt | date:'medium' }}
+              </p>
+            </div>
+
+            <div class="voice-chip">
+              {{ generatedStory.voiceType || 'SOFT_FEMALE' }}
+            </div>
+          </div>
+
+          <div class="story-text-block">
+            {{ generatedStory.storyText }}
+          </div>
+
+          <div class="story-highlights" *ngIf="generatedStory.highlights.length">
+            <span class="story-chip" *ngFor="let item of generatedStory.highlights">
+              {{ item }}
+            </span>
+          </div>
+
+          <div class="story-actions">
+            <button
+              type="button"
+              class="primary-pill"
+              (click)="generateAudio(generatedStory)"
+              [disabled]="audioLoading"
+            >
+              <span *ngIf="!audioLoading">
+                {{ generatedStory.audioGenerated ? 'Regenerate audio' : 'Generate audio' }}
+              </span>
+              <span *ngIf="audioLoading">Generating audio...</span>
+            </button>
+
+            <button
+              type="button"
+              class="danger-pill"
+              (click)="deleteCurrentStory()"
+              [disabled]="deleting"
+            >
+              <span *ngIf="!deleting">Delete story</span>
+              <span *ngIf="deleting">Deleting...</span>
+            </button>
+          </div>
+
+          <div class="story-audio-panel" *ngIf="generatedStory.audioGenerated || generatedAudio">
+            <div class="audio-head">
+              <div>
+                <p class="mini-kicker">Listen</p>
+                <h4>Audio reflection</h4>
+              </div>
+              <span class="audio-live-badge">Ready to play</span>
+            </div>
+
+            <audio
+              *ngIf="getAudioUrl(generatedStory) || getGeneratedAudioUrl()"
+              controls
+              [src]="getAudioUrl(generatedStory) || getGeneratedAudioUrl()">
+            </audio>
+
+            <p class="audio-helper" *ngIf="generatedAudio?.message">
+              {{ generatedAudio?.message }}
+            </p>
+          </div>
+        </ng-container>
+
+        <ng-template #emptyStoryState>
+          <div class="empty-story-state">
+            <div class="empty-icon">🎧</div>
+            <h3>No story selected</h3>
+            <p>Generate a new story or select one from your history.</p>
+          </div>
+        </ng-template>
+      </section>
+    </section>
+  </div>
+
+  <div class="toast-stack" *ngIf="toasts.length">
+    <div
+      class="toast"
+      *ngFor="let toast of toasts"
+      [class.success]="toast.type === 'success'"
+      [class.error]="toast.type === 'error'"
+      [class.info]="toast.type === 'info'">
+      {{ toast.text }}
+    </div>
+  </div>
+</div>

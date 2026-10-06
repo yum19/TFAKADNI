@@ -1,0 +1,71 @@
+<div class="container fade-in py-3 py-lg-4">
+  <h3 class="mb-1">Prenatal Exams</h3>
+  <p class="small opacity-50">Read-only view</p>
+</div>
+
+<div class="container fade-in">
+  @if(loading) { <mat-progress-bar mode="indeterminate" class="mb-4"></mat-progress-bar> }
+
+  @if(accessDenied) {
+  <mat-card>
+    <mat-card-content class="text-center py-5">
+      <span class="material-symbols-outlined d-block mb-3" style="font-size:4rem; color:rgba(244,67,54,0.4)">lock</span>
+      <h3>Access Denied</h3>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  @if(!loading && !accessDenied) {
+  <mat-card class="mb-4">
+    <mat-card-header>
+      <div class="w-100 mb-3">
+        <h3 class="mb-0">Pending ({{ pendingExams.length }})</h3>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      @if(pendingExams.length === 0) {
+      <p class="text-secondary text-center py-3">All exams are done! 🎉</p>
+      }
+      @for(exam of pendingExams; track exam.id) {
+      <div class="exam-item">
+        <div class="d-flex align-items-center gap-3">
+          <span class="material-symbols-outlined" style="color:#ff9800">radio_button_unchecked</span>
+          <div class="flex-grow-1">
+            <h4 class="fw-medium mb-0">{{ exam.examName }}</h4>
+            <p class="small text-secondary mb-0">
+              <span class="type-badge" [style.color]="getTypeColor(exam.examType)">{{ getTypeLabel(exam.examType) }}</span>
+              — Week {{ exam.recommendedWeek }}
+            </p>
+          </div>
+        </div>
+      </div>
+      @if(!$last) { <mat-divider class="my-2"></mat-divider> }
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if(completedExams.length > 0) {
+  <mat-card class="mb-4">
+    <mat-card-header>
+      <div class="w-100 mb-3">
+        <h3 class="mb-0">Completed ({{ completedExams.length }})</h3>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      @for(exam of completedExams; track exam.id) {
+      <div class="exam-item" style="opacity:0.7">
+        <div class="d-flex align-items-center gap-3">
+          <span class="material-symbols-outlined" style="color:#4caf50">task_alt</span>
+          <div>
+            <h4 class="fw-medium mb-0">{{ exam.examName }}</h4>
+            <p class="small text-secondary mb-0">Completed on {{ exam.doneDate | date:'MM/dd/yyyy' }}</p>
+          </div>
+        </div>
+      </div>
+      @if(!$last) { <mat-divider class="my-2"></mat-divider> }
+      }
+    </mat-card-content>
+  </mat-card>
+  }
+  }
+</div>

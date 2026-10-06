@@ -1,0 +1,262 @@
+<app-index-header></app-index-header>
+
+<div class="pd-wrap" (click)="closePickers()">
+  <div class="pd-layout">
+
+    <button class="pd-back-btn" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Back to community</span>
+    </button>
+
+    <div *ngIf="loading" class="pd-loading">
+  <div class="pd-loader"></div>
+  <p>Loading post…</p>
+</div>
+
+    <div *ngIf="!loading && !post" class="pd-card pd-empty">
+      <div class="pd-empty-ico">🔍</div>
+      <h3>Post not found</h3>
+      <p>This post does not exist or has been deleted.</p>
+      <button class="pd-back-btn-cta" (click)="goBack()">Go back</button>
+    </div>
+
+    <div *ngIf="!loading && post" class="pd-card pd-post">
+
+      <!-- POST HEADER -->
+      <div class="pd-post-header">
+        <div class="pd-post-av">
+          <span>{{ post.anonyme ? '👤' : '👩' }}</span>
+        </div>
+        <div class="pd-post-meta">
+          <div class="pd-post-name">
+            {{ post.anonyme ? 'Anonymous' : 'Member' }}
+            <mat-icon class="pd-verified">verified</mat-icon>
+          </div>
+          <div class="pd-post-time">@user · {{ post.date | date:'d MMMM yyyy · HH:mm' }}</div>
+        </div>
+        <div class="pd-ptag" [attr.data-tag]="post.tag">
+          {{ tagEmoji[post.tag] }} {{ tagLabels[post.tag] }}
+        </div>
+        <button class="pd-more-btn" [matMenuTriggerFor]="postMenu">
+          <mat-icon>more_horiz</mat-icon>
+        </button>
+        <mat-menu #postMenu="matMenu">
+          <button mat-menu-item (click)="openEditPost()"><mat-icon>edit</mat-icon><span>Edit</span></button>
+          <button mat-menu-item (click)="deletePost()">
+            <mat-icon color="warn">delete</mat-icon><span style="color:#dc2626">Delete</span>
+          </button>
+        </mat-menu>
+      </div>
+
+      <!-- CONTENT -->
+      <p class="pd-post-text">{{ post.contenu }}</p>
+
+      <!-- IMAGES -->
+      <div *ngIf="post.images && post.images.length > 0"
+           class="pd-post-images"
+           [class.single]="post.images.length === 1"
+           [class.two]="post.images.length === 2"
+           [class.three]="post.images.length === 3"
+           [class.four-plus]="post.images.length >= 4">
+        <img *ngFor="let img of post.images" [src]="img" class="pd-post-img" alt="" />
+      </div>
+
+      <!-- STATS -->
+      <div class="pd-post-stats">
+        <div class="pd-stat-group">
+          <div class="pd-reaction-avs" *ngIf="post.reactionSummary && post.reactionSummary.total > 0">
+            <ng-container *ngFor="let t of REACTION_TYPES">
+              <span *ngIf="(post.reactionSummary.counts[t] || 0) > 0" class="pd-reaction-av">
+                {{ REACTION_META[t].emoji }}
+              </span>
+            </ng-container>
+          </div>
+          <span>{{ post.reactionSummary?.total ?? 0 }} reaction{{ (post.reactionSummary?.total ?? 0) !== 1 ? 's' : '' }}</span>
+        </div>
+        <div class="pd-stat-group pd-ml-auto">
+          <span>{{ post.commentaires?.length ?? 0 }} comments</span>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="pd-post-actions">
+
+        <!-- React button -->
+        <div class="pd-react-wrapper">
+          <button
+            class="pd-act-btn pd-react-btn"
+            [class.reacted]="post.reactionSummary?.myReaction"
+            [style.color]="myPostReactionColor()"
+            (click)="quickLikePost($event)"
+            (mouseenter)="togglePostPicker($event)"
+            [disabled]="reactingPost"
+            type="button">
+            <span class="pd-react-emoji">
+              {{ post.reactionSummary?.myReaction
+                ? REACTION_META[post.reactionSummary!.myReaction!].emoji
+                : '👍' }}
+            </span>
+            <span>
+              {{ post.reactionSummary?.myReaction
+                ? REACTION_META[post.reactionSummary!.myReaction!].label
+                : 'Like' }}
+            </span>
+          </button>
+
+          <!-- POST REACTION PICKER -->
+          <div class="pd-reaction-picker"
+               *ngIf="openPostPicker"
+               (click)="$event.stopPropagation()">
+            <button *ngFor="let t of REACTION_TYPES"
+                    class="pd-reaction-option"
+                    [class.active]="post.reactionSummary?.myReaction === t"
+                    [title]="REACTION_META[t].label"
+                    (click)="reactToPost(t, $event)"
+                    type="button">
+              <span class="pd-reaction-emoji">{{ REACTION_META[t].emoji }}</span>
+              <span class="pd-reaction-label">{{ REACTION_META[t].label }}</span>
+              <span class="pd-reaction-count"
+                    *ngIf="(post.reactionSummary?.counts?.[t] || 0) > 0">
+                {{ post.reactionSummary!.counts[t] }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <button class="pd-act-btn" type="button">
+          <mat-icon>chat_bubble_outline</mat-icon> Comment
+        </button>
+        <button class="pd-act-btn" type="button">
+          <mat-icon>share</mat-icon> Share
+        </button>
+        <button class="pd-act-btn pd-bookmark" type="button">
+          <mat-icon>bookmark_border</mat-icon>
+        </button>
+      </div>
+
+      <!-- COMMENT INPUT -->
+      <div class="pd-comment-row">
+        <div class="pd-comment-av"></div>
+        <div class="pd-comment-input-wrap">
+          <input class="pd-comment-input" placeholder="Write a comment..."
+            [(ngModel)]="newComment" (keyup.enter)="submitComment()" />
+          <button class="pd-comment-send" (click)="submitComment()">
+            <mat-icon>send</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- COMMENTS LIST -->
+      <div *ngIf="post.commentaires && post.commentaires.length > 0" class="pd-comments">
+        <h4 class="pd-comments-title">Comments ({{ post.commentaires.length }})</h4>
+
+        <div *ngFor="let c of post.commentaires" class="pd-comment">
+          <div class="pd-comment-av-sm"></div>
+          <div class="pd-comment-body">
+            <div class="pd-comment-name">Member</div>
+
+            <!-- VIEW MODE -->
+            <ng-container *ngIf="editingCommentId !== c.id">
+              <div class="pd-comment-text">{{ c.contenu }}</div>
+
+              <!-- Comment reaction stats -->
+              <div class="pd-comment-reaction-stats"
+                   *ngIf="c.reactionSummary && c.reactionSummary.total > 0">
+                <ng-container *ngFor="let t of REACTION_TYPES">
+                  <span *ngIf="(c.reactionSummary.counts[t] || 0) > 0" class="pd-cr-stat">
+                    {{ REACTION_META[t].emoji }} {{ c.reactionSummary.counts[t] }}
+                  </span>
+                </ng-container>
+              </div>
+
+              <div class="pd-comment-footer">
+<span class="pd-comment-time">
+  <mat-icon>schedule</mat-icon>
+  {{ c.date | date:'d MMM · h:mm a' }}
+</span>
+                <!-- COMMENT REACTION WRAPPER -->
+                <div class="pd-comment-react-wrapper">
+                  <button
+                    class="pd-comment-act pd-comment-react-btn"
+                    [class.reacted]="c.reactionSummary?.myReaction"
+                    [style.color]="commentReactionColor(c)"
+                    (click)="quickLikeComment(c, $event)"
+                    (mouseenter)="toggleCommentPicker(c.id!, $event)"
+                    [disabled]="reactingCommentId === c.id"
+                    type="button">
+                    <span>{{ c.reactionSummary?.myReaction
+                      ? REACTION_META[c.reactionSummary!.myReaction!].emoji
+                      : '👍' }}</span>
+                    <span>{{ c.reactionSummary?.myReaction
+                      ? REACTION_META[c.reactionSummary!.myReaction!].label
+                      : 'Like' }}</span>
+                  </button>
+
+                  <!-- COMMENT REACTION PICKER -->
+                  <div class="pd-comment-reaction-picker"
+                       *ngIf="openCommentPickerId === c.id"
+                       (click)="$event.stopPropagation()">
+                    <button *ngFor="let t of REACTION_TYPES"
+                            class="pd-reaction-option"
+                            [class.active]="c.reactionSummary?.myReaction === t"
+                            [title]="REACTION_META[t].label"
+                            (click)="reactToComment(c, t, $event)"
+                            type="button">
+                      <span class="pd-reaction-emoji">{{ REACTION_META[t].emoji }}</span>
+                      <span class="pd-reaction-label">{{ REACTION_META[t].label }}</span>
+                      <span class="pd-reaction-count"
+                            *ngIf="(c.reactionSummary?.counts?.[t] || 0) > 0">
+                        {{ c.reactionSummary!.counts[t] }}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <button class="pd-comment-act" type="button">Reply</button>
+
+                <div class="pd-comment-actions">
+                  <button class="pd-comment-edit-btn"
+                          (click)="startEditComment(c.id!, c.contenu)"
+                          title="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button class="pd-comment-delete-btn"
+                          (click)="deleteComment(c.id!)"
+                          title="Delete">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- EDIT MODE -->
+            <ng-container *ngIf="editingCommentId === c.id">
+              <div class="pd-comment-edit-wrap">
+                <textarea class="pd-comment-edit-input"
+                          [(ngModel)]="editingCommentText"
+                          rows="2"
+                          (keyup.enter)="saveEditComment(c.id!)"
+                          (keyup.escape)="cancelEditComment()"></textarea>
+                <div class="pd-comment-edit-actions">
+                  <button class="pd-btn-cancel" (click)="cancelEditComment()">Cancel</button>
+                  <button class="pd-btn-save" (click)="saveEditComment(c.id!)">
+                    <mat-icon>check</mat-icon> Save
+                  </button>
+                </div>
+              </div>
+            </ng-container>
+
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!post.commentaires || post.commentaires.length === 0" class="pd-no-comments">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <p>Be the first to comment!</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<app-index-footer></app-index-footer>

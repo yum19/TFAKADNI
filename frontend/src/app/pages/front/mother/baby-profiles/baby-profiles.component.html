@@ -1,0 +1,169 @@
+<section class="document-page profiles-page">
+  <div class="document-shell">
+    <section class="hero-card">
+      <div class="hero-copy">
+        <p class="eyebrow">Baby profiles · organized care</p>
+        <h1>
+          Gentle profiles,
+          <span>beautifully arranged</span>
+        </h1>
+        <p class="hero-text">
+          Access and manage every baby profile in one calm and polished space.
+        </p>
+      </div>
+
+      <div class="hero-side">
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-number">{{ babies.length }}</span>
+            <span class="stat-label">Profiles</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">Live</span>
+            <span class="stat-label">Sync</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <a class="action-btn primary" routerLink="/mother/add-baby"
+            >+ Add baby</a
+          >
+          <button class="action-btn secondary" type="button" (click)="reload()">
+            Reload list
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="filters-card">
+      <div class="filters-row">
+        <label class="search-field">
+          <span>Search all attributes</span>
+          <input
+            type="text"
+            [value]="searchTerm"
+            (input)="onSearchChange($any($event.target).value)"
+            placeholder="Search by name, place, date, gender, notes..."
+          />
+        </label>
+
+        <div class="gender-filters">
+          <button
+            type="button"
+            class="filter-chip"
+            [class.active]="genderFilter === 'ALL'"
+            (click)="setGenderFilter('ALL')"
+          >
+            All
+          </button>
+          <button
+            type="button"
+            class="filter-chip"
+            [class.active]="genderFilter === 'FEMALE'"
+            (click)="setGenderFilter('FEMALE')"
+          >
+            Female
+          </button>
+          <button
+            type="button"
+            class="filter-chip"
+            [class.active]="genderFilter === 'MALE'"
+            (click)="setGenderFilter('MALE')"
+          >
+            Male
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div class="status" *ngIf="loading">Loading baby profiles...</div>
+    <div class="status error" *ngIf="!loading && error">{{ error }}</div>
+
+    <div class="empty" *ngIf="!loading && !error && babies.length === 0">
+      No baby profile found yet. Start by adding your first profile.
+    </div>
+
+    <div
+      class="empty"
+      *ngIf="
+        !loading && !error && babies.length > 0 && filteredBabies.length === 0
+      "
+    >
+      No profile matches your search or gender filter.
+    </div>
+
+    <div
+      class="baby-grid"
+      *ngIf="!loading && !error && paginatedBabies.length > 0"
+    >
+      <article
+        class="baby-card"
+        *ngFor="let baby of paginatedBabies; let i = index"
+        [style.--delay]="i * 70 + 'ms'"
+      >
+        <div class="image-wrap">
+          <img *ngIf="baby.photoUrl" [src]="baby.photoUrl" alt="Baby photo" />
+          <div class="photo-placeholder" *ngIf="!baby.photoUrl">
+            {{ getInitials(baby.firstName, baby.lastName) }}
+          </div>
+          <span class="gender-badge">{{ baby.gender }}</span>
+        </div>
+
+        <div class="baby-info">
+          <h3>{{ baby.firstName }} {{ baby.lastName }}</h3>
+          <p class="muted">Born {{ baby.birthDate | date: "mediumDate" }}</p>
+          <p class="place" *ngIf="baby.birthPlace">{{ baby.birthPlace }}</p>
+        </div>
+
+        <div class="card-actions">
+          <a class="detail-link" [routerLink]="['/mother/babies', baby.id]"
+            >Open profile</a
+          >
+          <button
+            class="delete-link"
+            type="button"
+            [disabled]="deletingId === baby.id"
+            (click)="deleteBaby(baby.id, baby.firstName, baby.lastName)"
+          >
+            Delete profile
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <div
+      class="pagination"
+      *ngIf="
+        !loading && !error && hasMultiplePages && filteredBabies.length > 0
+      "
+    >
+      <button
+        type="button"
+        class="page-btn"
+        [disabled]="currentPage === 1"
+        (click)="previousPage()"
+      >
+        Prev
+      </button>
+
+      <button
+        type="button"
+        class="page-btn number"
+        *ngFor="let page of pageNumbers"
+        [class.active]="page === currentPage"
+        (click)="goToPage(page)"
+      >
+        {{ page }}
+      </button>
+
+      <button
+        type="button"
+        class="page-btn"
+        [disabled]="currentPage === totalPages"
+        (click)="nextPage()"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</section>

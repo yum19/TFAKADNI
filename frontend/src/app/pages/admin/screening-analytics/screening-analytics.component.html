@@ -1,0 +1,330 @@
+<div class="container fade-in py-3 py-lg-4">
+  <div class="hero-card mb-4">
+    <div class="row gx-3 align-items-center">
+      <div class="col-12 col-lg mb-3 mb-lg-0">
+        <p class="hero-kicker">Admin analytics</p>
+        <h3 class="hero-title mb-2">Screening Analytics</h3>
+        <p class="hero-subtitle mb-0">
+          Explore postpartum screening performance through AI risk distribution, confidence trends,
+          and weekly prediction evolution. This dashboard helps the admin understand what the model
+          is producing before analyzing follow-up care actions.
+        </p>
+      </div>
+
+      <div class="col-12 col-lg-auto mb-3 mb-lg-0">
+        <div class="export-actions">
+          <button
+            mat-stroked-button
+            class="secondary-action"
+            [disabled]="!overview || exportingCsv"
+            (click)="exportCsv()"
+            [title]="!overview ? 'Load data first' : 'Download CSV spreadsheet'">
+            <mat-icon class="material-icons-outlined">
+              {{ exportingCsv ? 'hourglass_empty' : 'table_view' }}
+            </mat-icon>
+            {{ exportingCsv ? 'Exporting…' : 'Export CSV' }}
+          </button>
+
+          <button
+            mat-flat-button
+            class="primary-action"
+            [disabled]="!overview || exportingPdf"
+            (click)="exportPdf()"
+            [title]="!overview ? 'Load data first' : 'Download PDF report'">
+            <mat-icon class="material-icons-outlined">
+              {{ exportingPdf ? 'hourglass_empty' : 'picture_as_pdf' }}
+            </mat-icon>
+            {{ exportingPdf ? 'Generating…' : 'Export PDF' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="state-card mb-4">
+      <mat-spinner diameter="42"></mat-spinner>
+      <div>
+        <h4 class="mb-1">Loading screening analytics...</h4>
+        <p class="mb-0 text-secondary">Please wait while we fetch the latest prediction statistics.</p>
+      </div>
+    </div>
+  }
+
+  @if (!loading && error) {
+    <div class="state-card error-state mb-4">
+      <mat-icon class="material-icons-outlined">error</mat-icon>
+      <div>
+        <h4 class="mb-1">Unable to load screening analytics</h4>
+        <p class="mb-2 text-secondary">{{ error }}</p>
+        <button mat-flat-button class="primary-action" (click)="loadAnalytics()">
+          <mat-icon class="material-icons-outlined">refresh</mat-icon>
+          Retry
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (!loading && !error && overview) {
+    <div class="row gx-3 gx-lg-4 mb-1">
+      @for (metric of metrics; track metric.label) {
+        <div class="col-12 col-sm-6 col-lg-3">
+          <mat-card class="metric-card" [ngClass]="metric.tone">
+            <mat-card-content>
+              <div class="metric-head">
+                <div class="metric-icon">
+                  <mat-icon class="material-icons-outlined">{{ metric.icon }}</mat-icon>
+                </div>
+                <p class="metric-label mb-0">{{ metric.label }}</p>
+              </div>
+              <h1 class="metric-value mb-1">{{ metric.value }}</h1>
+              <p class="metric-helper mb-0">{{ metric.helper }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12 col-xl-6 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Risk distribution bar chart</h3>
+              <p class="text-secondary small mb-0">
+                Compare the number of low, moderate, and high-risk postpartum predictions.
+              </p>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <apx-chart
+              [series]="riskBarChart.series!"
+              [chart]="riskBarChart.chart!"
+              [xaxis]="riskBarChart.xaxis!"
+              [yaxis]="riskBarChart.yaxis!"
+              [stroke]="riskBarChart.stroke!"
+              [tooltip]="riskBarChart.tooltip!"
+              [dataLabels]="riskBarChart.dataLabels!"
+              [plotOptions]="riskBarChart.plotOptions!"
+              [colors]="riskBarChart.colors!">
+            </apx-chart>
+
+            <div class="note-box mt-3">
+              <mat-icon class="material-icons-outlined">bar_chart</mat-icon>
+              <p class="mb-0">
+                This bar chart makes the AI risk distribution immediately readable for the admin team.
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-xl-6 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Risk distribution donut</h3>
+              <p class="text-secondary small mb-0">
+                Interactive circular chart showing each risk level as part of the full prediction volume.
+              </p>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <apx-chart
+              [series]="riskDonutChart.series!"
+              [chart]="riskDonutChart.chart!"
+              [labels]="riskDonutChart.labels!"
+              [legend]="riskDonutChart.legend!"
+              [tooltip]="riskDonutChart.tooltip!"
+              [stroke]="riskDonutChart.stroke!"
+              [dataLabels]="riskDonutChart.dataLabels!"
+              [colors]="riskDonutChart.colors!"
+              [responsive]="riskDonutChart.responsive!"
+              [plotOptions]="riskDonutChart.plotOptions!">
+            </apx-chart>
+
+            <div class="note-box mt-3">
+              <mat-icon class="material-icons-outlined">donut_small</mat-icon>
+              <p class="mb-0">
+                Use this donut chart to understand the proportional weight of each AI risk class.
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12 col-xl-8 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Weekly prediction trend</h3>
+              <p class="text-secondary small mb-0">
+                Track how prediction levels evolve week after week across the screening pipeline.
+              </p>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <apx-chart
+              [series]="weeklyTrendChart.series!"
+              [chart]="weeklyTrendChart.chart!"
+              [xaxis]="weeklyTrendChart.xaxis!"
+              [yaxis]="weeklyTrendChart.yaxis!"
+              [stroke]="weeklyTrendChart.stroke!"
+              [tooltip]="weeklyTrendChart.tooltip!"
+              [dataLabels]="weeklyTrendChart.dataLabels!"
+              [fill]="weeklyTrendChart.fill!"
+              [colors]="weeklyTrendChart.colors!"
+              [legend]="weeklyTrendChart.legend!">
+            </apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-xl-4 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Confidence score</h3>
+              <p class="text-secondary small mb-0">
+                Half-donut gauge representing the average model confidence.
+              </p>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="gauge-shell">
+              <apx-chart
+                [series]="confidenceGaugeChart.series!"
+                [chart]="confidenceGaugeChart.chart!"
+                [labels]="confidenceGaugeChart.labels!"
+                [legend]="confidenceGaugeChart.legend!"
+                [tooltip]="confidenceGaugeChart.tooltip!"
+                [stroke]="confidenceGaugeChart.stroke!"
+                [dataLabels]="confidenceGaugeChart.dataLabels!"
+                [colors]="confidenceGaugeChart.colors!"
+                [responsive]="confidenceGaugeChart.responsive!"
+                [plotOptions]="confidenceGaugeChart.plotOptions!">
+              </apx-chart>
+
+              <div class="gauge-center-text">
+                <strong>{{ formatDecimal(overview.averageConfidence) }}%</strong>
+                <span>Average confidence</span>
+              </div>
+            </div>
+
+            <div class="note-box mt-2">
+              <mat-icon class="material-icons-outlined">verified</mat-icon>
+              <p class="mb-0">
+                Confidence is displayed as a percentage to make model quality easier to communicate.
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12 col-xl-7 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Risk distribution table</h3>
+              <p class="text-secondary small mb-0">
+                Detailed percentages for each risk level returned by the AI model.
+              </p>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="table-shell">
+              <table class="analytics-table">
+                <thead>
+                  <tr>
+                    <th>Risk level</th>
+                    <th>Count</th>
+                    <th>Percentage</th>
+                    <th>Color code</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of riskDistribution; track row.riskLevel) {
+                    <tr>
+                      <td>
+                        <span class="risk-tag" [ngClass]="getToneClass(row.riskLevel)">
+                          {{ row.riskLevel }}
+                        </span>
+                      </td>
+                      <td>{{ row.count }}</td>
+                      <td>{{ formatDecimal(row.percentage) }}%</td>
+                      <td>
+                        <div class="color-chip">
+                          <span class="color-dot" [style.background]="row.color"></span>
+                          {{ row.color }}
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-xl-5 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Executive insight</h3>
+              <p class="text-secondary small mb-0">
+                Quick interpretation of the most important AI screening indicators.
+              </p>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="insight-box mb-3">
+              <mat-icon class="material-icons-outlined">insights</mat-icon>
+              <div>
+                <h4 class="mb-1">Top insight</h4>
+                <p class="mb-0">{{ topInsight }}</p>
+              </div>
+            </div>
+
+            <div class="insight-box mb-3">
+              <mat-icon class="material-icons-outlined">warning</mat-icon>
+              <div>
+                <h4 class="mb-1">Monitoring note</h4>
+                <p class="mb-0">{{ monitoringInsight }}</p>
+              </div>
+            </div>
+
+            <div class="mini-kpi-list">
+              <div class="mini-kpi">
+                <span>Low risk cases</span>
+                <strong>{{ overview.lowRiskCount }}</strong>
+              </div>
+              <div class="mini-kpi">
+                <span>Moderate risk cases</span>
+                <strong>{{ overview.moderateRiskCount }}</strong>
+              </div>
+              <div class="mini-kpi">
+                <span>High risk cases</span>
+                <strong>{{ overview.highRiskCount }}</strong>
+              </div>
+              <div class="mini-kpi">
+                <span>Latest model version</span>
+                <strong>{{ overview.latestModelVersion }}</strong>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

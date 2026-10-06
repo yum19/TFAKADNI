@@ -1,0 +1,277 @@
+<section class="mother-notes">
+  <div class="notes-wrap">
+    <!-- ── Page Header ── -->
+    <header class="page-header">
+      <div>
+        <div class="header-eyebrow">
+          <span class="eyebrow-dot"></span>
+          Teamwork Hub
+        </div>
+        <h1 class="page-title">
+          Partner <em>Notes.</em>
+          <span class="ink-line"></span>
+        </h1>
+        <p class="page-lead">
+          Convert vague requests into concrete, supportive actions. Clear
+          messages build stronger partnerships.
+        </p>
+      </div>
+      <div class="header-stats">
+        <div class="hstat-pill">
+          <div class="hstat-dot dot-rose"></div>
+          <span
+            ><span class="hstat-val">{{ notes.length }}</span> messages</span
+          >
+        </div>
+        <div class="hstat-pill">
+          <div class="hstat-dot dot-sage"></div>
+          <span
+            ><span class="hstat-val unread-val">{{ unreadCount }}</span>
+            unread</span
+          >
+        </div>
+        <div class="hstat-pill">
+          <div class="hstat-dot dot-gold"></div>
+          <span
+            ><span class="hstat-val gold-val">{{ links.length }}</span> links
+            active</span
+          >
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Section Meta ── -->
+    <div class="section-meta">
+      <span class="section-chip">Compose & Inbox</span>
+      <div class="section-line"></div>
+      <span class="section-count">
+        {{ links.length }} active link{{ links.length !== 1 ? "s" : "" }}
+      </span>
+    </div>
+
+    <!-- ── Main Grid ── -->
+    <div class="main-grid">
+      <!-- LEFT: Compose -->
+      <div class="compose-wrap">
+        <div class="compose-card">
+          <div class="compose-card-top">
+            <div class="compose-label">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path d="M12 20h9" />
+                <path
+                  d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                />
+              </svg>
+              Write a note
+            </div>
+            <h3 class="compose-title-text">New Message</h3>
+            <p class="compose-subtitle">
+              Send a clear, actionable message to your partner.
+            </p>
+          </div>
+
+          <div class="compose-body">
+            <!-- Link Selector -->
+            <div>
+              <label class="field-label">Active Collaboration</label>
+              <div class="select-wrap">
+                <svg
+                  class="select-icon-left"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <select
+                  class="field-select"
+                  [(ngModel)]="selectedLink"
+                  title="Select collaboration link"
+                >
+                  <option *ngFor="let link of links" [ngValue]="link">
+                    Partner #{{ link.partnerId }} · Pregnancy #{{
+                      link.pregnancyId
+                    }}
+                  </option>
+                </select>
+                <svg
+                  class="select-chevron"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Message -->
+            <div>
+              <label class="field-label">Your Message</label>
+              <textarea
+                class="textarea-paper"
+                rows="6"
+                [(ngModel)]="draft"
+                placeholder="E.g. 'Could you confirm the Saturday transport time?'"
+              ></textarea>
+            </div>
+
+            <button class="btn-send" (click)="send()">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+              Send to Partner ✨
+            </button>
+
+            <div class="wisdom-box">
+              <div class="wisdom-icon-wrap">💡</div>
+              <div>
+                <div class="wisdom-title">Pro Tip</div>
+                <p class="wisdom-text">
+                  Concrete tasks (like "buy vitamins") lower partner stress more
+                  than open-ended questions.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Inbox -->
+      <div class="inbox-panel">
+        <div class="inbox-header">
+          <div>
+            <div class="inbox-title-row">
+              <h4 class="inbox-title">Inbox</h4>
+              <span class="inbox-count-badge">{{ notes.length }}</span>
+            </div>
+            <p class="inbox-sub">
+              {{ unreadCount }} unread · {{ notes.length }} total
+            </p>
+          </div>
+          <div class="unread-chip" *ngIf="unreadCount > 0">
+            <div class="unread-chip-dot"></div>
+            {{ unreadCount }} new
+          </div>
+        </div>
+
+        <div class="inbox-list">
+          <!-- Empty State -->
+          <div class="empty-inbox" *ngIf="notes.length === 0">
+            <div class="empty-letter">📮</div>
+            <h5 class="empty-title">No messages yet</h5>
+            <p class="empty-body">
+              Once your partner replies or you send a note, it will appear here.
+            </p>
+          </div>
+
+          <!-- Messages -->
+          <article
+            class="message-card"
+            *ngFor="let note of notes"
+            [class.unread]="!note.isRead"
+          >
+            <div class="msg-accent"></div>
+            <div class="msg-inner">
+              <div class="msg-top">
+                <div class="author-wrap">
+                  <div class="avatar-circle">
+                    {{ (note.authorName || "U")[0] }}
+                  </div>
+                  <div>
+                    <div class="author-name">
+                      {{ note.authorName || "User #" + note.authorId }}
+                    </div>
+                    <div class="msg-date">
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                      </svg>
+                      {{ note.createdAt | date: "MMM d, h:mm a" }}
+                    </div>
+                  </div>
+                </div>
+                <span
+                  class="status-badge"
+                  [class.badge-new]="!note.isRead"
+                  [class.badge-read]="note.isRead"
+                >
+                  {{ note.isRead ? "Read" : "New" }}
+                </span>
+              </div>
+
+              <p class="msg-body">{{ note.content }}</p>
+
+              <div class="msg-actions">
+                <button
+                  class="action-btn"
+                  *ngIf="!note.isRead"
+                  (click)="markRead(note)"
+                >
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Mark as Read
+                </button>
+                <button class="action-btn danger" (click)="remove(note)">
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path
+                      d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
+                    />
+                  </svg>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

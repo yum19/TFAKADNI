@@ -1,0 +1,151 @@
+<section class="evo-page">
+  <div class="evo-wrap">
+    <header class="studio-header">
+      <div class="studio-chip">
+        <span class="chip-dot"></span>
+        Neuro-Evolutionary Engine
+      </div>
+      <h1 class="evo-title">
+        The Evo-Care<br /><span class="accent">Engine.</span>
+      </h1>
+      <p class="evo-lead">
+        Intelligent weekly schedule optimization powered by Generative AI and
+        genetic algorithms — dynamically tuned to the mother's vitals and care
+        priorities.
+      </p>
+      <div class="header-actions">
+        <button
+          class="btn-evolve"
+          *ngIf="!hasEvolved && !isEvolving"
+          (click)="startEvolution()"
+        >
+          <mat-icon>auto_awesome</mat-icon> Generate Optimal Week
+        </button>
+        <button
+          class="btn-reevo"
+          *ngIf="hasEvolved && !isEvolving"
+          (click)="startEvolution()"
+        >
+          <mat-icon>refresh</mat-icon> Re-Evolve
+        </button>
+      </div>
+    </header>
+
+    <div class="evolution-terminal" *ngIf="isEvolving">
+      <div class="scanner-line"></div>
+      <div class="terminal-glyph">
+        <mat-icon>all_inclusive</mat-icon>
+      </div>
+      <h2 class="terminal-heading">Evolving Schedule...</h2>
+      <div class="terminal-box">
+        <p class="t-sys">> {{ evolutionText }}</p>
+        <p class="t-gen">
+          > Generation: [ <span>{{ currentGeneration }}</span> / 500 ]
+        </p>
+      </div>
+      <div class="progress-bar">
+        <div
+          class="progress-fill"
+          [style.width.%]="(currentGeneration / 500) * 100"
+        ></div>
+      </div>
+    </div>
+
+    <div class="schedule-dashboard" *ngIf="hasEvolved && !isEvolving">
+      <div class="stats-row">
+        <div class="stat-glass">
+          <div class="stat-label">Algorithm</div>
+          <div class="stat-value" style="font-size: 14px">
+            {{ stats.algorithmType }}
+          </div>
+        </div>
+        <div class="stat-glass">
+          <div class="stat-label">Compute Time</div>
+          <div class="stat-value success">{{ stats.computeTimeMs }} ms</div>
+        </div>
+        <div class="stat-glass">
+          <div class="stat-label">Generations</div>
+          <div class="stat-value">{{ stats.generationsRun }}</div>
+        </div>
+      </div>
+
+      <div class="week-divider">
+        <span class="week-chip">Optimal Week</span>
+        <div class="week-line"></div>
+        <span class="drag-hint">Drag to reorder</span>
+      </div>
+
+      <div
+        class="calendar-week"
+        cdkDropList
+        cdkDropListOrientation="horizontal"
+        (cdkDropListDropped)="drop($event)"
+      >
+        <div
+          class="day-column"
+          *ngFor="let task of schedule; let i = index"
+          cdkDrag
+        >
+          <div class="day-header">
+            <span class="day-abbr">{{ getDayAbbr(i) }}</span>
+            <span class="day-num" [class.is-today]="i === todayIndex">{{
+              getDayDate(i)
+            }}</span>
+          </div>
+          <div class="day-card" [class]="'type-' + getTypeKey(task.category)">
+            <div
+              class="task-badge"
+              [class]="'badge-' + getTypeKey(task.category)"
+            >
+              <mat-icon>{{ getTypeIcon(task.category) }}</mat-icon>
+              {{ getTypeLabel(task.category) }}
+            </div>
+            <div class="task-name">{{ task.title }}</div>
+            <div class="task-desc">{{ task.description }}</div>
+            <div class="impact-row">
+              <div class="impact-track">
+                <div
+                  class="impact-fill"
+                  [style.width.%]="task.baseHealingScore * 10"
+                ></div>
+              </div>
+              <div class="impact-label">{{ task.baseHealingScore }}/10</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend-row">
+        <div class="leg-item">
+          <div class="leg-dot chore"></div>
+          Chore
+        </div>
+        <div class="leg-item">
+          <div class="leg-dot relax"></div>
+          Physical Care
+        </div>
+        <div class="leg-item">
+          <div class="leg-dot medical"></div>
+          Medical Support
+        </div>
+        <div class="leg-item">
+          <div class="leg-dot bonding"></div>
+          Emotional Bonding
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-full" *ngIf="!hasEvolved && !isEvolving">
+      <div class="empty-glass">
+        <div class="empty-ring">
+          <mat-icon>all_inclusive</mat-icon>
+        </div>
+        <h3 class="empty-h">Ready to evolve</h3>
+        <p class="empty-p">
+          Click "Generate Optimal Week" to run the generative AI and genetic
+          algorithm pipeline to produce a personalized weekly care schedule.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

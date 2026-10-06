@@ -1,0 +1,325 @@
+<section class="collab-canvas">
+  <div class="canvas-wrap">
+    <!-- ── HERO ── -->
+    <div class="hero">
+      <div class="hero-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="petal petal-1"></div>
+        <div class="petal petal-2"></div>
+        <div class="petal petal-3"></div>
+      </div>
+
+      <div class="hero-inner">
+        <div class="hero-left">
+          <div class="hero-eyebrow">
+            <span class="eyebrow-dot"></span>
+            Shared Journey
+            <span class="eyebrow-sep">·</span>
+            End-to-end Encrypted
+          </div>
+
+          <h1 class="hero-title">
+            <span class="title-line title-regular">Invite your</span>
+            <span class="title-line title-italic">support<br />system.</span>
+          </h1>
+
+          <p class="hero-lead">
+            Define boundaries that protect your peace while keeping your partner
+            in the loop — full control, always yours.
+          </p>
+
+          <div class="hero-stats">
+            <div class="hstat">
+              <span class="hstat-val">{{ links.length }}</span>
+              <span class="hstat-lbl">Active Links</span>
+            </div>
+            <div class="hstat-divider"></div>
+            <div class="hstat">
+              <span class="hstat-val">{{ permissions.length }}</span>
+              <span class="hstat-lbl">Permissions</span>
+            </div>
+            <div class="hstat-divider"></div>
+            <div class="hstat">
+              <span class="hstat-val">{{ context.id ?? "—" }}</span>
+              <span class="hstat-lbl">Context ID</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="hero-float">
+            <div class="float-ring float-ring-1"></div>
+            <div class="float-ring float-ring-2"></div>
+            <div class="float-core">
+              <div class="float-emoji">🤝</div>
+              <div class="float-num">{{ links.length }}</div>
+              <div class="float-label">Active<br />Connections</div>
+              <div class="float-chips">
+                <span class="fchip fchip-rose">E2E</span>
+                <span class="fchip fchip-sage">Live</span>
+                <span class="fchip fchip-gold">Secure</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MAIN LAYOUT ── -->
+    <div class="main-layout">
+      <!-- LEFT: Configure ── -->
+      <div class="config-col">
+        <!-- Step 01 -->
+        <div class="step-card">
+          <div class="step-head">
+            <span class="step-num">01</span>
+            <div>
+              <h3 class="step-title">Who are you inviting?</h3>
+              <p class="step-sub">
+                Enter the partner's user ID and link it to a pregnancy context.
+              </p>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="field-wrap">
+              <label class="field-label">Partner User ID</label>
+              <div class="field-glass">
+                <span class="field-icon">👤</span>
+                <input
+                  type="number"
+                  [(ngModel)]="partnerId"
+                  placeholder="e.g. 1042"
+                  class="field-ctrl"
+                />
+              </div>
+            </div>
+            <div class="field-wrap">
+              <label class="field-label">Pregnancy Context ID</label>
+              <div class="field-glass">
+                <span class="field-icon">🤰</span>
+                <input
+                  type="number"
+                  [(ngModel)]="context.id"
+                  placeholder="e.g. 7"
+                  class="field-ctrl"
+                />
+              </div>
+            </div>
+          </div>
+
+          <button class="sync-strip" (click)="saveManualContext()">
+            <div class="sync-left">
+              <span class="sync-dot"></span>
+              <span class="sync-text"
+                >Context: <strong>{{ context.source }}</strong></span
+              >
+            </div>
+            <span class="sync-cta">
+              Sync Locally
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <!-- Step 02 -->
+        <div class="step-card">
+          <div class="step-head">
+            <span class="step-num">02</span>
+            <div class="step-head-content">
+              <div>
+                <h3 class="step-title">Permission Switchboard</h3>
+                <p class="step-sub">
+                  Toggle specific access levels for this partner.
+                </p>
+              </div>
+              <button
+                class="btn-ghost-reset"
+                (click)="resetPermissionDraft()"
+                *ngIf="editingLinkId"
+              >
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="switchboard-grid">
+            <div
+              class="switch-tile"
+              *ngFor="let item of permissions"
+              [class.active]="item.allowed"
+              (click)="item.allowed = !item.allowed"
+            >
+              <div class="tile-top">
+                <span class="tile-glyph">{{ item.allowed ? "🔓" : "🔒" }}</span>
+                <label class="toggle-switch" (click)="$event.stopPropagation()">
+                  <input type="checkbox" [(ngModel)]="item.allowed" />
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+              <div class="tile-lbl">{{ item.label }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-row">
+          <button class="btn-generate" (click)="createInvite()">
+            <span class="btn-shimmer"></span>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Generate Secure Invite
+          </button>
+          <span class="shield-note">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            E2E Encrypted
+          </span>
+        </div>
+      </div>
+
+      <!-- RIGHT: Hub ── -->
+      <div class="hub-panel">
+        <div class="hub-header">
+          <div class="hub-title-row">
+            <h4 class="hub-title">Active Connections</h4>
+            <span class="hub-badge">{{ links.length }}</span>
+          </div>
+          <p class="hub-sub">Your live partner access links</p>
+        </div>
+
+        <div class="hub-scroll">
+          <div class="empty-state" *ngIf="!links.length">
+            <div class="empty-orb">
+              <span>☁️</span>
+            </div>
+            <p class="empty-title">No links yet</p>
+            <p class="empty-body">
+              Generate your first invite to see active connections here.
+            </p>
+          </div>
+
+          <div
+            class="link-card"
+            *ngFor="let link of links; let i = index"
+            [class.editing]="editingLinkId === link.id"
+            [style.animation-delay]="i * 0.07 + 's'"
+          >
+            <div
+              class="lc-accent"
+              [class.active-accent]="link.status === 'active'"
+            ></div>
+            <div class="lc-body">
+              <div class="lc-top">
+                <div class="lc-info">
+                  <div
+                    class="lc-status-dot"
+                    [class.active]="link.status === 'active'"
+                  ></div>
+                  <div>
+                    <div class="lc-title">
+                      Pregnancy #{{ link.pregnancyId }}
+                    </div>
+                    <div class="lc-status-text">{{ link.status }}</div>
+                  </div>
+                </div>
+                <div class="lc-actions">
+                  <button class="lc-btn" (click)="editLink(link)" title="Edit">
+                    <svg
+                      width="11"
+                      height="11"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                      />
+                      <path
+                        d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    class="lc-btn"
+                    (click)="updatePermissions(link)"
+                    title="Sync"
+                  >
+                    <svg
+                      width="11"
+                      height="11"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+                      />
+                      <path d="M3 3v5h5" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="perm-cloud">
+                <span
+                  class="perm-tag"
+                  *ngFor="let p of link.permissions"
+                  [class.off]="!p.allowed"
+                  >{{ permissionService.humanize(p.permissionType) }}</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hub-footer">
+          <span class="wisdom-icon">💡</span>
+          <p class="wisdom-txt">
+            <strong>Share what helps, not everything.</strong>
+            Partners provide better support with clear, actionable tasks.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

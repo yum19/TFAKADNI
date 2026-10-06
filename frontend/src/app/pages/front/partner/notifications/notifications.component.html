@@ -1,0 +1,164 @@
+<!-- notifications-stream.component.html -->
+<section class="notifications-stream">
+  <div class="studio-wrap">
+    <header class="stream-header">
+      <span class="studio-chip">
+        Partner Alerts
+        <span class="ai-dot"></span>
+      </span>
+      <h1 class="studio-title">
+        Activity <span class="title-accent">Stream.</span>
+      </h1>
+      <p class="studio-lead">
+        Stay informed without being overloaded. Clear acknowledgments and
+        meaningful reminders for your support role.
+      </p>
+    </header>
+
+    <div class="glass-shell">
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="notifications.length === 0">
+        <div class="empty-ring">
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path d="M12 22c1.1 0 2-.9 2-2H10a2 2 0 0 0 2 2z" />
+            <path
+              d="M18 16V11a6 6 0 0 0-5-5.92V4a1 1 0 0 0-2 0v1.08A6 6 0 0 0 6 11v5l-2 2h16l-2-2z"
+            />
+          </svg>
+        </div>
+        <h5>All is quiet</h5>
+        <p>
+          You're completely up to date.<br />New collaboration alerts will
+          appear here.
+        </p>
+      </div>
+
+      <!-- Feed -->
+      <ng-container *ngIf="notifications.length > 0">
+        <div class="feed-header">
+          <span class="feed-title">Recent Activity</span>
+          <span class="feed-count">{{ notifications.length }} Total</span>
+        </div>
+
+        <article
+          class="notif-card"
+          *ngFor="let item of notifications"
+          [class.unread]="!item.isRead"
+        >
+          <div class="icon-box">
+            <svg
+              *ngIf="
+                item.title.toLowerCase().includes('invite') ||
+                item.title.toLowerCase().includes('mother')
+              "
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <svg
+              *ngIf="
+                item.title.toLowerCase().includes('guide') ||
+                item.title.toLowerCase().includes('read')
+              "
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path
+                d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+              />
+            </svg>
+            <svg
+              *ngIf="item.title.toLowerCase().includes('note')"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path
+                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+              />
+              <path
+                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+              />
+            </svg>
+            <svg
+              *ngIf="
+                !item.title.toLowerCase().match('invite|mother|guide|read|note')
+              "
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              />
+            </svg>
+          </div>
+
+          <div class="notif-content">
+            <div class="notif-meta">
+              <div>
+                <p class="notif-title" [class.is-read]="item.isRead">
+                  {{ item.title }}
+                </p>
+                <p class="notif-time">
+                  {{ item.createdAt | date: "MMM d, h:mm a" }}
+                </p>
+              </div>
+              <div
+                class="status-dot"
+                [class.unread-dot]="!item.isRead"
+                [class.read-dot]="item.isRead"
+              ></div>
+            </div>
+            <p class="notif-body">{{ item.body }}</p>
+            <button
+              class="btn-mark"
+              *ngIf="!item.isRead"
+              (click)="markRead(item.id)"
+            >
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Mark as read
+            </button>
+          </div>
+        </article>
+      </ng-container>
+    </div>
+
+    <footer class="stream-footer">End of activity stream</footer>
+  </div>
+</section>

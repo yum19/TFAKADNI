@@ -1,0 +1,250 @@
+<div class="contraception-page">
+  <section class="hero-section">
+    <img
+      class="hero-image"
+      src="assets/img/contraception.png"
+      alt="Contraception"
+    />
+    <div class="hero-overlay"></div>
+  </section>
+
+  <section class="info-section">
+    <div class="section-header">
+      <span class="kicker">{{ uiTexts.kicker }}</span>
+      <h2>{{ uiTexts.pageTitle }}</h2>
+      <p>{{ uiTexts.pageDescription }}</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card" *ngFor="let card of infoCards">
+        <div class="card-icon">
+          <mat-icon>{{ card.icon }}</mat-icon>
+        </div>
+        <h3>{{ card.title }}</h3>
+        <p>{{ card.text }}</p>
+      </div>
+    </div>
+
+    <div class="methods-highlight">
+      <div class="methods-header">
+        <h3>{{ uiTexts.methodsTitle }}</h3>
+        <p>{{ uiTexts.methodsDescription }}</p>
+      </div>
+
+      <div class="method-scroll">
+        <div class="method-pill" *ngFor="let method of methodOptions">
+          <mat-icon>{{ method.icon }}</mat-icon>
+          <span>{{ method.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="details-grid">
+      <div class="detail-card" *ngFor="let item of methodDetails">
+        <div class="detail-top">
+          <div class="detail-icon">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </div>
+          <div>
+            <h4>{{ item.title }}</h4>
+            <span>{{ item.subtitle }}</span>
+          </div>
+        </div>
+        <p>{{ item.text }}</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="ai-helper-wrapper">
+    <div class="helper-label">
+      {{ loadingTranslations ? uiTexts.translating : uiTexts.helperLabel }}
+    </div>
+
+    <button class="ai-avatar-btn" (click)="openChatWidget()">
+      <div class="ai-avatar-core">
+        <mat-icon>support_agent</mat-icon>
+      </div>
+    </button>
+  </div>
+
+  <div class="chat-widget" *ngIf="showChatWidget">
+    <div class="chat-widget-header">
+      <div class="chat-header-left">
+        <div class="mini-avatar">
+          <mat-icon>support_agent</mat-icon>
+        </div>
+        <div>
+          <h3>{{ uiTexts.chatTitle }}</h3>
+          <p>{{ uiTexts.chatSubtitle }}</p>
+        </div>
+      </div>
+
+      <button class="close-btn" (click)="closeChatWidget()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="session-choice" *ngIf="showSessionChoice">
+      <div class="choice-intro">
+        <h4>{{ uiTexts.choiceTitle }}</h4>
+        <p>{{ uiTexts.choiceDescription }}</p>
+      </div>
+
+      <button class="new-session-btn" (click)="chooseNewSession()">
+        <mat-icon>add_comment</mat-icon>
+        {{ uiTexts.startNewSession }}
+      </button>
+
+      <div class="previous-sessions" *ngIf="groupedSessions.length > 0">
+        <h5>{{ uiTexts.previousSessions }}</h5>
+
+        <div class="session-card" *ngFor="let session of groupedSessions">
+          <button class="session-main" (click)="chooseExistingSession(session)">
+            <div class="session-icon">
+              <mat-icon>forum</mat-icon>
+            </div>
+
+            <div class="session-text">
+              <strong>{{ uiTexts.sessionWord }} {{ session | slice:0:8 }}</strong>
+              <p>{{ getSessionPreview(session) }}</p>
+            </div>
+          </button>
+
+          <button class="session-delete-btn" (click)="deleteSession(session)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="no-session" *ngIf="groupedSessions.length === 0">
+        <mat-icon>chat</mat-icon>
+        <p>{{ uiTexts.noPreviousSessions }}</p>
+      </div>
+    </div>
+
+    <div class="chat-content" *ngIf="!showSessionChoice">
+      <div class="chat-toolbar">
+        <button class="back-choice-btn" (click)="backToSessionChoice()">
+          <mat-icon>arrow_back</mat-icon>
+          {{ uiTexts.sessions }}
+        </button>
+
+        <div class="current-session">
+          {{
+            currentSessionId
+              ? (uiTexts.sessionWord + ' ' + (currentSessionId | slice:0:8))
+              : uiTexts.newSession
+          }}
+        </div>
+      </div>
+
+      <div class="chat-box">
+        <div *ngIf="chatMessages.length === 0" class="empty-chat">
+          <mat-icon>support_agent</mat-icon>
+          <p>{{ uiTexts.firstQuestion }}</p>
+        </div>
+
+        <div
+          *ngFor="let msg of chatMessages; trackBy: trackByMessageId"
+          class="message-wrapper"
+          [ngClass]="{
+            'user-wrapper': msg.role.toUpperCase() === 'USER',
+            'assistant-wrapper': msg.role.toUpperCase() === 'ASSISTANT'
+          }"
+        >
+          <div
+            class="message"
+            [ngClass]="{
+              'user-message': msg.role.toUpperCase() === 'USER',
+              'assistant-message': msg.role.toUpperCase() === 'ASSISTANT'
+            }"
+          >
+            <div class="message-head">
+              <span>{{
+                msg.role.toUpperCase() === 'USER' ? uiTexts.you : uiTexts.assistant
+              }}</span>
+              <small>{{ formatDateTime(msg.createdAt) }}</small>
+            </div>
+
+            <div *ngIf="editingMessageId !== msg.id; else editTemplate">
+              <p>{{ msg.content }}</p>
+            </div>
+
+            <ng-template #editTemplate>
+              <div class="edit-box" *ngIf="msg.role.toUpperCase() === 'USER'">
+                <textarea
+                  rows="3"
+                  [(ngModel)]="editingText"
+                  [placeholder]="uiTexts.editPlaceholder"
+                ></textarea>
+
+                <div class="edit-actions">
+                  <button class="save-edit-btn" (click)="saveEdit(msg)" [disabled]="loadingChat">
+                    <mat-icon>check</mat-icon>
+                    {{ uiTexts.save }}
+                  </button>
+
+                  <button class="cancel-edit-btn" (click)="cancelEdit()">
+                    <mat-icon>close</mat-icon>
+                    {{ uiTexts.cancel }}
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="message-actions" *ngIf="editingMessageId !== msg.id">
+            <button
+              class="message-action-btn"
+              *ngIf="msg.role.toUpperCase() === 'USER'"
+              (click)="startEdit(msg)"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button
+              class="message-action-btn delete"
+              (click)="deleteMessage(msg.id)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="loadingChat" class="typing-indicator">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div class="chat-input-row">
+        <input
+          type="text"
+          [(ngModel)]="chatInput"
+          [placeholder]="uiTexts.inputPlaceholder"
+          (keyup.enter)="sendMessage()"
+        />
+        <button class="send-btn" (click)="sendMessage()" [disabled]="loadingChat">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="translation-popup-overlay" *ngIf="loadingTranslations">
+    <div class="translation-popup" [attr.dir]="currentLang === 'ar' ? 'rtl' : 'ltr'">
+      <div class="translation-popup-glow"></div>
+
+      <div class="translation-popup-icon">
+        <mat-icon>translate</mat-icon>
+      </div>
+
+      <div class="translation-spinner-wrap">
+        <div class="translation-spinner-ring"></div>
+        <div class="translation-spinner-core"></div>
+      </div>
+
+      <h3>{{ getTranslationPopupTitle() }}</h3>
+      <p>{{ getTranslationPopupMessage() }}</p>
+    </div>
+  </div>
+</div>

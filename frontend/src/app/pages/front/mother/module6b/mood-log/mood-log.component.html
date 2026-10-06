@@ -1,0 +1,386 @@
+<div class="mood-page">
+  <div class="mood-shell">
+
+    <section class="mood-hero">
+      <div class="hero-content">
+        <div class="hero-kicker">
+          <mat-icon>favorite</mat-icon>
+          <span>Postpartum care</span>
+        </div>
+
+        <h1 class="hero-title">Mood <span>reflection</span> journal</h1>
+
+        <p class="hero-lead">
+          Add today’s mood gently on the left, explore your full emotional timeline on the right,
+          and follow your weekly emotional rhythm with elegant insights.
+        </p>
+
+        <div class="hero-actions">
+          <a routerLink="/mother/postpartum" class="hero-secondary-btn">
+            Back to postpartum hub
+          </a>
+
+          <a routerLink="/mother/postpartum/screenings" class="hero-primary-btn">
+            View screening assessments
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-trend-card" [ngClass]="moodTrendBadge.cssClass">
+        <div class="trend-top-row">
+          <div class="trend-icon-wrap">
+            <mat-icon>{{ moodTrendBadge.icon }}</mat-icon>
+          </div>
+
+          <div class="trend-mini-badge">
+            <span class="trend-badge-emoji">{{ moodTrendBadge.emoji }}</span>
+            <span class="trend-badge-arrow">{{ moodTrendBadge.arrow }}</span>
+          </div>
+        </div>
+
+        <div class="trend-content">
+          <div class="trend-label">Automatic badge</div>
+          <h3 class="trend-title">{{ moodTrendBadge.label }}</h3>
+          <p class="trend-desc">{{ moodTrendBadge.description }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-grid">
+      <article class="stat-card stat-main">
+        <div class="stat-kicker">Overview</div>
+        <h3>Total journal entries</h3>
+        <div class="stat-value">{{ totalLogs }}</div>
+        <p>Every mood log you have saved so far.</p>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-kicker">Average</div>
+        <h3>Overall mood score</h3>
+        <div class="stat-value">{{ averageMood }}/10</div>
+        <p>Your average emotional score across all entries.</p>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-kicker">This week</div>
+        <h3>Weekly average</h3>
+        <div class="stat-value">{{ thisWeekAverage }}/10</div>
+        <p>A soft summary of how this week has felt.</p>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-kicker">Shared</div>
+        <h3>Shared with doctor</h3>
+        <div class="stat-value">{{ sharedCount }}</div>
+        <p>Entries you marked as shared for follow-up.</p>
+      </article>
+    </section>
+
+    <section class="chart-card">
+      <div class="chart-head">
+        <div>
+          <div class="panel-kicker">Weekly rhythm</div>
+          <h2 class="panel-title">Mood evolution</h2>
+        </div>
+        <div class="chart-score-badge">Best this week: {{ bestMoodThisWeek }}/10</div>
+      </div>
+
+      <div class="chart-area" *ngIf="weeklyChartData.length > 0">
+        <svg viewBox="0 0 360 130" class="mood-chart-svg" preserveAspectRatio="none">
+          <polyline
+            class="chart-line"
+            [attr.points]="chartPolylinePoints"
+            fill="none"
+          ></polyline>
+
+          <ng-container *ngFor="let dot of chartDots">
+            <circle
+              class="chart-dot"
+              [attr.cx]="dot.x"
+              [attr.cy]="dot.y"
+              r="4.5"
+            ></circle>
+          </ng-container>
+        </svg>
+
+        <div class="chart-labels">
+          <div class="chart-label" *ngFor="let item of weeklyChartData">
+            <span class="day">{{ item.shortDate }}</span>
+            <span class="value">{{ item.score }}/10</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="mood-layout">
+
+      <section class="journal-panel">
+        <div class="panel-glow panel-glow-left"></div>
+
+        <div class="panel-header">
+          <div>
+            <div class="panel-kicker">
+              {{ editingId ? 'Editing entry' : 'Today’s mood' }}
+            </div>
+            <h2 class="panel-title">
+              {{ editingId ? 'Update your mood log' : 'Add your mood log today' }}
+            </h2>
+          </div>
+
+          <div class="selected-mood-preview" *ngIf="getSelectedMood() as selected">
+            <span class="selected-emoji">{{ selected.emoji }}</span>
+            <span class="selected-label">{{ selected.label }}</span>
+          </div>
+        </div>
+
+        <div class="mood-choices">
+          <button
+            type="button"
+            class="mood-choice"
+            *ngFor="let choice of moodChoices"
+            [class.active]="isMoodSelected(choice)"
+            [ngClass]="getMoodColorClass(choice.score)"
+            (click)="selectMood(choice)"
+          >
+            <span class="choice-emoji">{{ choice.emoji }}</span>
+            <span class="choice-label">{{ choice.label }}</span>
+          </button>
+        </div>
+
+        <div class="choice-description" *ngIf="getSelectedMood() as selectedMood">
+          {{ selectedMood.description }}
+        </div>
+
+        <form class="journal-form" [formGroup]="moodForm" (ngSubmit)="submitMoodLog()">
+          <div class="field-row">
+            <div class="field-group">
+              <label for="logDate">Log date</label>
+              <input id="logDate" type="date" formControlName="logDate" />
+            </div>
+
+            <div class="field-group score-box">
+              <label>Mood score</label>
+              <div class="score-value">
+                {{ moodForm.get('moodScore')?.value || '--' }}/10
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="notes">Daily reflection</label>
+            <textarea
+              id="notes"
+              rows="8"
+              formControlName="notes"
+              placeholder="Today I woke up feeling..."
+            ></textarea>
+          </div>
+
+          <div class="bottom-tools">
+            <div class="share-toggle-wrap">
+              <div class="share-left">
+                <mat-icon>link</mat-icon>
+                <span>Share with doctor</span>
+              </div>
+
+              <label class="switch">
+                <input type="checkbox" formControlName="isShared" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="form-buttons">
+              <button
+                *ngIf="editingId"
+                type="button"
+                class="cancel-btn"
+                (click)="cancelEdit()"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                class="save-btn"
+                [disabled]="submitting"
+              >
+                <mat-icon>{{ editingId ? 'edit' : 'task_alt' }}</mat-icon>
+                <span>{{ submitting ? 'Saving...' : (editingId ? 'Update Journal' : 'Save Journal') }}</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="form-feedback" *ngIf="successMessage || errorMessage">
+          <div class="feedback success" *ngIf="successMessage">
+            {{ successMessage }}
+          </div>
+          <div class="feedback error" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </div>
+        </div>
+      </section>
+
+      <section class="history-panel">
+        <div class="panel-glow panel-glow-right"></div>
+
+        <div class="history-header">
+          <div>
+            <div class="panel-kicker">Timeline</div>
+            <h2 class="panel-title">All mood entries</h2>
+          </div>
+
+          <div class="history-count">
+            {{ filteredLogs.length }} {{ filteredLogs.length === 1 ? 'entry' : 'entries' }}
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="filter-box">
+            <label>Emotion</label>
+            <select
+              [value]="filterEmotion"
+              (change)="onEmotionFilterChange($any($event.target).value)"
+            >
+              <option value="ALL">All</option>
+              <option value="GREAT">Great</option>
+              <option value="GOOD">Good</option>
+              <option value="OKAY">Okay</option>
+              <option value="SAD">Sad</option>
+              <option value="ANXIOUS">Anxious</option>
+            </select>
+          </div>
+
+          <div class="filter-box">
+            <label>Shared</label>
+            <select
+              [value]="filterShared"
+              (change)="onSharedFilterChange($any($event.target).value)"
+            >
+              <option value="ALL">All</option>
+              <option value="SHARED">Shared</option>
+              <option value="PRIVATE">Private</option>
+            </select>
+          </div>
+
+          <div class="filter-box search-box">
+            <label>Search</label>
+            <input
+              type="text"
+              [value]="searchText"
+              (input)="onSearchChange($any($event.target).value)"
+              placeholder="Search notes or emotion..."
+            />
+          </div>
+        </div>
+
+        <div class="timeline-loading" *ngIf="loading">
+          <div class="spinner"></div>
+          <p>Loading mood entries...</p>
+        </div>
+
+        <div class="timeline-empty" *ngIf="!loading && filteredLogs.length === 0">
+          <div class="empty-emoji">🌷</div>
+          <h3>No mood logs yet</h3>
+          <p>Start your first daily reflection on the left and it will appear here beautifully.</p>
+        </div>
+
+        <div class="timeline-list" *ngIf="!loading && filteredLogs.length > 0">
+          <article
+            class="timeline-card"
+            *ngFor="let log of paginatedLogs; trackBy: trackByLogId"
+            [ngClass]="getMoodColorClass(log.moodScore)"
+          >
+            <div class="timeline-card-glow"></div>
+
+            <div class="timeline-top">
+              <div class="timeline-top-left">
+                <div class="timeline-emoji">{{ getCardMoodEmoji(log) }}</div>
+
+                <div>
+                  <div class="timeline-mood">
+                    {{ getMoodLabel(log.moodScore, log.emotionType) }}
+                  </div>
+                  <div class="timeline-date">{{ formatDate(log.logDate) }}</div>
+                </div>
+              </div>
+
+              <div class="timeline-score">{{ log.moodScore }}/10</div>
+            </div>
+
+            <div class="timeline-note">
+              {{ log.notes || 'No reflection note was added for this day.' }}
+            </div>
+
+            <div class="timeline-meta">
+              <div class="meta-pill">
+                <mat-icon>favorite</mat-icon>
+                <span>{{ log.emotionType || 'Mood' }}</span>
+              </div>
+
+              <div class="meta-pill" [class.shared]="log.isShared">
+                <mat-icon>{{ log.isShared ? 'link' : 'lock' }}</mat-icon>
+                <span>{{ log.isShared ? 'Shared with doctor' : 'Private note' }}</span>
+              </div>
+            </div>
+
+            <div class="timeline-actions">
+              <button
+                type="button"
+                class="edit-btn"
+                (click)="startEdit(log)"
+              >
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+
+              <button
+                type="button"
+                class="delete-btn"
+                (click)="deleteLog(log)"
+              >
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <section class="pagination-wrap" *ngIf="!loading && shouldShowPagination">
+          <button
+            type="button"
+            class="page-nav-btn"
+            (click)="goToPage(currentPage - 1)"
+            [disabled]="currentPage === 1"
+          >
+            <mat-icon>chevron_left</mat-icon>
+            <span>Previous</span>
+          </button>
+
+          <div class="page-numbers">
+            <button
+              type="button"
+              class="page-number-btn"
+              *ngFor="let page of pageNumbers"
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="page-nav-btn"
+            (click)="goToPage(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+          >
+            <span>Next</span>
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </section>
+      </section>
+
+    </div>
+  </div>
+</div>

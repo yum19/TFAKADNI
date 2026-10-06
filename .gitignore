@@ -1,0 +1,33 @@
+# IntelliJ / VS Code / IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+
+# Backend Maven
+backend/target/
+
+# Backend Gradle
+backend/build/
+.gradle/
+
+# Env / secrets
+.env
+*.env
+application-local.properties
+application-secret.properties
+
+# Temporary
+*.tmp

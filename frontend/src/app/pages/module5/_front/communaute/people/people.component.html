@@ -1,0 +1,99 @@
+<app-index-header></app-index-header>
+
+<div class="pp-wrap">
+  <div class="pp-inner">
+
+    <div class="pp-page-header">
+      <div class="pp-header-text">
+        <h1 class="pp-title">People</h1>
+        <p class="pp-subtitle">Discover and connect with the community</p>
+      </div>
+      <div class="pp-search-wrap">
+        <mat-icon class="pp-search-icon">search</mat-icon>
+        <input class="pp-search-input" placeholder="Search people…"
+               [(ngModel)]="searchQuery" (input)="applyFilter()" />
+      </div>
+    </div>
+
+    <div class="pp-tabs">
+      <button class="pp-tab" [class.active]="activeTab==='all'"
+              (click)="activeTab='all'; applyFilter()">
+        <mat-icon>public</mat-icon><span>All Users</span>
+      </button>
+      <button class="pp-tab" [class.active]="activeTab==='following'"
+              (click)="activeTab='following'; applyFilter()">
+        <mat-icon>how_to_reg</mat-icon><span>Following</span>
+        <span class="pp-tab-count" *ngIf="following.length > 0">{{ following.length }}</span>
+      </button>
+      <button class="pp-tab" [class.active]="activeTab==='followers'"
+              (click)="activeTab='followers'; applyFilter()">
+        <mat-icon>people</mat-icon><span>Followers</span>
+        <span class="pp-tab-count" *ngIf="followers.length > 0">{{ followers.length }}</span>
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="pp-loading">
+      <div class="pp-loader"></div>
+      <p>Loading people…</p>
+    </div>
+
+    <div *ngIf="!loading" class="pp-grid">
+
+      <div *ngIf="displayedUsers.length === 0" class="pp-empty">
+        <mat-icon>person_search</mat-icon>
+        <p *ngIf="activeTab === 'all'">No users found</p>
+        <p *ngIf="activeTab === 'following'">You're not following anyone yet</p>
+        <p *ngIf="activeTab === 'followers'">You have no followers yet</p>
+      </div>
+
+      <div *ngFor="let u of displayedUsers" class="pp-card">
+        <div class="pp-card-cover"></div>
+        <div class="pp-card-body">
+
+          <div class="pp-avatar">{{ getInitials(u.fullName) }}</div>
+          <h3 class="pp-name">{{ u.fullName }}</h3>
+          <p class="pp-handle">{{ u.email }}</p>
+
+          <div class="pp-stats">
+            <div class="pp-stat">
+              <span class="pp-stat-num">{{ u.followersCount }}</span>
+              <span class="pp-stat-lbl">Followers</span>
+            </div>
+            <div class="pp-stat-div"></div>
+            <div class="pp-stat">
+              <span class="pp-stat-num">{{ u.followingCount }}</span>
+              <span class="pp-stat-lbl">Following</span>
+            </div>
+          </div>
+
+          <!-- Follow / Unfollow button — hover state driven by component -->
+          <button
+  class="pp-follow-btn"
+  [class.following]="u.isFollowedByMe"
+  [disabled]="inProgress.has(u.id)"
+  (click)="toggleFollow(u)"
+  type="button">
+  <ng-container *ngIf="inProgress.has(u.id)">
+    <mat-icon>hourglass_empty</mat-icon>
+    <span>Please wait…</span>
+  </ng-container>
+  <ng-container *ngIf="!inProgress.has(u.id)">
+    <ng-container *ngIf="!u.isFollowedByMe">
+      <mat-icon>person_add</mat-icon>
+      <span>Follow</span>
+    </ng-container>
+    <ng-container *ngIf="u.isFollowedByMe">
+      <mat-icon>how_to_reg</mat-icon>
+      <span>Following</span>
+    </ng-container>
+  </ng-container>
+</button>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<app-index-footer></app-index-footer>

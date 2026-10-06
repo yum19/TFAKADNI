@@ -1,0 +1,545 @@
+// partner-hub.component.scss
+
+.partner-hub {
+  min-height: 100vh;
+  background-image: url('/assets/img/partner_pages_background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+  font-family: 'Inter', system-ui, sans-serif;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--mat-sys-on-background) 78%, transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+.studio-wrap {
+  position: relative;
+  z-index: 1;
+  padding: 52px 48px 64px;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+
+  @media (max-width: 600px) {
+    padding: 32px 20px 48px;
+  }
+}
+
+// ── Glass Card base ────────────────────────────────────
+.glass-card {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--mat-sys-surface) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 35%, transparent);
+  border-radius: 18px;
+  padding: 32px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--mat-sys-primary),
+      var(--mat-sys-primary-container),
+      transparent
+    );
+    border-radius: 18px 18px 0 0;
+  }
+}
+
+// ── Chip & dot ─────────────────────────────────────────
+.studio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--mat-sys-primary-container) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-primary) 40%, transparent);
+  color: var(--mat-sys-primary-container);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 50px;
+  margin-bottom: 16px;
+}
+
+.hub-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--mat-sys-primary-container);
+  display: inline-block;
+  animation: hubPulse 2s ease-in-out infinite;
+
+  @keyframes hubPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .4; transform: scale(1.7); }
+  }
+}
+
+// ── Shared labels ──────────────────────────────────────
+.section-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--mat-sys-primary-container);
+  margin-bottom: 6px;
+}
+
+.col-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.col-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  gap: 2px;
+}
+
+// ── Buttons ────────────────────────────────────────────
+.studio-btn {
+  padding: 11px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all .2s;
+  letter-spacing: .3px;
+  text-decoration: none;
+  border: none;
+
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+
+  &.primary-btn {
+    background: color-mix(in srgb, var(--mat-sys-primary) 22%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+    color: var(--mat-sys-primary-container);
+
+    &:hover {
+      background: color-mix(in srgb, var(--mat-sys-primary) 35%, transparent);
+      border-color: color-mix(in srgb, var(--mat-sys-primary) 80%, transparent);
+      transform: translateY(-1px);
+    }
+  }
+
+  &.ghost-btn {
+    background: color-mix(in srgb, var(--mat-sys-surface) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 35%, transparent);
+    color: color-mix(in srgb, #fff 55%, transparent);
+
+    &:hover {
+      background: color-mix(in srgb, var(--mat-sys-surface) 18%, transparent);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+  }
+
+  &:active { transform: translateY(0) !important; }
+}
+
+// ── Hero ───────────────────────────────────────────────
+.hero-studio {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--mat-sys-surface) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 35%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: 52px 56px;
+  display: flex;
+  align-items: center;
+  min-height: 320px;
+
+  // Top accent line
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--mat-sys-primary),
+      var(--mat-sys-primary-container),
+      transparent
+    );
+    z-index: 2;
+  }
+
+  @media (max-width: 600px) {
+    padding: 36px 28px;
+  }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 80% 50%,
+    color-mix(in srgb, var(--mat-sys-primary) 18%, transparent) 0%,
+    transparent 65%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-visual {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 42%;
+  background:
+    linear-gradient(to left, transparent, color-mix(in srgb, var(--mat-sys-surface) 10%, transparent) 80%),
+    url('https://images.unsplash.com/photo-1531983412531-1f49a365ffed?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;
+  opacity: 0.18;
+  pointer-events: none;
+
+  @media (max-width: 860px) { display: none; }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.studio-title {
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -2px;
+  line-height: 1.05;
+  margin: 0 0 12px;
+
+  .title-accent { color: var(--mat-sys-primary-container); }
+}
+
+.studio-lead {
+  color: color-mix(in srgb, #fff 60%, transparent);
+  font-size: 15px;
+  line-height: 1.65;
+  margin: 0 0 28px;
+  max-width: 420px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+// ── Stats Row ──────────────────────────────────────────
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 860px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px) { grid-template-columns: 1fr 1fr; }
+}
+
+.stat-widget {
+  text-align: center;
+  padding: 28px 20px;
+  transition: transform .3s ease, border-color .3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--mat-sys-primary) 50%, transparent);
+  }
+
+  .stat-icon {
+    font-size: 1.3rem; width: 1.3rem; height: 1.3rem;
+    color: var(--mat-sys-primary-container);
+    opacity: .6;
+    margin-bottom: 10px;
+  }
+
+  .stat-val {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--mat-sys-primary-container);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: color-mix(in srgb, #fff 35%, transparent);
+  }
+}
+
+// ── Main Grid ──────────────────────────────────────────
+.main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 28px;
+  align-items: start;
+
+  @media (max-width: 860px) { grid-template-columns: 1fr; }
+}
+
+// ── Habits ─────────────────────────────────────────────
+.habit-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.habit-slab {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 22px 24px;
+  transition: transform .3s ease, border-color .3s ease;
+
+  &:hover {
+    transform: translateX(6px);
+    border-color: color-mix(in srgb, var(--mat-sys-primary) 50%, transparent);
+  }
+
+  .habit-index {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--mat-sys-primary) 20%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mat-sys-primary) 35%, transparent);
+    color: var(--mat-sys-primary-container);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  p {
+    font-size: 14px;
+    line-height: 1.6;
+    font-weight: 500;
+    color: color-mix(in srgb, #fff 70%, transparent);
+    margin: 0;
+    padding-top: 6px;
+  }
+}
+
+// ── Toolkit ────────────────────────────────────────────
+.toolkit-col .col-header {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+
+  .section-label { margin: 0; }
+
+  .col-title { flex: 1; }
+}
+
+.pro-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--mat-sys-primary) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-primary) 40%, transparent);
+  color: var(--mat-sys-primary-container);
+  padding: 4px 12px;
+  border-radius: 50px;
+  flex-shrink: 0;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+// ── Bento Cards ────────────────────────────────────────
+.bento-card {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  padding: 28px;
+  transition: transform .3s ease, border-color .3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5px);
+    border-color: color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+
+    .bento-icon {
+      background: color-mix(in srgb, var(--mat-sys-primary) 30%, transparent);
+      border-color: color-mix(in srgb, var(--mat-sys-primary) 60%, transparent);
+    }
+
+    .bento-arrow { opacity: 1; transform: translate(2px, -2px); }
+  }
+
+  .bento-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mat-sys-primary) 25%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mat-sys-primary-container);
+    margin-bottom: 18px;
+    transition: all .3s ease;
+
+    mat-icon { font-size: 1.3rem; width: 1.3rem; height: 1.3rem; }
+  }
+
+  h5 {
+    font-size: 16px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0 0 8px;
+    letter-spacing: -0.3px;
+  }
+
+  p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: color-mix(in srgb, #fff 40%, transparent);
+    margin: 0;
+    flex: 1;
+  }
+
+  .bento-arrow {
+    align-self: flex-end;
+    margin-top: 16px;
+    color: var(--mat-sys-primary-container);
+    opacity: 0;
+    transition: all .3s ease;
+
+    mat-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
+  }
+}
+
+// ── AI Featured Bento ──────────────────────────────────
+.bento-ai {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 32px;
+
+  // Stronger primary tint to make it stand out
+  background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+  border-color: color-mix(in srgb, var(--mat-sys-primary) 40%, transparent);
+
+  &:hover {
+    transform: translateY(-4px);
+    background: color-mix(in srgb, var(--mat-sys-primary) 22%, transparent);
+    border-color: color-mix(in srgb, var(--mat-sys-primary) 65%, transparent);
+  }
+
+  .ai-glow {
+    position: absolute;
+    top: -60%; right: -5%;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--mat-sys-primary) 20%, transparent) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  .ai-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .ai-icon {
+    background: color-mix(in srgb, var(--mat-sys-primary) 30%, transparent);
+    border-color: color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    flex-shrink: 0;
+    margin-bottom: 0;
+
+    mat-icon { font-size: 1.5rem; width: 1.5rem; height: 1.5rem; }
+  }
+
+  .ai-text {
+    flex: 1;
+    min-width: 160px;
+
+    h5 {
+      font-size: 17px;
+      background: linear-gradient(135deg, #fff 40%, var(--mat-sys-primary-container));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    p { color: color-mix(in srgb, #fff 45%, transparent); }
+  }
+
+  .ai-launch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: color-mix(in srgb, var(--mat-sys-primary) 30%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mat-sys-primary) 60%, transparent);
+    border-radius: 10px;
+    color: var(--mat-sys-primary-container);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    transition: all .2s;
+    flex-shrink: 0;
+
+    mat-icon { font-size: .9rem; width: .9rem; height: .9rem; }
+
+    &:hover {
+      background: color-mix(in srgb, var(--mat-sys-primary) 45%, transparent);
+    }
+  }
+}

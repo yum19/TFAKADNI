@@ -1,0 +1,317 @@
+<section class="document-page">
+  <div class="document-shell">
+
+    <header class="topbar"></header>
+
+    <section class="hero-card">
+      <div class="hero-copy">
+        <p class="eyebrow">Teething · baby milestones</p>
+        <h1>Tiny teeth, <span>beautifully tracked</span></h1>
+        <p class="hero-text">Track eruption dates, symptoms and notes with care.</p>
+      </div>
+      <div class="hero-side">
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-number">{{ teethingLogs.length }}</span>
+            <span class="stat-label">Logs</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">{{ babyId }}</span>
+            <span class="stat-label">Baby ID</span>
+          </div>
+        </div>
+        <button type="button" class="add-document-btn" (click)="openAddModal()">
+          <span class="plus">+</span> Add tooth
+        </button>
+      </div>
+    </section>
+
+    <div class="messages">
+      <div class="status success" *ngIf="successMessage">{{ successMessage }}</div>
+      <div class="status error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    </div>
+
+    <section class="gallery-section">
+      <div class="documents-grid two-col">
+
+        <section class="filters-card arc-card" #formCard>
+          <div class="arc-tabs">
+            <button
+              type="button"
+              class="arc-tab"
+              [class.arc-tab--active]="activeArcTab === 'tracking'"
+              (click)="activeArcTab = 'tracking'">
+              Child's teeth
+            </button>
+
+            <button
+              type="button"
+              class="arc-tab"
+              [class.arc-tab--active]="activeArcTab === 'chart'"
+              (click)="activeArcTab = 'chart'">
+              Dental chart
+            </button>
+          </div>
+
+          <ng-container *ngIf="activeArcTab === 'tracking'">
+            <div class="arc-legend">
+              <span class="arc-legend-item"><i class="arc-dot arc-dot--erupted"></i>Erupted</span>
+              <span class="arc-legend-item"><i class="arc-dot arc-dot--early"></i>Early</span>
+              <span class="arc-legend-item"><i class="arc-dot arc-dot--pending"></i>Pending</span>
+            </div>
+
+            <p class="arc-jaw-label">Upper Teeth</p>
+            <div class="arc-wrap" *ngIf="!loading">
+              <svg viewBox="0 0 300 170" class="arc-svg" preserveAspectRatio="xMidYMid meet">
+                <g
+                  *ngFor="let t of upperTeeth; trackBy: trackByToothId"
+                  class="tooth-node"
+                  [attr.transform]="'translate(' + t.cx + ',' + t.cy + ')'"
+                  (click)="openToothModal(t)">
+                  <circle r="18" [attr.fill]="getToothFill(t.status)"></circle>
+
+                  <ng-container *ngIf="t.status === 'pending'; else singleValueUpper">
+                    <text
+                      text-anchor="middle"
+                      [attr.fill]="getTextFill(t.status)"
+                      font-family="Nunito, sans-serif"
+                      font-weight="800"
+                      font-size="8"
+                      y="-2">
+                      {{ t.displayLabel }}
+                    </text>
+                    <text
+                      text-anchor="middle"
+                      [attr.fill]="getTextFill(t.status)"
+                      font-family="Nunito, sans-serif"
+                      font-weight="800"
+                      font-size="8"
+                      y="9">
+                      {{ t.displayLine2 }}
+                    </text>
+                  </ng-container>
+
+                  <ng-template #singleValueUpper>
+                    <text
+                      text-anchor="middle"
+                      dominant-baseline="middle"
+                      [attr.fill]="getTextFill(t.status)"
+                      font-family="Nunito, sans-serif"
+                      font-weight="800"
+                      font-size="11">
+                      {{ t.displayLabel }}
+                    </text>
+                  </ng-template>
+                </g>
+              </svg>
+            </div>
+
+            <p class="arc-jaw-label">Lower Teeth</p>
+            <div class="arc-wrap" *ngIf="!loading">
+              <svg viewBox="0 0 300 170" class="arc-svg" preserveAspectRatio="xMidYMid meet">
+                <g
+                  *ngFor="let t of lowerTeeth; trackBy: trackByToothId"
+                  class="tooth-node"
+                  [attr.transform]="'translate(' + t.cx + ',' + t.cy + ')'"
+                  (click)="openToothModal(t)">
+                  <circle r="18" [attr.fill]="getToothFill(t.status)"></circle>
+
+                  <ng-container *ngIf="t.status === 'pending'; else singleValueLower">
+                    <text
+                      text-anchor="middle"
+                      [attr.fill]="getTextFill(t.status)"
+                      font-family="Nunito, sans-serif"
+                      font-weight="800"
+                      font-size="8"
+                      y="-2">
+                      {{ t.displayLabel }}
+                    </text>
+                    <text
+                      text-anchor="middle"
+                      [attr.fill]="getTextFill(t.status)"
+                      font-family="Nunito, sans-serif"
+                      font-weight="800"
+                      font-size="8"
+                      y="9">
+                      {{ t.displayLine2 }}
+                    </text>
+                  </ng-container>
+
+                  <ng-template #singleValueLower>
+                    <text
+                      text-anchor="middle"
+                      dominant-baseline="middle"
+                      [attr.fill]="getTextFill(t.status)"
+                      font-family="Nunito, sans-serif"
+                      font-weight="800"
+                      font-size="11">
+                      {{ t.displayLabel }}
+                    </text>
+                  </ng-template>
+                </g>
+              </svg>
+            </div>
+
+            <div class="arc-loading" *ngIf="loading">Loading…</div>
+          </ng-container>
+
+          <ng-container *ngIf="activeArcTab === 'chart'">
+            <div class="chart-section">
+              <p class="chart-jaw-title">Upper Teeth</p>
+              <div class="chart-list">
+                <div class="chart-row" *ngFor="let t of upperTeeth">
+                  <span
+                    class="chart-status-dot"
+                    [class.chart-dot--erupted]="t.status === 'erupted'"
+                    [class.chart-dot--early]="t.status === 'early'"
+                    [class.chart-dot--pending]="t.status === 'pending'">
+                  </span>
+                  <span class="chart-name">{{ t.def.label }}</span>
+                  <span class="chart-range">{{ t.def.minMonth }}–{{ t.def.maxMonth }} mo</span>
+                  <span class="chart-actual" *ngIf="t.log">✓ {{ t.log.eruptionDate | date:'MMM yyyy' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-section">
+              <p class="chart-jaw-title">Lower Teeth</p>
+              <div class="chart-list">
+                <div class="chart-row" *ngFor="let t of lowerTeeth">
+                  <span
+                    class="chart-status-dot"
+                    [class.chart-dot--erupted]="t.status === 'erupted'"
+                    [class.chart-dot--early]="t.status === 'early'"
+                    [class.chart-dot--pending]="t.status === 'pending'">
+                  </span>
+                  <span class="chart-name">{{ t.def.label }}</span>
+                  <span class="chart-range">{{ t.def.minMonth }}–{{ t.def.maxMonth }} mo</span>
+                  <span class="chart-actual" *ngIf="t.log">✓ {{ t.log.eruptionDate | date:'MMM yyyy' }}</span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </section>
+
+        <section class="filters-card">
+          <ng-container *ngIf="isEditMode">
+            <div class="filters-head">
+              <span class="filters-title">Edit teething log</span>
+            </div>
+
+            <form [formGroup]="teethingForm" (ngSubmit)="onSubmit()" class="inline-form">
+              <div class="form-grid">
+               <label class="field">
+  <span>Tooth label</span>
+  <input
+    type="text"
+    formControlName="toothLabel"
+    class="readonly-field"
+    readonly
+  />
+</label>
+
+                <label class="field">
+                  <span>Eruption date</span>
+                  <input type="date" formControlName="eruptionDate" />
+                </label>
+
+                <label class="field full">
+                  <span>Symptoms</span>
+                  <textarea rows="3" formControlName="symptoms" placeholder="Swollen gums, drooling, fever..."></textarea>
+                </label>
+
+                <label class="field full">
+                  <span>Notes</span>
+                  <textarea rows="4" formControlName="notes" placeholder="Add any additional notes..."></textarea>
+                </label>
+              </div>
+
+              <div class="modal-actions">
+                <button type="button" class="secondary-btn" (click)="resetForm()">Cancel</button>
+                <button type="submit" class="primary-btn" [disabled]="submitting">
+                  {{ submitting ? 'Saving...' : 'Update' }}
+                </button>
+              </div>
+            </form>
+          </ng-container>
+
+          <div class="filters-head" [style.margin-top]="isEditMode ? '24px' : '0'">
+            <span class="filters-title">Teething history</span>
+          </div>
+
+          <div *ngIf="loading" class="empty-state compact">
+            <h3>Loading...</h3>
+          </div>
+
+          <div *ngIf="!loading && teethingLogs.length === 0" class="empty-state compact">
+            <h3>No teething records yet</h3>
+            <p>Add the first tooth using the arc on the left.</p>
+            <button type="button" class="empty-add-btn" (click)="openAddModal()">Add first tooth</button>
+          </div>
+
+          <div class="logs-list" *ngIf="!loading && teethingLogs.length > 0">
+            <article class="document-card" *ngFor="let log of teethingLogs; trackBy: trackByLogId">
+              <div class="document-body">
+                <div class="log-head">
+                  <span class="tooth-label">🦷 {{ log.toothLabel }}</span>
+                  <span class="document-date">{{ log.eruptionDate | date:'dd MMM yyyy' }}</span>
+                </div>
+
+                <p class="document-notes" *ngIf="log.symptoms">
+                  <strong>Symptoms:</strong> {{ log.symptoms }}
+                </p>
+
+                <p class="document-notes" *ngIf="log.notes">
+                  <strong>Notes:</strong> {{ log.notes }}
+                </p>
+
+                <div class="document-footer">
+                  <div class="card-actions">
+                    <button type="button" class="update-btn" (click)="editLog(log)">Update</button>
+                    <button type="button" class="delete-btn" (click)="deleteLog(log.id)">Remove</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+      </div>
+    </section>
+  </div>
+</section>
+
+<div class="modal-backdrop" *ngIf="showAddModal" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <p class="modal-eyebrow">ADD TEETHING LOG</p>
+
+    <div class="modal-field">
+      <label>Tooth label</label>
+      <input type="text" [ngModel]="modalToothLabel" disabled class="modal-readonly-input" />
+    </div>
+
+    <div class="modal-field">
+      <label>Eruption date</label>
+      <input type="date" [(ngModel)]="modalEruptionDate" />
+    </div>
+
+    <div class="modal-field">
+      <label>Symptoms</label>
+      <textarea rows="3" [(ngModel)]="modalSymptoms" placeholder="Swollen gums, drooling, fever..."></textarea>
+    </div>
+
+    <div class="modal-field">
+      <label>Notes</label>
+      <textarea rows="3" [(ngModel)]="modalNotes" placeholder="Add any additional notes..."></textarea>
+    </div>
+
+    <small class="error-text" *ngIf="modalError">{{ modalError }}</small>
+
+    <div class="modal-footer">
+      <button type="button" class="modal-cancel-btn" (click)="closeModal()">Cancel</button>
+      <button type="button" class="modal-add-btn" (click)="submitModal()" [disabled]="submitting">
+        {{ submitting ? 'Saving...' : 'Add' }}
+      </button>
+    </div>
+  </div>
+</div>

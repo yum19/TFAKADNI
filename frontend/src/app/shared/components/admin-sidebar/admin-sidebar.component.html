@@ -1,0 +1,94 @@
+<aside class="admin-sidebar" [class.collapsed]="collapsed">
+  <!-- Ambient background glow -->
+  <div class="sidebar-glow"></div>
+
+  <!-- ── Header ─────────────────────────────────────── -->
+  <header class="sidebar-header">
+    <a
+      routerLink="/admin"
+      class="brand-link"
+      [title]="collapsed ? 'MAMA Studio' : ''"
+    >
+      <div class="logo-ring">
+        <img src="assets/img/logo-mother.png" alt="MAMA Studio" />
+        <div class="logo-ring-pulse"></div>
+      </div>
+    </a>
+
+    <div class="brand-text" [class.hidden]="collapsed">
+      <div class="brand-title">
+        MAMA<span class="brand-accent">Studio</span>
+      </div>
+      <div class="brand-sub">Enterprise Admin</div>
+    </div>
+
+    <button
+      class="collapse-btn"
+      (click)="toggleSidebar.emit()"
+      [title]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+    >
+      <mat-icon>{{ collapsed ? "chevron_right" : "chevron_left" }}</mat-icon>
+    </button>
+  </header>
+
+  <div class="sidebar-rule"></div>
+
+  <!-- ── Navigation ─────────────────────────────────── -->
+  <nav class="nav-scroll">
+    @for (section of navSections; track section.label) {
+      <div class="nav-section">
+        <span class="section-label" [class.hidden]="collapsed">
+          {{ section.label }}
+        </span>
+
+        @for (item of section.items; track item.path) {
+          <a
+            class="nav-item"
+            [routerLink]="item.path"
+            routerLinkActive="nav-item--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            [title]="collapsed ? item.label : ''"
+          >
+            <span class="nav-item-bg"></span>
+            <span class="nav-item-icon">
+              <mat-icon>{{ item.icon }}</mat-icon>
+            </span>
+            <span class="nav-item-label" [class.hidden]="collapsed">{{
+              item.label
+            }}</span>
+            <span class="nav-item-badge" [class.hidden]="collapsed"></span>
+          </a>
+        }
+      </div>
+    }
+  </nav>
+
+  <div class="sidebar-rule sidebar-rule--footer"></div>
+
+  <!-- ── Footer ─────────────────────────────────────── -->
+  <footer class="sidebar-footer">
+    @if (!collapsed) {
+      <div class="tip-card">
+        <div class="tip-card-stripe"></div>
+        <div class="tip-header">
+          <mat-icon>auto_awesome</mat-icon>
+          <span>Quick tip</span>
+        </div>
+        <p>
+          Use Content Studio to batch-publish courses and sync partner guides in
+          one pass.
+        </p>
+      </div>
+    }
+
+    <button
+      class="logout-btn"
+      (click)="logout()"
+      [class.collapsed]="collapsed"
+      [title]="collapsed ? 'End Session' : ''"
+    >
+      <mat-icon>logout</mat-icon>
+      <span class="logout-label" [class.hidden]="collapsed">End Session</span>
+    </button>
+  </footer>
+</aside>

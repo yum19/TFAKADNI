@@ -1,0 +1,71 @@
+.theme-custom {
+  /* 🌸 BACKGROUND */
+  --mat-sys-background: light-dark(#fff5f7, #1a1416);
+  --mat-sys-on-background: light-dark(#2b1b1f, #fcebed);
+
+  /* 💖 PRIMARY (your base color) */
+  --mat-sys-primary: light-dark(#ff4f75, #ff8fa3);
+  --mat-sys-on-primary: light-dark(#ffffff, #4a0012);
+  --mat-sys-primary-container: light-dark(#ffd9e1, #7a0028);
+  --mat-sys-on-primary-container: light-dark(#4a0012, #ffd9e1);
+
+  /* 🌷 SECONDARY (lighter + softer version) */
+  --mat-sys-secondary: light-dark(#d97c8f, #f2a7b5);
+  --mat-sys-on-secondary: light-dark(#ffffff, #4a0012);
+  --mat-sys-secondary-container: light-dark(#ffe4ea, #6a0022);
+  --mat-sys-on-secondary-container: light-dark(#4a0012, #ffe4ea);
+
+  /* 🌺 TERTIARY (accent variation) */
+  --mat-sys-tertiary: light-dark(#ff7a95, #ffb3c1);
+  --mat-sys-on-tertiary: light-dark(#ffffff, #4a0012);
+  --mat-sys-tertiary-container: light-dark(#ffe4ea, #6a0022);
+  --mat-sys-on-tertiary-container: light-dark(#4a0012, #ffe4ea);
+
+  /* 🤍 SURFACES (clean Flo style) */
+  --mat-sys-surface: light-dark(#ffffff, #1a1416);
+  --mat-sys-surface-dim: light-dark(#f8e9ec, #1a1416);
+  --mat-sys-surface-bright: light-dark(#ffffff, #3a2a2e);
+
+  --mat-sys-surface-container-lowest: light-dark(#ffffff, #140c0e);
+  --mat-sys-surface-container-low: light-dark(#fff3f5, #1e1417);
+  --mat-sys-surface-container: light-dark(#ffeef1, #24181c);
+  --mat-sys-surface-container-high: light-dark(#fde6ea, #2f2125);
+  --mat-sys-surface-container-highest: light-dark(#f9dde2, #3a2a2e);
+
+  --mat-sys-surface-variant: light-dark(#f4d6dc, #4a3a3f);
+  --mat-sys-on-surface: light-dark(#2b1b1f, #fcebed);
+  --mat-sys-on-surface-variant: light-dark(#6a5a5f, #d8c2c8);
+
+  /* subtle borders */
+  --mat-sys-outline: light-dark(#d1a3ad, #8c757c);
+  --mat-sys-outline-variant: light-dark(#f1d7de, #4a3a3f);
+
+  --mat-sys-surface-tint: light-dark(#ff4f75, #ff8fa3);
+
+  /* ❗ errors */
+  --mat-sys-error: light-dark(#ba1a1a, #ffb4ab);
+  --mat-sys-on-error: light-dark(#ffffff, #690005);
+  --mat-sys-error-container: light-dark(#ffdad6, #93000a);
+  --mat-sys-on-error-container: light-dark(#93000a, #ffdad6);
+
+  --mat-sys-scrim: light-dark(#000000, #000000);
+  --mat-sys-shadow: light-dark(#000000, #000000);
+
+  --mat-sys-neutral-variant20: #3a2a2e;
+
+  /* UTILITIES */
+  &.bg-theme,
+  .bg-theme {
+    background-color: var(--mat-sys-primary) !important;
+  }
+
+  &.bg-light-theme,
+  .bg-light-theme {
+    background-color: var(--mat-sys-primary-container);
+  }
+
+  .text-theme,
+  &.text-theme {
+    color: var(--mat-sys-primary);
+  }
+}

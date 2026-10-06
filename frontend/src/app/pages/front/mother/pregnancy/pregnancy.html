@@ -1,0 +1,602 @@
+<!-- ░░ BACKGROUND PAGE ░░ -->
+<div class="preg-page-bg">
+  <div class="preg-bg-img" style="background-image: url('assets/img/bg-pregnancy.jpg')"></div>
+  <div class="preg-bg-overlay"></div>
+</div>
+
+<!-- ░░ HERO ░░ -->
+<section class="preg-hero fade-in">
+  <div class="preg-hero__left">
+    <span class="preg-hero__eyebrow">🌸 Your pregnancy journey</span>
+    <h1 class="preg-hero__title">
+      My <span style="font-style:italic; background:linear-gradient(135deg,#c94d6a,#d97b58,#a8722e); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; background-size:200% auto; display:inline-block;">Pregnancy</span>
+    </h1>
+    <p class="preg-hero__sub">
+      Every week is a new chapter. Here are all the details of your extraordinary journey.
+    </p>
+    <div class="preg-hero__actions">
+      @if(pregnancy) {
+      <button class="preg-btn preg-btn--pdf" (click)="downloadReport()" [disabled]="downloadingPdf">
+        <span class="material-symbols-outlined">{{ downloadingPdf ? 'hourglass_empty' : 'download' }}</span>
+        {{ downloadingPdf ? 'Generating PDF...' : 'Download my report' }}
+      </button>
+      }
+     @if(pregnancy && pregnancy.status === 'ACTIVE') {
+      <button class="preg-btn preg-btn--risk" (click)="openRiskPopup()">
+        <span class="material-symbols-outlined">security</span>
+        Risk score
+      </button>
+      <button class="preg-btn preg-btn--edit" (click)="openEditForm()">
+        <span class="material-symbols-outlined">edit</span> Edit
+      </button>
+      <button class="preg-btn preg-btn--delete" (click)="deletePregnancy()" [disabled]="deleting">
+        <span class="material-symbols-outlined">delete</span>
+        {{ deleting ? '...' : 'Delete' }}
+      </button>
+      }
+      @if(canCreateNew()) {
+      <button class="preg-btn preg-btn--create" (click)="openCreateForm()">
+        <span class="material-symbols-outlined">add_circle</span> New record
+      </button>
+      }
+    </div>
+  </div>
+  <div class="preg-hero__right">
+    @if(pregnancy) {
+    <div class="preg-week-ring">
+      <svg viewBox="0 0 120 120" class="preg-ring-svg">
+        <circle cx="60" cy="60" r="52" class="preg-ring-bg"/>
+        <circle cx="60" cy="60" r="52" class="preg-ring-fill"
+          style="stroke-dasharray:326.7"
+          [style.stroke-dashoffset]="326.7 - (326.7 * pregnancyProgress / 100)"/>
+      </svg>
+      <div class="preg-ring-inner">
+        <span class="material-symbols-outlined preg-ring-icon">pregnant_woman</span>
+        <span class="preg-ring-week">W{{ currentWeek }}</span>
+        <span class="preg-ring-label">of 40</span>
+      </div>
+    </div>
+    }
+  </div>
+</section>
+
+<!-- ░░ SHARING STATUS BANNER ░░ -->
+@if(pregnancy && pregnancy.isSharedPartner) {
+<section class="sharing-banner fade-in-delay-1">
+  <div class="sharing-banner__inner">
+    <span class="material-symbols-outlined sharing-banner__icon">people</span>
+    <div>
+      <p class="sharing-banner__title mb-0">Shared with your partner</p>
+      <p class="sharing-banner__sub mb-0">Your partner can view your pregnancy folder, exams and fetal development</p>
+    </div>
+    <button class="preg-btn preg-btn--delete" (click)="openEditForm()" style="margin-left:auto;flex-shrink:0">
+      <span class="material-symbols-outlined">settings</span> Manage
+    </button>
+  </div>
+</section>
+}
+
+<!-- ░░ HISTORY RIBBON ░░ -->
+@if(!loading && pregnancies.length > 1) {
+<section class="preg-history fade-in-delay-1">
+  <span class="preg-history__label">
+    <span class="material-symbols-outlined">history</span> History
+  </span>
+  @for(p of pregnancies; track p.id) {
+  <div class="preg-history__chip"
+       [class.preg-history__chip--active]="pregnancy?.id === p.id"
+       (click)="selectPregnancy(p)">
+    <span class="material-symbols-outlined">pregnant_woman</span>
+    {{ p.lmpDate | date:'MM/yyyy' }}
+    <span class="preg-history__status" [style.color]="getStatusColor(p.status)">
+      {{ getStatusLabel(p.status) }}
+    </span>
+  </div>
+  }
+</section>
+}
+
+<!-- ░░ LOADING ░░ -->
+@if(loading) {
+<div class="preg-loading">
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
+}
+
+<!-- ░░ NO PREGNANCY ░░ -->
+@if(!loading && pregnancies.length === 0) {
+<section class="preg-empty fade-in-delay-1">
+  <div class="preg-empty__card">
+    <span class="material-symbols-outlined preg-empty__icon">pregnant_woman</span>
+    <h2 class="preg-empty__title">No pregnancy record yet</h2>
+    <p class="preg-empty__sub">Create your first record to start your journey.</p>
+    <button class="preg-btn preg-btn--create" (click)="openCreateForm()">
+      <span class="material-symbols-outlined">add_circle</span>
+      Create my record
+    </button>
+  </div>
+</section>
+}
+
+<!-- ░░ BENTO GRID ░░ -->
+@if(pregnancy && !loading) {
+<section class="preg-bento fade-in-delay-2">
+
+  <!-- CARD 1 — PREGNANCY INFO -->
+  <div class="preg-bento__card preg-bento__card--info">
+    <div class="preg-card-tag">🤱 Pregnancy details</div>
+    <div class="preg-info-header">
+      <div>
+        <h2 class="preg-card-title">Week {{ currentWeek }}</h2>
+        <p class="preg-info-sub">
+          {{ getTrimester() }} —
+          <span class="preg-type-pill">{{ getTypeLabel(pregnancy.pregnancyType) }}</span>
+        </p>
+      </div>
+      <span class="preg-status-pill"
+            [style.background]="getStatusColor(pregnancy.status) + '22'"
+            [style.color]="getStatusColor(pregnancy.status)"
+            [style.border]="'1.5px solid ' + getStatusColor(pregnancy.status) + '55'">
+        {{ getStatusLabel(pregnancy.status) }}
+      </span>
+    </div>
+
+    <div class="preg-progress-list">
+      <div class="preg-progress-item" [class.preg-progress--done]="currentWeek >= 12">
+        <div class="preg-progress__header">
+          <span class="preg-progress__name">Trimester 1</span>
+          <span class="preg-progress__weeks">W1 – W12</span>
+          <span class="preg-progress__pct">{{ currentWeek >= 12 ? 100 : pregnancyProgress }}%</span>
+        </div>
+        <div class="preg-progress__bar">
+          <div class="preg-progress__fill preg-progress__fill--t1"
+               [style.width]="(currentWeek >= 12 ? 100 : pregnancyProgress) + '%'"></div>
+        </div>
+      </div>
+
+      <div class="preg-progress-item" [class.preg-progress--active]="currentWeek > 12 && currentWeek <= 26">
+        <div class="preg-progress__header">
+          <span class="preg-progress__name">Trimester 2 @if(currentWeek > 12 && currentWeek <= 26) { ✦ }</span>
+          <span class="preg-progress__weeks">W13 – W26</span>
+          <span class="preg-progress__pct">{{ trimester2Progress }}%</span>
+        </div>
+        <div class="preg-progress__bar">
+          <div class="preg-progress__fill" [style.width]="trimester2Progress + '%'"></div>
+        </div>
+      </div>
+
+      <div class="preg-progress-item">
+        <div class="preg-progress__header">
+          <span class="preg-progress__name">Trimester 3</span>
+          <span class="preg-progress__weeks">W27 – W40</span>
+          <span class="preg-progress__pct">
+            {{ currentWeek > 26 ? Math.round(((currentWeek-26)/14)*100) : 0 }}%
+          </span>
+        </div>
+        <div class="preg-progress__bar">
+          <div class="preg-progress__fill"
+               [style.width]="(currentWeek > 26 ? Math.round(((currentWeek-26)/14)*100) : 0) + '%'"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 2 — IMPORTANT DATES -->
+  <div class="preg-bento__card preg-bento__card--dates">
+    <div class="preg-card-tag">📅 Important dates</div>
+    <div class="preg-dates-list">
+      <div class="preg-date-item">
+        <div class="preg-date-icon preg-date-icon--peach">
+          <span class="material-symbols-outlined">event</span>
+        </div>
+        <div>
+          <p class="preg-date__label">Last Menstrual Period</p>
+          <p class="preg-date__value">{{ pregnancy.lmpDate | date:'MMMM dd, yyyy' }}</p>
+        </div>
+      </div>
+      <div class="preg-date-divider"></div>
+      <div class="preg-date-item">
+        <div class="preg-date-icon preg-date-icon--rose">
+          <span class="material-symbols-outlined">child_friendly</span>
+        </div>
+        <div>
+          <p class="preg-date__label">Expected Due Date</p>
+          <p class="preg-date__value preg-date__value--highlight">{{ pregnancy.dueDate | date:'MMMM dd, yyyy' }}</p>
+        </div>
+      </div>
+      <div class="preg-date-divider"></div>
+      <div class="preg-date-item">
+        <div class="preg-date-icon preg-date-icon--sky">
+          <span class="material-symbols-outlined">schedule</span>
+        </div>
+        <div>
+          <p class="preg-date__label">Record created</p>
+          <p class="preg-date__value">{{ pregnancy.createdAt | date:'MMMM dd, yyyy' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 3 — MEDICAL FOLLOW-UP -->
+  <div class="preg-bento__card preg-bento__card--medical">
+    <div class="preg-card-tag">🏥 Medical follow-up</div>
+    <div class="preg-medical-list">
+      <div class="preg-medical-item">
+        <div class="preg-medical-icon">
+          <span class="material-symbols-outlined">stethoscope</span>
+        </div>
+        <div>
+          <p class="preg-medical__label">Attending physician</p>
+          <p class="preg-medical__value">{{ pregnancy.doctorName || 'Not provided' }}</p>
+        </div>
+      </div>
+      <div class="preg-medical-item">
+        <div class="preg-medical-icon">
+          <span class="material-symbols-outlined">apartment</span>
+        </div>
+        <div>
+          <p class="preg-medical__label">Hospital / Clinic</p>
+          <p class="preg-medical__value">{{ pregnancy.hospitalName || 'Not provided' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 4 — NOTES -->
+  <div class="preg-bento__card preg-bento__card--notes">
+    <div class="preg-card-tag">📝 Notes</div>
+    <div class="preg-notes-body">
+      <p class="preg-notes-text">{{ pregnancy.notes || 'No notes for this pregnancy.' }}</p>
+    </div>
+    <div class="preg-notes-deco">💭</div>
+  </div>
+
+</section>
+}
+
+<!-- ░░ CREATE POPUP ░░ -->
+@if(showForm) {
+<div class="preg-popup-overlay" (click)="closeCreateForm()">
+  <div class="preg-popup-box" (click)="$event.stopPropagation()">
+    <div class="preg-popup-header">
+      <div class="preg-popup-icon">
+        <span class="material-symbols-outlined">add_circle</span>
+      </div>
+      <div>
+        <h3 class="preg-popup-title">New pregnancy record</h3>
+        <p class="preg-popup-sub">Fill in your details to begin tracking</p>
+      </div>
+      <button mat-icon-button (click)="closeCreateForm()" class="ms-auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <form [formGroup]="createForm" (ngSubmit)="save()">
+      <div class="row gx-3">
+        <div class="col-12 col-md-6 mb-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Last menstrual period *</mat-label>
+            <input matInput [matDatepicker]="picker1" formControlName="lmpDate" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
+            @if(createForm.get('lmpDate')?.hasError('lmpTooOld')) {
+              <mat-error>Date too old — pregnancy already completed</mat-error>
+            }
+            @if(createForm.get('lmpDate')?.hasError('required')) {
+              <mat-error>This field is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6 mb-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Due date (auto-calculated)</mat-label>
+            <input matInput [matDatepicker]="picker2" formControlName="dueDate" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="picker2" [disabled]="true"></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+            <mat-hint>LMP + 40 weeks</mat-hint>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Pregnancy type *</mat-label>
+            <mat-select formControlName="pregnancyType">
+              <mat-option value="SINGLETON">Single pregnancy</mat-option>
+              <mat-option value="TWINS">Twins</mat-option>
+              <mat-option value="TRIPLETS">Triplets</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Attending physician</mat-label>
+            <input matInput formControlName="doctorName" placeholder="Dr. Name" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Hospital / Clinic</mat-label>
+            <input matInput formControlName="hospitalName" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 mb-2">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Notes</mat-label>
+            <textarea matInput formControlName="notes" rows="3"></textarea>
+          </mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <div class="sharing-toggle-box"
+               [class.sharing-toggle-box--active]="createForm.get('isSharedPartner')?.value">
+            <div class="d-flex align-items-center gap-3">
+              <div class="sharing-toggle-icon"
+                   [class.sharing-toggle-icon--active]="createForm.get('isSharedPartner')?.value">
+                <span class="material-symbols-outlined">
+                  {{ createForm.get('isSharedPartner')?.value ? 'people' : 'person_off' }}
+                </span>
+              </div>
+              <div class="flex-grow-1">
+                <p class="sharing-toggle-title mb-1">Share with my partner</p>
+                <p class="sharing-toggle-desc mb-0">
+                  @if(createForm.get('isSharedPartner')?.value) {
+                    <span class="sharing-on">✅ Your partner can view your pregnancy, exams and fetal development</span>
+                  } @else {
+                    <span class="sharing-off">🔒 Your data is private — you can change this later</span>
+                  }
+                </p>
+              </div>
+              <mat-slide-toggle formControlName="isSharedPartner" color="primary" class="flex-shrink-0">
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex gap-2 justify-content-end mt-2">
+        <button mat-button type="button" (click)="closeCreateForm()">Cancel</button>
+        <button mat-raised-button type="submit" [disabled]="createForm.invalid || saving" class="preg-btn preg-btn--create">
+          @if(saving) { Saving... } @else { Create record }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- ░░ EDIT POPUP ░░ -->
+@if(showEditForm && pregnancy) {
+<div class="preg-popup-overlay" (click)="closeEditForm()">
+  <div class="preg-popup-box" (click)="$event.stopPropagation()">
+    <div class="preg-popup-header">
+      <div class="preg-popup-icon preg-popup-icon--edit">
+        <span class="material-symbols-outlined">edit</span>
+      </div>
+      <div>
+        <h3 class="preg-popup-title">Edit pregnancy</h3>
+        <p class="preg-popup-sub">Update your pregnancy details</p>
+      </div>
+      <button mat-icon-button (click)="closeEditForm()" class="ms-auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="preg-info-hint">
+      <span class="material-symbols-outlined">info</span>
+      The due date will be recalculated automatically (LMP + 40 weeks)
+    </div>
+
+    <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="mt-3">
+      <div class="row gx-3">
+        <div class="col-12 col-md-6 mb-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Last menstrual period *</mat-label>
+            <input matInput [matDatepicker]="editPicker" formControlName="lmpDate" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="editPicker"></mat-datepicker-toggle>
+            <mat-datepicker #editPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Pregnancy type *</mat-label>
+            <mat-select formControlName="pregnancyType">
+              <mat-option value="SINGLETON">Single pregnancy</mat-option>
+              <mat-option value="TWINS">Twins</mat-option>
+              <mat-option value="TRIPLETS">Triplets</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Attending physician</mat-label>
+            <input matInput formControlName="doctorName" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Hospital / Clinic</mat-label>
+            <input matInput formControlName="hospitalName" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Notes</mat-label>
+            <textarea matInput formControlName="notes" rows="3"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="col-12 mb-3">
+          <div class="sharing-toggle-box"
+               [class.sharing-toggle-box--active]="editForm.get('isSharedPartner')?.value">
+            <div class="d-flex align-items-center gap-3">
+              <div class="sharing-toggle-icon"
+                   [class.sharing-toggle-icon--active]="editForm.get('isSharedPartner')?.value">
+                <span class="material-symbols-outlined">
+                  {{ editForm.get('isSharedPartner')?.value ? 'people' : 'person_off' }}
+                </span>
+              </div>
+              <div class="flex-grow-1">
+                <p class="sharing-toggle-title mb-1">Share with my partner</p>
+                <p class="sharing-toggle-desc mb-0">
+                  @if(editForm.get('isSharedPartner')?.value) {
+                    <span class="sharing-on">✅ Your partner can view your pregnancy, exams and fetal development</span>
+                  } @else {
+                    <span class="sharing-off">🔒 Your data is private — your partner cannot see anything</span>
+                  }
+                </p>
+              </div>
+              <mat-slide-toggle formControlName="isSharedPartner" color="primary" class="flex-shrink-0">
+              </mat-slide-toggle>
+            </div>
+            @if(editForm.get('isSharedPartner')?.value) {
+            <div class="sharing-permissions mt-3">
+              <p class="sharing-perm-title mb-2">What your partner can see :</p>
+              <div class="sharing-perm-list">
+                <div class="sharing-perm-item">
+                  <span class="material-symbols-outlined">pregnant_woman</span>
+                  Pregnancy folder (read only)
+                </div>
+                <div class="sharing-perm-item">
+                  <span class="material-symbols-outlined">child_care</span>
+                  Fetal development week by week
+                </div>
+                <div class="sharing-perm-item">
+                  <span class="material-symbols-outlined">assignment</span>
+                  Prenatal exams checklist
+                </div>
+                <div class="sharing-perm-item sharing-perm-item--blocked">
+                  <span class="material-symbols-outlined">block</span>
+                  Vitals & alerts (private)
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="d-flex gap-2 justify-content-end mt-2">
+        <button mat-button type="button" (click)="closeEditForm()">Cancel</button>
+        <button mat-raised-button type="submit" [disabled]="editForm.invalid || saving" class="preg-btn preg-btn--edit">
+          @if(saving) { Saving... } @else { Save changes }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+@if(showRiskPopup) {
+<div class="risk-overlay" (click)="closeRiskPopup()">
+  <div class="risk-box" (click)="$event.stopPropagation()">
+ 
+    <!-- Header -->
+    <div class="risk-header">
+      <div class="risk-header-icon">
+        <span class="material-symbols-outlined">security</span>
+      </div>
+      <div>
+        <h3 class="risk-title">Pregnancy Risk Score</h3>
+        <p class="risk-sub">Based on your vitals, alerts & trimester</p>
+      </div>
+      <button mat-icon-button (click)="closeRiskPopup()" class="ms-auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+ 
+    <!-- Loading -->
+    @if(riskLoading) {
+    <div class="risk-loading">
+      <div class="risk-loading__dots"><span></span><span></span><span></span></div>
+      <p class="risk-loading__text">Analyzing your health data...</p>
+    </div>
+    }
+ 
+    <!-- Result -->
+    @if(!riskLoading) {
+    <div class="risk-result">
+ 
+      <!-- Jauge circulaire -->
+      <div class="risk-gauge-wrap">
+        <svg class="risk-gauge-svg" viewBox="0 0 120 120">
+          <!-- Track -->
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#f0e8e8" stroke-width="10"/>
+          <!-- Fill -->
+          <circle cx="60" cy="60" r="54" fill="none"
+                  [attr.stroke]="riskGaugeColor"
+                  stroke-width="10"
+                  stroke-linecap="round"
+                  [attr.stroke-dasharray]="riskGaugeDash"
+                  transform="rotate(-90 60 60)"
+                  style="transition: stroke-dasharray 1s ease"/>
+        </svg>
+        <div class="risk-gauge-center">
+          <span class="risk-gauge-emoji">{{ riskEmoji }}</span>
+          <span class="risk-gauge-score" [style.color]="riskColor">{{ riskScore }}</span>
+          <span class="risk-gauge-label">/100</span>
+        </div>
+      </div>
+ 
+      <!-- Level badge -->
+      <div class="risk-level-badge" [style.background]="riskColor + '15'" [style.border]="'2px solid ' + riskColor + '40'">
+        <span class="risk-level-text" [style.color]="riskColor">{{ riskLevel }}</span>
+      </div>
+ 
+      <!-- Factors -->
+      <div class="risk-factors">
+        <p class="risk-section-label">📊 Score breakdown</p>
+        @for(f of riskFactors; track f.label) {
+        <div class="risk-factor-row">
+          <div class="risk-factor-dot" [style.background]="f.color"></div>
+          <span class="risk-factor-label">{{ f.label }}</span>
+          @if(f.impact < 0) {
+          <span class="risk-factor-impact" [style.color]="f.color">{{ f.impact }} pts</span>
+          }
+          @if(f.impact === 0) {
+          <span class="risk-factor-ok">+0</span>
+          }
+        </div>
+        }
+      </div>
+ 
+      <!-- Advices -->
+      @if(riskAdvices.length > 0) {
+      <div class="risk-advices">
+        <p class="risk-section-label">💡 Recommendations</p>
+        @for(a of riskAdvices; track a) {
+        <div class="risk-advice-row">{{ a }}</div>
+        }
+      </div>
+      }
+ 
+      <!-- Disclaimer -->
+      <div class="risk-disclaimer">
+        <span class="material-symbols-outlined">info</span>
+        This score is informational only. Always consult your healthcare provider for medical decisions.
+      </div>
+ 
+      <div class="d-flex justify-content-end mt-3">
+        <button class="preg-btn preg-btn--edit" (click)="closeRiskPopup()">Close</button>
+      </div>
+ 
+    </div>
+    }
+ 
+  </div>
+</div>
+}
+@if(showDeleteConfirm) {
+<div class="preg-popup-overlay" (click)="showDeleteConfirm = false">
+  <div class="preg-popup-box" style="max-width:420px; text-align:center" (click)="$event.stopPropagation()">
+    <div style="font-size:3rem; margin-bottom:1rem">🗑️</div>
+    <h3 class="preg-popup-title">Delete this pregnancy?</h3>
+    <p style="color:var(--text-mid); font-family:var(--font-body); font-size:0.9rem; margin: 0.5rem 0 1.5rem">
+      This action is irreversible. All associated vitals, alerts and exams will also be deleted.
+    </p>
+    <div class="d-flex gap-2 justify-content-center">
+      <button class="preg-btn" style="background:rgba(0,0,0,0.05);color:#666;border:1.5px solid rgba(0,0,0,0.1)" 
+              (click)="showDeleteConfirm = false">
+        Cancel
+      </button>
+      <button class="preg-btn preg-btn--delete" (click)="confirmDelete()" [disabled]="deleting">
+        <span class="material-symbols-outlined">delete</span>
+        {{ deleting ? 'Deleting...' : 'Yes, delete' }}
+      </button>
+    </div>
+  </div>
+</div>
+}

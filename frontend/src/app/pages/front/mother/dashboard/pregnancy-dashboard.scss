@@ -1,0 +1,863 @@
+/* ╔══════════════════════════════════════════════════╗ */
+/* ║   MAMA AI — DASHBOARD FRONT-OFFICE CSS          ║ */
+/* ║   Style: Prenatal lifestyle magazine            ║ */
+/* ╚══════════════════════════════════════════════════╝ */
+
+/* ─── FONTS ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ─── TOKENS ─────────────────────────────────────────── */
+:root {
+  /* 🎨 COULEURS PLUS FONCÉES — bien lisibles sur fond clair */
+  --rose:        #c94d6a;          /* était #e8748a — plus foncé */
+  --rose-light:  #f5c6d0;          /* était #fce8ed — plus visible */
+  --peach:       #d97b58;          /* était #f5a88e — plus foncé */
+  --peach-light: #fce3d6;          /* était #fdf0ea */
+  --cream:       #f7ede4;          /* était #fdf6f0 — légèrement plus foncé */
+  --sage:        #4d8c52;          /* était #8baf8e — bien plus foncé, lisible */
+  --sage-light:  #c8e6ca;          /* était #eaf3eb */
+  --gold:        #a8722e;          /* était #d4975a — plus foncé */
+  --gold-light:  #f5e0c0;          /* était #fdf3e7 */
+  --sky:         #3a8fb5;          /* était #7bbcd4 — plus foncé */
+  --sky-light:   #bde3f5;          /* était #e8f4f9 */
+  --text-dark:   #1e1215;          /* était #3a2a2e — presque noir, max lisibilité */
+  --text-mid:    #4a3038;          /* était #7a6065 — bien plus foncé */
+  --text-soft:   #7a5c65;          /* était #b39da3 — plus lisible */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
+  --shadow-soft: 0 4px 24px rgba(201, 77, 106, 0.18);
+  --shadow-card: 0 2px 16px rgba(30, 18, 21, 0.10);
+}
+
+/* ─── PAGE BACKGROUND ────────────────────────────────── */
+.mama-page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.mama-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.mama-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(247, 237, 228, 0.75);
+}
+
+/* ─── ANIMATIONS ─────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ringDraw {
+  from { stroke-dashoffset: 326.7; }
+}
+@keyframes shimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.fade-in           { animation: fadeUp 0.7s ease both; }
+.fade-in-delay-1   { animation: fadeUp 0.7s 0.15s ease both; }
+.fade-in-delay-2   { animation: fadeUp 0.7s 0.3s ease both; }
+
+/* ─── HERO ───────────────────────────────────────────── */
+.mama-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 3rem 2.5rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.mama-hero__left {
+  flex: 1;
+}
+
+.mama-hero__eyebrow {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rose);
+  background: var(--rose-light);
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+.mama-hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-dark);
+  margin-bottom: 0.8rem;
+}
+.mama-hero__title em {
+  font-style: italic;
+  background: linear-gradient(135deg, var(--rose) 0%, var(--peach) 60%, var(--gold) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+.mama-hero__sub {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text-mid);
+  max-width: 480px;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+
+.mama-hero__pills {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.mama-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: default;
+  border: 1.5px solid transparent;
+}
+.mama-pill .material-symbols-outlined { font-size: 1rem; }
+.mama-pill--rose      { background: var(--rose-light);  color: var(--rose);  border-color: rgba(201,77,106,0.35); }
+.mama-pill--peach     { background: var(--peach-light); color: var(--gold);  border-color: rgba(168,114,46,0.35); }
+.mama-pill--countdown { font-weight: 600; font-family: var(--font-display); }
+
+/* ─── PROGRESS RING ──────────────────────────────────── */
+.mama-hero__right {
+  flex-shrink: 0;
+}
+
+.mama-progress-ring {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+.mama-ring-svg {
+  width: 140px;
+  height: 140px;
+  transform: rotate(-90deg);
+}
+
+.mama-ring-bg {
+  fill: none;
+  stroke: var(--rose-light);
+  stroke-width: 8;
+}
+
+.mama-ring-fill {
+  fill: none;
+  stroke: var(--rose);
+  stroke-width: 8;
+  stroke-linecap: round;
+  animation: ringDraw 1.2s ease both;
+}
+
+.mama-ring-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.mama-ring-icon  { font-size: 1.6rem; color: var(--rose); }
+.mama-ring-pct   { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--text-dark); line-height: 1; }
+.mama-ring-label { font-family: var(--font-body); font-size: 0.65rem; color: var(--text-mid); letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* ─── STATS RIBBON ───────────────────────────────────── */
+.mama-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  max-width: 1400px;
+  margin: 0 auto 1.5rem;
+  padding: 0 2.5rem;
+}
+
+.mama-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.4rem;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.mama-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-soft);
+}
+
+.mama-stat--rose  { background: rgba(245,198,208,0.90); border: 1.5px solid rgba(201,77,106,0.35); }
+.mama-stat--green { background: rgba(200,230,202,0.90); border: 1.5px solid rgba(77,140,82,0.35); }
+.mama-stat--sky   { background: rgba(189,227,245,0.90); border: 1.5px solid rgba(58,143,181,0.35); }
+.mama-stat--gold  { background: rgba(245,224,192,0.90); border: 1.5px solid rgba(168,114,46,0.35); }
+
+.mama-stat__icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.mama-stat--rose  .mama-stat__icon { background: rgba(201,77,106,0.20); color: var(--rose); }
+.mama-stat--green .mama-stat__icon { background: rgba(77,140,82,0.20);  color: var(--sage); }
+.mama-stat--sky   .mama-stat__icon { background: rgba(58,143,181,0.20); color: var(--sky); }
+.mama-stat--gold  .mama-stat__icon { background: rgba(168,114,46,0.20); color: var(--gold); }
+.mama-stat__icon .material-symbols-outlined { font-size: 1.3rem; }
+
+.mama-stat__body  { flex: 1; min-width: 0; }
+.mama-stat__value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1.2;
+}
+.mama-stat__label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--text-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mama-stat__deco {
+  position: absolute;
+  right: 12px;
+  bottom: 6px;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  opacity: 0.10;
+  color: var(--text-dark);
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* ─── BENTO GRID ─────────────────────────────────────── */
+.mama-bento {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 1.2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2.5rem 3rem;
+}
+
+.mama-bento__card {
+  background: rgba(255,255,255,0.88);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-xl);
+  padding: 1.8rem 2rem;
+  box-shadow: var(--shadow-card);
+  border: 1.5px solid rgba(255,255,255,0.75);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  animation: scaleIn 0.5s ease both;
+}
+.mama-bento__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 36px rgba(201,77,106,0.15);
+}
+
+/* ── Card positions ── */
+.mama-bento__card--baby       { grid-column: 1; grid-row: 1; }
+.mama-bento__card--countdown  { grid-column: 2; grid-row: 1; }
+.mama-bento__card--progress   { grid-column: 1; grid-row: 2; }
+.mama-bento__card--milestones { grid-column: 2; grid-row: 2; }
+.mama-bento__card--exams      { grid-column: 1 / 3; grid-row: 3; }
+
+/* ─── CARD COMMONS ───────────────────────────────────── */
+.mama-card-tag {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rose);
+  background: var(--rose-light);
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-bottom: 0.8rem;
+}
+.mama-card-tag--countdown { background: transparent !important; }
+
+.mama-card-title {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 1.2rem;
+  line-height: 1.2;
+}
+.mama-card-title small {
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-mid);
+}
+
+/* ─── BABY CARD ──────────────────────────────────────── */
+.mama-baby-measures {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+.mama-measure {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mama-measure__num {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--rose);
+  line-height: 1;
+}
+.mama-measure__unit {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-mid);
+}
+.mama-measure__lbl {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.mama-measure-divider {
+  width: 1px;
+  height: 56px;
+  background: linear-gradient(to bottom, transparent, var(--rose-light), transparent);
+}
+
+.mama-baby-desc {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--text-mid);
+  line-height: 1.7;
+  padding: 12px 16px;
+  background: var(--peach-light);
+  border-radius: 14px;
+  border-left: 3px solid var(--peach);
+  margin-bottom: 1rem;
+}
+
+.mama-baby-tips { display: flex; flex-direction: column; gap: 8px; }
+.mama-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 0.83rem;
+  color: var(--text-mid);
+}
+.mama-tip__dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--rose);
+  margin-top: 5px;
+  flex-shrink: 0;
+  animation: dotPulse 2s ease-in-out infinite;
+}
+@keyframes dotPulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:0.5; transform:scale(0.6); }
+}
+
+.mama-loading-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--text-mid);
+}
+.mama-loading-state .material-symbols-outlined { font-size: 3rem; color: var(--rose-light); }
+.mama-loading-state p { font-family: var(--font-body); font-size: 0.85rem; margin-top: 8px; }
+
+/* ─── PROGRESS CARD ──────────────────────────────────── */
+.mama-trimester-list { display: flex; flex-direction: column; gap: 1.2rem; }
+
+.mama-tri__header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  gap: 6px;
+}
+.mama-tri__name  { font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; color: var(--text-dark); flex: 1; }
+.mama-tri__weeks { font-family: var(--font-body); font-size: 0.72rem; color: var(--text-mid); }
+.mama-tri__pct   { font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; color: var(--rose); min-width: 38px; text-align: right; }
+
+.mama-tri__bar {
+  height: 8px;
+  background: var(--rose-light);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.mama-tri__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--rose), var(--peach));
+  border-radius: 20px;
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+}
+
+.mama-trimester--done .mama-tri__fill { background: linear-gradient(90deg, var(--sage), #3a7d3e); }
+.mama-trimester--done .mama-tri__pct  { color: var(--sage); }
+.mama-trimester--active .mama-tri__name { color: var(--rose); }
+
+/* ─── MILESTONES TIMELINE ────────────────────────────── */
+.mama-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.mama-timeline::-webkit-scrollbar { width: 4px; }
+.mama-timeline::-webkit-scrollbar-track { background: transparent; }
+.mama-timeline::-webkit-scrollbar-thumb { background: var(--rose-light); border-radius: 4px; }
+
+.mama-timeline__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 6px;
+  border-radius: 12px;
+  transition: background 0.2s;
+  position: relative;
+}
+.mama-timeline__item:hover { background: var(--rose-light); }
+
+.mama-timeline__dot {
+  flex-shrink: 0;
+  width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mama-timeline__dot .material-symbols-outlined {
+  font-size: 1.1rem;
+  color: var(--text-mid);
+}
+.mama-timeline__item--done .mama-timeline__dot .material-symbols-outlined {
+  color: var(--sage);
+}
+
+.mama-timeline__line { display: none; }
+
+.mama-timeline__content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+.mama-timeline__week {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--rose);
+  background: var(--rose-light);
+  padding: 2px 8px;
+  border-radius: 10px;
+  min-width: 38px;
+  text-align: center;
+}
+.mama-timeline__title {
+  font-family: var(--font-body);
+  font-size: 0.83rem;
+  color: var(--text-dark);
+}
+.mama-timeline__item--done .mama-timeline__title { color: var(--text-mid); text-decoration: line-through; }
+
+/* ─── EXAMS ──────────────────────────────────────────── */
+.mama-exams-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--cream);
+  border-radius: 14px;
+  margin-bottom: 1rem;
+  border: 1.5px solid var(--rose-light);
+}
+.mama-exams-search .material-symbols-outlined { font-size: 1.1rem; color: var(--text-mid); }
+
+.mama-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  width: 100%;
+}
+.mama-search-input::placeholder { color: var(--text-mid); }
+
+.mama-exams-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.mama-exams-list::-webkit-scrollbar { width: 4px; }
+.mama-exams-list::-webkit-scrollbar-thumb { background: var(--rose-light); border-radius: 4px; }
+
+.mama-exam-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--cream);
+  border: 1.5px solid transparent;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+.mama-exam-row:hover { border-color: var(--rose-light); background: rgba(245,198,208,0.4); transform: translateX(3px); }
+.mama-exam-row--done { opacity: 0.80; }
+
+.mama-exam__status .material-symbols-outlined { font-size: 1.2rem; color: var(--text-mid); }
+.mama-exam-row--done .mama-exam__status .material-symbols-outlined { color: var(--sage); }
+
+.mama-exam__info { flex: 1; min-width: 0; }
+.mama-exam__name {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mama-exam__type {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: var(--text-mid);
+}
+
+.mama-week-badge {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--rose);
+  background: var(--rose-light);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.mama-exam__tag {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(217,123,88,0.25);
+  color: var(--gold);
+  white-space: nowrap;
+}
+.mama-exam__tag--done { background: rgba(77,140,82,0.20); color: var(--sage); }
+
+.mama-paginator {
+  background: transparent;
+  font-family: var(--font-body);
+  margin-top: 8px;
+}
+
+/* ════════════════════════════════════════════════════ */
+/* ══  COUNTDOWN WIDGET                             ══ */
+/* ════════════════════════════════════════════════════ */
+
+@keyframes urgentPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(201,77,106,0.35); }
+  50%      { box-shadow: 0 0 0 10px rgba(201,77,106,0); }
+}
+
+.countdown-message {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-style: italic;
+  margin-bottom: 1.4rem;
+  line-height: 1.4;
+}
+
+.countdown-blocks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 1.4rem;
+}
+.countdown-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.7);
+  border-radius: 14px;
+  padding: 10px 8px;
+  border: 1.5px solid;
+  min-width: 52px;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.countdown-block__num {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.countdown-block__label {
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-soft);
+  margin-top: 2px;
+}
+.countdown-sep {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  padding-bottom: 12px;
+  opacity: 0.7;
+}
+.countdown-block--sec { min-width: 44px; }
+.countdown-block--sec .countdown-block__num { font-size: 1.5rem; }
+
+.countdown-progress-wrap { margin-bottom: 1.2rem; }
+.countdown-progress-track {
+  height: 6px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+.countdown-progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 1s linear;
+}
+.countdown-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  color: var(--text-soft);
+  font-weight: 500;
+}
+
+.countdown-due {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+}
+.countdown-due .material-symbols-outlined { font-size: 1.3rem; flex-shrink: 0; }
+.countdown-due__label { font-family: var(--font-body); font-size: 0.68rem; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.06em; margin: 0; }
+.countdown-due__value { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; margin: 0; }
+
+.countdown-urgent-badge {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(201,77,106,0.15);
+  color: var(--rose);
+  animation: urgentPulse 2s ease-in-out infinite;
+}
+
+.countdown-birthday { text-align: center; padding: 2rem 1rem; }
+.countdown-birthday__emoji { font-size: 3.5rem; display: block; margin-bottom: 0.5rem; }
+.countdown-birthday__text  { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--rose); margin: 0; }
+
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media (max-width: 960px) {
+  .mama-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .mama-bento {
+    grid-template-columns: 1fr;
+  }
+  .mama-bento__card--baby,
+  .mama-bento__card--countdown,
+  .mama-bento__card--progress,
+  .mama-bento__card--milestones,
+  .mama-bento__card--exams {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .mama-hero { flex-direction: column; padding: 2rem 1.5rem 1.5rem; }
+  .mama-stats { grid-template-columns: 1fr 1fr; padding: 0 1.5rem; }
+  .mama-bento { padding: 0 1.5rem 2rem; }
+  .mama-hero__title { font-size: 2.2rem; }
+  .countdown-blocks { gap: 4px; }
+  .countdown-block  { min-width: 44px; padding: 8px 6px; }
+  .countdown-block__num { font-size: 1.5rem; }
+}
+/* ── Astro + Saison ── */
+.countdown-astro {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(247,237,228,0.6);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.countdown-astro__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.countdown-astro__emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.countdown-astro__label {
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+.countdown-astro__value {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+.countdown-astro__divider {
+  width: 1px;
+  height: 36px;
+  background: var(--rose-light);
+  margin: 0 10px;
+  flex-shrink: 0;
+}
+
+/* ── Citation motivante ── */
+.countdown-quote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border-left: 3px solid;
+  background: rgba(255,255,255,0.5);
+  margin-bottom: 1rem;
+}
+.countdown-quote__icon {
+  font-size: 1.4rem;
+  font-family: var(--font-display);
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.countdown-quote__text {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-style: italic;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Checklist ── */
+.countdown-checklist {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(247,237,228,0.6);
+}
+.countdown-checklist__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 10px;
+}
+.countdown-checklist__title .material-symbols-outlined { font-size: 0.9rem; }
+.countdown-check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.countdown-check-item:hover { background: rgba(255,255,255,0.5); }
+.countdown-check-icon {
+  font-size: 1.1rem;
+  color: var(--text-soft);
+  flex-shrink: 0;
+}
+.countdown-check-item--done .countdown-check-icon { color: var(--sage); }
+.countdown-check-label {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--text-dark);
+}
+.countdown-check-item--done .countdown-check-label {
+  color: var(--text-soft);
+  text-decoration: line-through;
+}

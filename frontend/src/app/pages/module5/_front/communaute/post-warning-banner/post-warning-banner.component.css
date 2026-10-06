@@ -1,0 +1,88 @@
+/* post-warning-banner.component.css
+   Shown inline inside the post card, just after the post header */
+
+.pwb-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 10px 16px 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border-left: 3px solid transparent;
+  animation: pwbIn 0.3s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes pwbIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Severity colour themes ── */
+.pwb-high {
+  background: #FBEAF0;
+  border-color: #D4537E;
+}
+
+.pwb-medium {
+  background: #E6F1FB;
+  border-color: #378ADD;
+}
+
+.pwb-low {
+  background: #FAEEDA;
+  border-color: #EF9F27;
+}
+
+/* ── Icon ── */
+.pwb-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Body ── */
+.pwb-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pwb-title {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.pwb-high   .pwb-title { color: #72243E; }
+.pwb-medium .pwb-title { color: #0C447C; }
+.pwb-low    .pwb-title { color: #633806; }
+
+.pwb-message {
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0 0 8px;
+}
+
+.pwb-high   .pwb-message { color: #993556; }
+.pwb-medium .pwb-message { color: #185FA5; }
+.pwb-low    .pwb-message { color: #854F0B; }
+
+/* ── Dismiss link ── */
+.pwb-dismiss {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+
+.pwb-dismiss:hover { opacity: 1; }
+
+.pwb-high   .pwb-dismiss { color: #72243E; }
+.pwb-medium .pwb-dismiss { color: #0C447C; }
+.pwb-low    .pwb-dismiss { color: #633806; }

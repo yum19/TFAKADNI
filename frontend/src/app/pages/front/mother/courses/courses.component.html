@@ -1,0 +1,134 @@
+<!-- courses.component.html -->
+<section class="mother-courses">
+  <div class="courses-wrap">
+    <!-- ── Header ── -->
+    <header class="courses-header">
+      <div class="header-copy">
+        <span class="header-badge">🌸 Curated Academy</span>
+        <h1 class="courses-title">
+          Elevate your<br />
+          <span class="title-accent">Motherhood.</span>
+        </h1>
+        <p class="courses-lead">
+          Ditch the search engine overwhelm. Access evidence-based pathways for
+          clinical care, partner logic, and emotional resilience.
+        </p>
+        <div class="joined-pill">
+          <div class="joined-dots"><span></span><span></span><span></span></div>
+          Joined by 12k+ Mothers
+        </div>
+      </div>
+      <div class="hero-img-wrap">
+        <div class="hero-stat-badge">
+          <div class="stat-num">12k+</div>
+          <div class="stat-label">Active Mothers</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Command Center ── -->
+    <div class="command-center">
+      <div class="search-group">
+        <svg
+          class="search-icon"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input
+          [(ngModel)]="search"
+          (ngModelChange)="apply()"
+          class="search-ctrl"
+          placeholder="Search by trimester, symptom, or skill..."
+        />
+      </div>
+      <div class="cmd-divider"></div>
+      <select
+        title="select-category"
+        [(ngModel)]="selectedCategory"
+        (ngModelChange)="apply()"
+        class="filter-pill"
+      >
+        <option value="">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+      </select>
+    </div>
+
+    <!-- ── Section label ── -->
+    <div class="section-meta">
+      <span class="section-chip">Course Library</span>
+      <div class="section-line"></div>
+      <span class="result-count">{{ filtered.length }} pathways</span>
+    </div>
+
+    <!-- ── Cards Grid ── -->
+    <div class="cards-grid">
+      <article class="course-card" *ngFor="let course of filtered">
+        <div class="card-visual">
+          <img
+            class="card-img"
+            [src]="
+              course.thumbnail ||
+              'https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=800'
+            "
+            alt=""
+          />
+          <div class="card-img-overlay"></div>
+          <span class="card-cat-tag">{{ course.category || "Clinical" }}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="meta-level">Level: {{ course.level }}</span>
+            <span class="meta-duration">
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+              {{ course.durationMin }} min
+            </span>
+          </div>
+          <h2 class="card-title">{{ course.title }}</h2>
+          <ul class="outcome-list">
+            <li>Strategic trimester milestones</li>
+            <li>Evidence-based nutrition protocols</li>
+            <li>Partner communication frameworks</li>
+          </ul>
+          <div class="instructor-row">
+            <div class="instructor-avatar">👩‍⚕️</div>
+            <div>
+              <div class="instructor-name">Dr. Sarah Jensen</div>
+              <div class="instructor-role">Chief Obstetrician</div>
+            </div>
+          </div>
+
+          <a [routerLink]="['/mother/courses', course.id]" class="btn-aurora">
+            Explore Journey
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,513 @@
+<!-- ░░ HERO ░░ -->
+<div class="dash-hero">
+  <div class="dash-hero__left">
+    <span class="dash-eyebrow">⚙️ Back Office · MAMAAI Platform</span>
+    <h1 class="dash-title">
+      Admin <span class="dash-title__accent">Analytics</span>
+    </h1>
+    <p class="dash-sub">
+      Real-time platform intelligence &amp; health monitoring
+    </p>
+  </div>
+  <div class="dash-hero__right">
+    <div class="dash-hero__live">
+      <span class="dash-live-dot"></span>
+      <span class="dash-live-text">Live data</span>
+    </div>
+    <span class="dash-version-badge">v3.0 Stable</span>
+    <button class="dash-refresh-btn" (click)="loadData()">
+      <span class="material-symbols-outlined">refresh</span>
+      Refresh
+    </button>
+  </div>
+</div>
+
+@if (loading) {
+  <div class="dash-loading">
+    <div class="dash-loading__bar"></div>
+  </div>
+}
+
+<!-- ░░ KPI STRIP — 6 cards (4 pregnancy + 2 platform) ░░ -->
+<div class="dash-kpi-strip">
+  <div class="dash-kpi dash-kpi--rose">
+    <div class="dash-kpi__icon">
+      <span class="material-symbols-outlined">pregnant_woman</span>
+    </div>
+    <div class="dash-kpi__body">
+      <span class="dash-kpi__value">{{ totalGrossesses }}</span>
+      <span class="dash-kpi__label">Total Pregnancies</span>
+    </div>
+    <div class="dash-kpi__ring">
+      <svg viewBox="0 0 36 36">
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="rgba(201,77,106,0.15)"
+          stroke-width="3"
+        />
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="#c94d6a"
+          stroke-width="3"
+          [attr.stroke-dasharray]="activeRate * 0.942 + ', 100'"
+          stroke-linecap="round"
+          transform="rotate(-90 18 18)"
+        />
+      </svg>
+      <span class="dash-kpi__ring-pct">{{ activeRate }}%</span>
+    </div>
+  </div>
+
+  <div class="dash-kpi dash-kpi--violet">
+    <div class="dash-kpi__icon">
+      <span class="material-symbols-outlined">crisis_alert</span>
+    </div>
+    <div class="dash-kpi__body">
+      <span class="dash-kpi__value">{{ alertesCritiques }}</span>
+      <span class="dash-kpi__label">Critical Alerts</span>
+    </div>
+    <div class="dash-kpi__ring">
+      <svg viewBox="0 0 36 36">
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="rgba(156,39,176,0.15)"
+          stroke-width="3"
+        />
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="#9c27b0"
+          stroke-width="3"
+          [attr.stroke-dasharray]="criticalRate * 0.942 + ', 100'"
+          stroke-linecap="round"
+          transform="rotate(-90 18 18)"
+        />
+      </svg>
+      <span class="dash-kpi__ring-pct">{{ criticalRate }}%</span>
+    </div>
+  </div>
+
+  <div class="dash-kpi dash-kpi--sky">
+    <div class="dash-kpi__icon">
+      <span class="material-symbols-outlined">monitor_heart</span>
+    </div>
+    <div class="dash-kpi__body">
+      <span class="dash-kpi__value">{{ totalVitals }}</span>
+      <span class="dash-kpi__label">Vital Records</span>
+    </div>
+    <div class="dash-kpi__ring">
+      <svg viewBox="0 0 36 36">
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="rgba(58,143,181,0.15)"
+          stroke-width="3"
+        />
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="#3a8fb5"
+          stroke-width="3"
+          stroke-dasharray="75, 100"
+          stroke-linecap="round"
+          transform="rotate(-90 18 18)"
+        />
+      </svg>
+      <span class="dash-kpi__ring-pct">↑</span>
+    </div>
+  </div>
+
+  <div class="dash-kpi dash-kpi--green">
+    <div class="dash-kpi__icon">
+      <span class="material-symbols-outlined">child_care</span>
+    </div>
+    <div class="dash-kpi__body">
+      <span class="dash-kpi__value"
+        >{{ totalMilestones }}<span class="dash-kpi__sub">/40</span></span
+      >
+      <span class="dash-kpi__label">Fetal Weeks</span>
+    </div>
+    <div class="dash-kpi__ring">
+      <svg viewBox="0 0 36 36">
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="rgba(76,175,80,0.15)"
+          stroke-width="3"
+        />
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="#4caf50"
+          stroke-width="3"
+          [attr.stroke-dasharray]="milestonesRate * 0.942 + ', 100'"
+          stroke-linecap="round"
+          transform="rotate(-90 18 18)"
+        />
+      </svg>
+      <span class="dash-kpi__ring-pct">{{ milestonesRate }}%</span>
+    </div>
+  </div>
+
+  <!-- Platform KPIs from AdminService -->
+  <div class="dash-kpi dash-kpi--peach">
+    <div class="dash-kpi__icon">
+      <span class="material-symbols-outlined">school</span>
+    </div>
+    <div class="dash-kpi__body">
+      <span class="dash-kpi__value">{{ courses }}</span>
+      <span class="dash-kpi__label">Active Courses</span>
+    </div>
+    <div class="dash-kpi__ring">
+      <svg viewBox="0 0 36 36">
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="rgba(217,123,88,0.15)"
+          stroke-width="3"
+        />
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="#d97b58"
+          stroke-width="3"
+          stroke-dasharray="70, 100"
+          stroke-linecap="round"
+          transform="rotate(-90 18 18)"
+        />
+      </svg>
+      <span class="dash-kpi__ring-pct">↑</span>
+    </div>
+  </div>
+
+  <div class="dash-kpi dash-kpi--gold">
+    <div class="dash-kpi__icon">
+      <span class="material-symbols-outlined">menu_book</span>
+    </div>
+    <div class="dash-kpi__body">
+      <span class="dash-kpi__value">{{ guides }}</span>
+      <span class="dash-kpi__label">Partner Guides</span>
+    </div>
+    <div class="dash-kpi__ring">
+      <svg viewBox="0 0 36 36">
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="rgba(168,114,46,0.15)"
+          stroke-width="3"
+        />
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="#a8722e"
+          stroke-width="3"
+          stroke-dasharray="60, 100"
+          stroke-linecap="round"
+          transform="rotate(-90 18 18)"
+        />
+      </svg>
+      <span class="dash-kpi__ring-pct">↑</span>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ CHARTS ROW ░░ -->
+<div class="dash-grid">
+  <div class="dash-card dash-card--alerts">
+    <div class="dash-card__header">
+      <div class="dash-card__title-wrap">
+        <span class="dash-card__tag">📊 Distribution</span>
+        <h3 class="dash-card__title">Alerts by Severity</h3>
+      </div>
+    </div>
+    <div class="dash-chart-wrap dash-chart-wrap--donut">
+      <canvas #alertsChart></canvas>
+      <div class="dash-donut-center">
+        <span class="dash-donut-num">{{ totalAlertes }}</span>
+        <span class="dash-donut-lbl">Total</span>
+      </div>
+    </div>
+    <div class="dash-legend">
+      <div class="dash-legend__item">
+        <span class="dash-legend__dot" style="background: #03a9f4"></span>Info
+      </div>
+      <div class="dash-legend__item">
+        <span class="dash-legend__dot" style="background: #ff9800"></span
+        >Warning
+      </div>
+      <div class="dash-legend__item">
+        <span class="dash-legend__dot" style="background: #f44336"></span>Danger
+      </div>
+      <div class="dash-legend__item">
+        <span class="dash-legend__dot" style="background: #9c27b0"></span
+        >Critical
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-card dash-card--pregnancy">
+    <div class="dash-card__header">
+      <div class="dash-card__title-wrap">
+        <span class="dash-card__tag">🤰 Overview</span>
+        <h3 class="dash-card__title">Pregnancies by Status</h3>
+      </div>
+    </div>
+    <div class="dash-chart-wrap">
+      <canvas #pregnancyChart></canvas>
+    </div>
+  </div>
+
+  <div class="dash-card dash-card--vitals">
+    <div class="dash-card__header">
+      <div class="dash-card__title-wrap">
+        <span class="dash-card__tag">❤️ Trend</span>
+        <h3 class="dash-card__title">Blood Pressure — Last 10</h3>
+      </div>
+    </div>
+    <div class="dash-chart-wrap">
+      <canvas #vitalsChart></canvas>
+    </div>
+  </div>
+
+  <div class="dash-card dash-card--milestones">
+    <div class="dash-card__header">
+      <div class="dash-card__title-wrap">
+        <span class="dash-card__tag">👶 Content</span>
+        <h3 class="dash-card__title">Fetal Weeks Config</h3>
+      </div>
+    </div>
+    <div class="dash-chart-wrap dash-chart-wrap--donut">
+      <canvas #milestonesChart></canvas>
+      <div class="dash-donut-center">
+        <span class="dash-donut-num" style="color: #4caf50"
+          >{{ milestonesRate }}%</span
+        >
+        <span class="dash-donut-lbl">Done</span>
+      </div>
+    </div>
+    <div class="dash-milestones-progress">
+      <div class="dash-mp-bar">
+        <div class="dash-mp-fill" [style.width]="milestonesRate + '%'"></div>
+      </div>
+      <span class="dash-mp-label"
+        >{{ totalMilestones }} / 40 weeks configured</span
+      >
+    </div>
+  </div>
+</div>
+
+<!-- ░░ TABLES ROW ░░ -->
+<div class="dash-tables">
+  <!-- Recent Pregnancies -->
+  <div class="dash-card dash-card--table">
+    <div class="dash-card__header">
+      <div class="dash-card__title-wrap">
+        <span class="dash-card__tag">🗂️ Recent</span>
+        <h3 class="dash-card__title">Latest Pregnancies</h3>
+      </div>
+      <a routerLink="/app/admin/pregnancies" class="dash-view-all"
+        >View all →</a
+      >
+    </div>
+    <div class="dash-table">
+      <div class="dash-table__head">
+        <span>Type</span><span>Status</span><span>LMP</span><span>Due</span>
+      </div>
+      @if (dernieresGrossesses.length === 0) {
+        <div class="dash-empty">No pregnancies yet</div>
+      }
+      @for (p of dernieresGrossesses; track p.id) {
+        <div class="dash-table__row">
+          <span class="dash-table__type">{{ p.pregnancyType }}</span>
+          <span
+            class="dash-status-badge"
+            [style.background]="getStatutColor(p.status) + '22'"
+            [style.color]="getStatutColor(p.status)"
+            [style.border]="'1px solid ' + getStatutColor(p.status) + '44'"
+          >
+            {{ getStatutLabel(p.status) }}
+          </span>
+          <span class="dash-table__date">{{
+            p.lmpDate | date: "dd/MM/yy"
+          }}</span>
+          <span class="dash-table__date">{{
+            p.dueDate | date: "dd/MM/yy"
+          }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Critical Alerts -->
+  <div class="dash-card dash-card--table">
+    <div class="dash-card__header">
+      <div class="dash-card__title-wrap">
+        <span class="dash-card__tag dash-card__tag--violet">🚨 Priority</span>
+        <h3 class="dash-card__title">Critical Alerts</h3>
+      </div>
+      <a routerLink="/app/admin/alerts" class="dash-view-all">View all →</a>
+    </div>
+    @if (alertesCritiquesListe.length === 0) {
+      <div class="dash-empty-good">
+        <span class="material-symbols-outlined">check_circle</span>
+        <p>No critical alerts ✅</p>
+      </div>
+    }
+    <div class="dash-alerts-list">
+      @for (alert of alertesCritiquesListe; track alert.id) {
+        <div class="dash-alert-row">
+          <div
+            class="dash-alert-icon"
+            [style.background]="getSeverityColor(alert.severity) + '18'"
+            [style.border]="
+              '1.5px solid ' + getSeverityColor(alert.severity) + '40'
+            "
+          >
+            <span
+              class="material-symbols-outlined"
+              [style.color]="getSeverityColor(alert.severity)"
+            >
+              {{ getSeverityIcon(alert.severity) }}
+            </span>
+          </div>
+          <div class="dash-alert-body">
+            <div class="dash-alert-meta">
+              <span
+                class="dash-severity-badge"
+                [style.background]="getSeverityColor(alert.severity) + '18'"
+                [style.color]="getSeverityColor(alert.severity)"
+              >
+                {{ alert.severity }}
+              </span>
+              <span class="dash-alert-type">{{ alert.alertType }}</span>
+              @if (!alert.isRead) {
+                <span class="dash-new-badge">NEW</span>
+              }
+            </div>
+            <p class="dash-alert-msg">{{ alert.message }}</p>
+            <span class="dash-alert-time">{{
+              alert.triggeredAt | date: "dd/MM/yy HH:mm"
+            }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Latest Vitals -->
+  <div class="dash-card dash-card--vitals-list">
+    <div class="dash-card__header">
+      <div class="dash-card__title-wrap">
+        <span class="dash-card__tag dash-card__tag--sky">💓 Monitoring</span>
+        <h3 class="dash-card__title">Latest Vitals</h3>
+      </div>
+      <a routerLink="/app/admin/vitals" class="dash-view-all">View all →</a>
+    </div>
+    <div class="dash-vitals-grid">
+      @for (v of derniersVitals; track v.id) {
+        <div class="dash-vital-card">
+          <div class="dash-vital-header">
+            <span class="material-symbols-outlined">monitor_heart</span>
+            <span class="dash-vital-date">{{
+              v.measuredAt | date: "dd/MM HH:mm"
+            }}</span>
+          </div>
+          <div class="dash-vital-row">
+            <div class="dash-vital-item">
+              <span class="dash-vital-lbl">BP</span>
+              <span
+                class="dash-vital-val"
+                [class.dash-vital-val--danger]="
+                  getTensionStatus(v.systolicBp, v.diastolicBp) === 'danger'
+                "
+                [class.dash-vital-val--warning]="
+                  getTensionStatus(v.systolicBp, v.diastolicBp) === 'warning'
+                "
+              >
+                {{ v.systolicBp }}/{{ v.diastolicBp }}
+              </span>
+            </div>
+            <div class="dash-vital-item">
+              <span class="dash-vital-lbl">HR</span>
+              <span class="dash-vital-val">{{ v.heartRate }}</span>
+            </div>
+            <div class="dash-vital-item">
+              <span class="dash-vital-lbl">Wt</span>
+              <span class="dash-vital-val">{{ v.weightKg }}kg</span>
+            </div>
+            <div class="dash-vital-item">
+              <span class="dash-vital-lbl">O₂</span>
+              <span class="dash-vital-val">{{ v.oxygenPct || "--" }}%</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ░░ STRATEGIC SECTION ░░ -->
+<div class="dash-strategic">
+  <!-- Strategic Pillars -->
+  <div class="dash-card dash-card--pillars">
+    <div class="dash-card__header">
+      <div class="dash-card__title-wrap">
+        <span class="dash-card__tag">🏛️ Strategy</span>
+        <h3 class="dash-card__title">Strategic Pillars</h3>
+      </div>
+    </div>
+    <div class="dash-priority-feed">
+      @for (pillar of pillars; track pillar.title) {
+        <div class="dash-priority-node">
+          <div class="dash-node-title">{{ pillar.title }}</div>
+          <div class="dash-node-desc">{{ pillar.desc }}</div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Launch Protocol -->
+  <div class="dash-card dash-card--checklist">
+    <div class="dash-card__header">
+      <div class="dash-card__title-wrap">
+        <span class="dash-card__tag dash-card__tag--green">🚀 Launch</span>
+        <h3 class="dash-card__title">Launch Protocol</h3>
+      </div>
+    </div>
+    <div class="dash-checklist-feed">
+      @for (item of launchChecklist; track item) {
+        <div class="dash-check-item">
+          <div class="dash-check-box">✓</div>
+          <div class="dash-check-text">{{ item }}</div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

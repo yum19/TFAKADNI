@@ -1,0 +1,32 @@
+<!-- Shown to OTHER users — pink eye overlay sits over blurred content -->
+<div *ngIf="overlayVisible" class="pbo-overlay"
+     [class.pbo-high]="analysis?.severity === 'HIGH'"
+     [class.pbo-medium]="analysis?.severity === 'MEDIUM'">
+
+  <!-- Crossed-eye SVG icon button -->
+  <button class="pbo-eye-btn" (click)="reveal()" type="button" title="Show content">
+    <svg viewBox="0 0 24 24" fill="none"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Eye outline -->
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" class="pbo-eye-path"/>
+      <!-- Pupil -->
+      <circle cx="12" cy="12" r="3" class="pbo-eye-path"/>
+      <!-- Slash — the "hidden" indicator -->
+      <line x1="3" y1="3" x2="21" y2="21" class="pbo-eye-slash"/>
+    </svg>
+  </button>
+
+  <!-- Warning message -->
+  <p class="pbo-message">{{ analysis?.blurMessage }}</p>
+  <span class="pbo-hint">Tap to reveal content</span>
+</div>
+
+<!-- After reveal: small inline indicator -->
+<div *ngIf="!overlayVisible" class="pbo-revealed">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+  Content shown
+</div>

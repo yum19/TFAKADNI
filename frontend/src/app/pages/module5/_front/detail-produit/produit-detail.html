@@ -1,0 +1,207 @@
+
+<div class="pd-wrap">
+
+  <!-- BREADCRUMB -->
+  <nav class="pd-breadcrumb" aria-label="Breadcrumb">
+    <div class="pd-bc-inner">
+      <button class="pd-bc-link" (click)="goBack()" type="button">
+        <mat-icon>store</mat-icon> Shop
+      </button>
+      <mat-icon class="pd-bc-sep" aria-hidden="true">chevron_right</mat-icon>
+      <span *ngIf="produit?.categorie" class="pd-bc-cat">{{ produit!.categorie!.nom }}</span>
+      <mat-icon *ngIf="produit?.categorie" class="pd-bc-sep" aria-hidden="true">chevron_right</mat-icon>
+      <span class="pd-bc-cur">{{ produit?.nom ?? '…' }}</span>
+    </div>
+  </nav>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="pd-loading" role="status">
+    <span></span><span></span><span></span>
+  </div>
+
+  <!-- NOT FOUND -->
+  <div *ngIf="!loading && notFound" class="pd-not-found" role="alert">
+    <div class="pd-nf-orb"><mat-icon>search_off</mat-icon></div>
+    <h2>Product not found</h2>
+    <p>This product does not exist or has been removed from the shop.</p>
+    <button class="pd-back-cta" (click)="goBack()" type="button">
+      <mat-icon>arrow_back</mat-icon> Back to shop
+    </button>
+  </div>
+
+  <!-- PRODUCT -->
+  <div *ngIf="!loading && produit" class="pd-product">
+
+    <!-- Gallery -->
+    <div class="pd-gallery" aria-label="Product gallery">
+      <div class="pd-thumbs" *ngIf="imageCount > 1">
+        <button *ngFor="let img of produit.images; let i = index"
+          class="pd-thumb" [class.active]="selectedImageIndex === i"
+          (click)="selectImage(i)" type="button" [attr.aria-label]="'Image ' + (i+1)">
+          <img [src]="img" [alt]="produit.nom + ' image ' + (i+1)" loading="lazy" />
+        </button>
+      </div>
+
+      <div class="pd-main-img" [class.no-thumb]="imageCount <= 1">
+        <img *ngIf="selectedImage" [src]="selectedImage" [alt]="produit.nom" />
+        <div *ngIf="!selectedImage" class="pd-no-img" aria-hidden="true"><mat-icon>spa</mat-icon></div>
+
+        <button *ngIf="imageCount > 1" class="pd-arr pd-arr-l" (click)="prevImage()" type="button">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button *ngIf="imageCount > 1" class="pd-arr pd-arr-r" (click)="nextImage()" type="button">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+
+        <button class="pd-wishlist" [class.active]="wishlist" (click)="toggleWishlist()" type="button"
+          [attr.aria-label]="wishlist ? 'Remove from wishlist' : 'Add to wishlist'">
+          <mat-icon>{{ wishlist ? 'favorite' : 'favorite_border' }}</mat-icon>
+        </button>
+
+        <div *ngIf="!inStock" class="pd-oos-overlay" role="alert">
+          <span>Out of stock</span>
+        </div>
+        <div *ngIf="inStock && (produit.stock || 0) <= 5" class="pd-low-badge">
+          <mat-icon>local_fire_department</mat-icon> Only {{ produit.stock }} left!
+        </div>
+        <div *ngIf="imageCount > 1" class="pd-img-counter">
+          {{ selectedImageIndex + 1 }} / {{ imageCount }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Info panel -->
+    <div class="pd-info">
+      <div class="pd-info-top">
+        <span *ngIf="produit.categorie" class="pd-cat">{{ produit.categorie.nom }}</span>
+      </div>
+
+      <h1 class="pd-name">{{ produit.nom }}</h1>
+
+      <div class="pd-rating-row">
+        <div class="pd-stars">
+          <span class="s on">★</span><span class="s on">★</span>
+          <span class="s on">★</span><span class="s on">★</span>
+          <span class="s half">★</span>
+        </div>
+        <span class="pd-rating-txt">4.4 · 38 reviews</span>
+        <span class="pd-dot">·</span>
+        <span class="pd-stock-tag" [class]="stockClass">
+          <mat-icon>{{ stockClass === 'out' ? 'cancel' : 'check_circle' }}</mat-icon>
+          {{ stockLabel }}
+        </span>
+      </div>
+
+      <div class="pd-price-block">
+        <div class="pd-price-row">
+          <span class="pd-price">{{ produit.prix | number:'1.2-2' }}</span>
+          <span class="pd-currency">TND</span>
+        </div>
+        <p class="pd-price-note">VAT included · Shipping calculated at checkout</p>
+      </div>
+
+      <hr class="pd-divider" />
+
+      <!-- Quantity -->
+      <div class="pd-qty" *ngIf="inStock && !isInCart">
+        <span class="pd-qty-label">Quantity</span>
+        <div class="pd-qty-row">
+          <div class="pd-qty-ctrl">
+            <button class="pd-qty-btn" (click)="decrease()" [disabled]="quantity <= 1" type="button">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <span class="pd-qty-val">{{ quantity }}</span>
+            <button class="pd-qty-btn" (click)="increase()" [disabled]="quantity >= maxQty()" type="button">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <span class="pd-qty-max">{{ produit.stock }} available</span>
+        </div>
+      </div>
+
+      <!-- Already in cart notice -->
+      <div *ngIf="isInCart && inStock" class="pd-in-cart-notice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        This product is already in your cart.
+        <button (click)="cartSvc.open()" type="button" class="pd-view-cart-link">View cart</button>
+      </div>
+
+      <!-- CTA buttons -->
+      <div class="pd-cta-row">
+        <button *ngIf="isInCart" class="pd-cart-btn pd-cart-btn--incart" (click)="cartSvc.open()" type="button">
+          <mat-icon>shopping_cart</mat-icon>
+          View cart
+        </button>
+
+        <button *ngIf="!isInCart" class="pd-cart-btn"
+          [disabled]="!inStock" (click)="addToCart()" type="button">
+          <mat-icon>shopping_cart</mat-icon>
+          Add to cart
+        </button>
+
+        <button class="pd-buy-btn" [disabled]="!inStock" (click)="buyNow()" type="button">
+          <mat-icon>bolt</mat-icon>
+          Buy now
+        </button>
+      </div>
+
+      <!-- Guarantees -->
+      <div class="pd-guarantees">
+        <div class="pd-guarantee"><mat-icon>local_shipping</mat-icon><span>Delivery within 48h</span></div>
+        <div class="pd-guarantee"><mat-icon>autorenew</mat-icon><span>30-day returns</span></div>
+        <div class="pd-guarantee"><mat-icon>verified_user</mat-icon><span>Secure payment</span></div>
+      </div>
+
+      <hr class="pd-divider" />
+
+      <!-- Tabs -->
+      <div class="pd-tabs" role="tablist">
+        <button class="pd-tab" [class.active]="activeTab==='description'" (click)="activeTab='description'" type="button">Description</button>
+        <button class="pd-tab" [class.active]="activeTab==='details'"     (click)="activeTab='details'"     type="button">Details</button>
+        <button class="pd-tab" [class.active]="activeTab==='delivery'"    (click)="activeTab='delivery'"    type="button">Delivery</button>
+      </div>
+
+      <div class="pd-tab-body">
+        <div *ngIf="activeTab === 'description'">
+          <p class="pd-desc-text" *ngIf="produit.description">{{ produit.description }}</p>
+          <p class="pd-none"      *ngIf="!produit.description">No description available.</p>
+        </div>
+
+        <dl *ngIf="activeTab === 'details'" class="pd-details">
+          <div class="pd-detail-row"><dt>Reference</dt><dd>#{{ produit.id }}</dd></div>
+          <div class="pd-detail-row"><dt>Category</dt><dd>{{ produit.categorie?.nom ?? '—' }}</dd></div>
+          <div class="pd-detail-row"><dt>Unit price</dt><dd>{{ produit.prix | number:'1.2-2' }} TND</dd></div>
+          <div class="pd-detail-row"><dt>Availability</dt><dd>{{ produit.stock }} unit(s)</dd></div>
+        </dl>
+
+        <div *ngIf="activeTab === 'delivery'" class="pd-livraison">
+          <div class="pd-liv-item">
+            <mat-icon>local_shipping</mat-icon>
+            <div><strong>Standard delivery</strong><span>2–3 business days · Free over 50 TND</span></div>
+          </div>
+          <div class="pd-liv-item">
+            <mat-icon>flash_on</mat-icon>
+            <div><strong>Express delivery</strong><span>24h · 8 TND</span></div>
+          </div>
+          <div class="pd-liv-item">
+            <mat-icon>autorenew</mat-icon>
+            <div><strong>Free returns</strong><span>30 days to change your mind, no justification needed</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back button -->
+  <div *ngIf="!loading" class="pd-back-row">
+    <button class="pd-back-btn" (click)="goBack()" type="button">
+      <mat-icon>arrow_back</mat-icon> Continue shopping
+    </button>
+  </div>
+
+</div>
+

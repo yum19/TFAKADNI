@@ -1,0 +1,113 @@
+/* post-blur-overlay.component.css
+   The overlay that sits on top of blurred post content for non-authors */
+
+/* ── Overlay container — sits inside position:relative post body ── */
+.pbo-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 16px;
+  border-radius: 10px;
+  text-align: center;
+  animation: pboFadeIn 0.25s ease both;
+  z-index: 5;
+}
+
+@keyframes pboFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Pink tint for HIGH severity ── */
+.pbo-high {
+  background: rgba(212, 83, 126, 0.12);
+}
+
+/* ── Blue tint for MEDIUM severity ── */
+.pbo-medium {
+  background: rgba(55, 138, 221, 0.10);
+}
+
+/* ── Eye icon button ── */
+.pbo-eye-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 2px solid #D4537E;
+  background: #FBEAF0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.15s, border-color 0.18s;
+  flex-shrink: 0;
+}
+
+.pbo-eye-btn:hover {
+  background: #F4C0D1;
+  transform: scale(1.08);
+}
+
+.pbo-eye-btn:active {
+  transform: scale(0.96);
+}
+
+.pbo-eye-btn svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* Paths use pink stroke */
+.pbo-eye-path {
+  stroke: #993556;
+}
+
+.pbo-eye-slash {
+  stroke: #D4537E;
+  stroke-width: 2.5;
+}
+
+/* ── Text ── */
+.pbo-message {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #72243E;
+  max-width: 280px;
+}
+
+.pbo-medium .pbo-message {
+  color: #0C447C;
+}
+
+.pbo-hint {
+  font-size: 11px;
+  color: #993556;
+  opacity: 0.75;
+  letter-spacing: 0.2px;
+}
+
+.pbo-medium .pbo-hint {
+  color: #185FA5;
+}
+
+/* ── Revealed indicator ── */
+.pbo-revealed {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-muted, #b08a9a);
+  margin-bottom: 8px;
+  padding: 4px 0;
+}
+
+.pbo-revealed svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+}

@@ -1,0 +1,119 @@
+$sidebar-width: 260px;
+$sidebar-collapsed-width: 72px;
+$header-height: 68px;
+$transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+.admin-shell {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--mat-sys-background);
+
+  &.mat-drawer-container { background: var(--mat-sys-background); }
+}
+
+.shell-content {
+  display: flex !important;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--mat-sys-background);
+}
+
+// ── Sidebar column ─────────────────────────────────────
+.admin-sidebar-col {
+  width: $sidebar-width;
+  flex-shrink: 0;
+  height: 100vh;
+  position: relative;
+  z-index: 200;
+  transition: width $transition, transform $transition;
+
+  &.sidebar-collapsed {
+    width: $sidebar-collapsed-width;
+  }
+
+  // Mobile: always fixed, slides in/out
+  @media (max-width: 1023px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: $sidebar-width !important; // always full width on mobile
+
+    &.mobile-hidden {
+      transform: translateX(-100%);
+    }
+
+    &.mobile-visible {
+      transform: translateX(0);
+      box-shadow: 4px 0 32px color-mix(in srgb, var(--mat-sys-shadow, #000) 18%, transparent);
+    }
+  }
+}
+
+// ── Main column ────────────────────────────────────────
+.admin-main-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  transition: margin-left $transition;
+}
+
+// ── Main scroll area ───────────────────────────────────
+.admin-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 36px 40px 64px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mat-sys-outline-variant) transparent;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: var(--mat-sys-outline-variant);
+    border-radius: 6px;
+    &:hover { background: var(--mat-sys-outline); }
+  }
+
+  @media (max-width: 600px) { padding: 24px 16px 48px; }
+}
+
+.admin-main.no-padding {
+  padding: 0 !important;
+}
+
+// ── Mobile overlay ─────────────────────────────────────
+// Lives OUTSIDE mat-sidenav-container so it sits above everything
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  background: color-mix(in srgb, var(--mat-sys-scrim, #000) 48%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity $transition;
+  cursor: pointer;
+
+  // Only exists on mobile — hidden by default everywhere
+  display: none;
+
+  @media (max-width: 1023px) {
+    display: block;
+
+    &.visible {
+      opacity: 1;
+      // pointer-events: all;
+    }
+  }
+}
+
+// ── Theme drawer ───────────────────────────────────────
+.theme-drawer {
+  width: 320px;
+  border-left: 1px solid var(--mat-sys-outline-variant);
+}

@@ -1,0 +1,102 @@
+<div class="create-story-overlay" (click)="cancel()">
+  <div class="create-story-modal" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <h2>✨ Create a Story</h2>
+      <button class="close-btn" (click)="cancel()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Type Selector -->
+    <div class="type-selector">
+      <button 
+        [class.active]="story.type === 'TEXT'" 
+        (click)="selectType('TEXT')"
+        class="type-btn">
+        <mat-icon>text_fields</mat-icon>
+        <span>Text</span>
+      </button>
+      <button 
+        [class.active]="story.type === 'PHOTO'" 
+        (click)="selectType('PHOTO')"
+        class="type-btn">
+        <mat-icon>photo_camera</mat-icon>
+        <span>Photo</span>
+      </button>
+    </div>
+
+    <!-- TEXT MODE -->
+    <div *ngIf="story.type === 'TEXT'" class="text-mode">
+      <!-- Color Picker -->
+      <div class="color-picker">
+        <label>Background color:</label>
+        <div class="color-options">
+          <button
+            *ngFor="let color of colorOptions"
+            class="color-btn"
+            [class.active]="selectedColor === color"
+            [style.background]="color"
+            (click)="selectColor(color)">
+          </button>
+        </div>
+      </div>
+
+      <!-- Text Area with Preview -->
+      <div class="text-preview" [style.background]="selectedColor">
+        <textarea 
+          [(ngModel)]="story.contenu" 
+          placeholder="What's on your mind today? 💭"
+          class="story-textarea"
+          rows="6"
+          maxlength="200">
+        </textarea>
+      </div>
+      
+      <div class="char-count">
+        {{ story.contenu?.length || 0 }} / 200 characters
+      </div>
+    </div>
+
+    <!-- PHOTO MODE -->
+    <div *ngIf="story.type === 'PHOTO'" class="photo-mode">
+      <div class="upload-zone"
+           [class.has-image]="previewImage"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event)"
+           (click)="!previewImage && fileInput.click()">
+        <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+
+        <div *ngIf="!previewImage" class="upload-placeholder">
+          <mat-icon>cloud_upload</mat-icon>
+          <p>Drag a photo or click to select</p>
+          <small>JPG, PNG, GIF (max 5MB)</small>
+        </div>
+
+        <div *ngIf="previewImage" class="preview-container">
+          <img [src]="previewImage" class="preview-image" alt="Preview">
+          <button class="remove-preview" (click)="removeImage(); $event.stopPropagation()">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="modal-footer">
+      <button class="cancel-btn" (click)="cancel()">
+        Cancel
+      </button>
+      <button 
+        class="publish-btn" 
+        [disabled]="isSubmitting || (story.type === 'TEXT' && !story.contenu?.trim()) || (story.type === 'PHOTO' && !previewImage)"
+        (click)="publishStory()">
+        <mat-icon *ngIf="!isSubmitting">send</mat-icon>
+        <span *ngIf="isSubmitting">⏳ Publishing...</span>
+        <span *ngIf="!isSubmitting">Publish story</span>
+      </button>
+    </div>
+
+  </div>
+</div>

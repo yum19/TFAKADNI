@@ -1,0 +1,227 @@
+<!-- admin-courses.component.html -->
+<section class="course-library-canvas">
+  <div class="library-wrap">
+    <!-- ── Header ── -->
+    <header class="library-header">
+      <div class="header-left">
+        <div class="header-row">
+          <span class="studio-chip">
+            Admin Console
+            <span class="studio-dot"></span>
+          </span>
+        </div>
+        <h1 class="library-title">
+          Course <span class="title-accent">Library.</span>
+        </h1>
+        <p class="library-lead">
+          Manage, expand, and structure your educational content.
+        </p>
+      </div>
+
+      <div class="header-stats">
+        <div class="header-stat">
+          <span class="stat-val">{{ courses.length }}</span>
+          <span class="stat-lbl">Courses</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="header-stat">
+          <span class="stat-val">{{
+            courses.length > 0 ? "Live" : "Empty"
+          }}</span>
+          <span class="stat-lbl status-live">Status</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Course List ── -->
+    <div class="glass-card library-card">
+      @if (courses.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <mat-icon>school</mat-icon>
+          </div>
+          <h4 class="empty-title">No courses deployed yet</h4>
+          <p class="empty-sub">Go to the Studio to create your first course.</p>
+        </div>
+      }
+
+      <div class="course-list">
+        @for (course of courses; track course.id) {
+          <div
+            class="course-row"
+            [class.is-editing]="editingCourse?.id === course.id"
+            [class.is-expanded]="expandedCourseId === course.id"
+          >
+            <!-- ── View mode ── -->
+            @if (editingCourse?.id !== course.id) {
+              <div class="course-row-main">
+                <div class="course-index">{{ $index + 1 }}</div>
+
+                <div class="course-meta">
+                  <h5 class="course-title">{{ course.title }}</h5>
+                  <div class="course-pills">
+                    <span class="meta-pill">ID: {{ course.id }}</span>
+                    <span class="meta-pill pill-cat">{{
+                      course.category
+                    }}</span>
+                    <span class="meta-pill pill-level">{{ course.level }}</span>
+                    <span class="meta-pill pill-dur"
+                      >{{ course.durationMin }} min</span
+                    >
+                  </div>
+                </div>
+
+                <div class="course-actions">
+                  <button
+                    class="action-btn action-btn--expand"
+                    [class.active]="expandedCourseId === course.id"
+                    (click)="toggleCourseDetails(course.id)"
+                    [title]="
+                      expandedCourseId === course.id
+                        ? 'Collapse modules'
+                        : 'View modules'
+                    "
+                  >
+                    <mat-icon>{{
+                      expandedCourseId === course.id ? "expand_less" : "layers"
+                    }}</mat-icon>
+                    <span>{{
+                      expandedCourseId === course.id ? "Collapse" : "Content"
+                    }}</span>
+                  </button>
+                  <button
+                    class="action-btn action-btn--edit"
+                    (click)="startEditCourse(course)"
+                    title="Edit course"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    class="action-btn action-btn--delete"
+                    (click)="deleteCourse(course.id)"
+                    title="Delete course"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ── Expanded modules panel ── -->
+              @if (expandedCourseId === course.id) {
+                <div class="modules-panel">
+                  <div class="modules-panel-header">
+                    <div class="modules-panel-label">
+                      <mat-icon>view_module</mat-icon>
+                      Modules inside <strong>{{ course.title }}</strong>
+                    </div>
+                  </div>
+
+                  <div class="modules-list">
+                    @for (mod of courseModules; track mod.id) {
+                      <div class="module-row">
+                        <div class="module-order">{{ mod.orderIndex }}</div>
+                        <div class="module-info">
+                          <span class="module-title">{{ mod.title }}</span>
+                          <span class="module-id">ID: {{ mod.id }}</span>
+                        </div>
+                        <div class="module-badges">
+                          <span class="mod-badge mod-badge--type">{{
+                            mod.contentType
+                          }}</span>
+                          @if (mod.quizId) {
+                            <span class="mod-badge mod-badge--quiz">
+                              <mat-icon>psychology</mat-icon>
+                              Quiz
+                            </span>
+                          }
+                        </div>
+                        <div class="module-actions">
+                          @if (mod.quizId) {
+                            <button
+                              class="action-btn action-btn--sm action-btn--delete"
+                              title="Delete quiz only"
+                              (click)="deleteQuiz(mod.quizId, course.id)"
+                            >
+                              <mat-icon>quiz</mat-icon>
+                            </button>
+                          }
+                          <button
+                            class="action-btn action-btn--sm action-btn--delete"
+                            title="Delete module"
+                            (click)="deleteModule(mod.id, course.id)"
+                          >
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    } @empty {
+                      <div class="modules-empty">
+                        <mat-icon>inbox</mat-icon>
+                        No modules found in this course.
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            }
+
+            <!-- ── Edit mode ── -->
+            @if (editingCourse?.id === course.id) {
+              <div class="edit-panel">
+                <div class="edit-panel-header">
+                  <div class="edit-panel-label">
+                    <mat-icon>edit</mat-icon>
+                    Editing — <strong>{{ course.title }}</strong>
+                  </div>
+                </div>
+
+                <div class="edit-fields">
+                  <div class="edit-field edit-field--wide">
+                    <label class="field-label">Title</label>
+                    <input
+                      class="glass-input"
+                      type="text"
+                      [(ngModel)]="editingCourse.title"
+                      placeholder="Course title"
+                    />
+                  </div>
+                  <div class="edit-field">
+                    <label class="field-label">Category</label>
+                    <input
+                      class="glass-input"
+                      type="text"
+                      [(ngModel)]="editingCourse.category"
+                      placeholder="e.g., Nutrition"
+                    />
+                  </div>
+                  <div class="edit-field edit-field--narrow">
+                    <label class="field-label">Duration (Min)</label>
+                    <input
+                      class="glass-input"
+                      type="number"
+                      [(ngModel)]="editingCourse.durationMin"
+                    />
+                  </div>
+                </div>
+
+                <div class="edit-footer">
+                  <button
+                    class="action-btn action-btn--cancel"
+                    (click)="editingCourse = null"
+                  >
+                    <mat-icon>close</mat-icon>
+                    Cancel
+                  </button>
+                  <button class="deploy-btn" (click)="saveCourse()">
+                    <mat-icon>save</mat-icon>
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>

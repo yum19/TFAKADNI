@@ -1,0 +1,372 @@
+<section class="document-page">
+  <div class="document-shell">
+    <header class="topbar">
+    
+    </header>
+
+    <section class="hero-card">
+      <div class="hero-copy">
+        <p class="eyebrow">Growth records · baby tracking</p>
+        <h1>
+          Gentle growth,
+          <span>beautifully measured</span>
+        </h1>
+        <p class="hero-text">Track weight, height and optional head circumference over time.</p>
+      </div>
+
+      <div class="hero-side">
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-number">{{ itemsCount }}</span>
+            <span class="stat-label">Entries</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">{{ babyId }}</span>
+            <span class="stat-label">Baby ID</span>
+          </div>
+        </div>
+
+        <button type="button" class="add-document-btn" (click)="scrollToForm()">
+          <span class="plus">+</span>
+          Add entry
+        </button>
+      </div>
+    </section>
+
+    <section class="filters-card growth-search-card">
+      <div class="filters-row growth-search-row">
+        <div class="search-input-wrap growth-search-field">
+          <span class="search-icon">⌕</span>
+          <input
+            type="text"
+            [value]="searchTerm"
+            (input)="onSearchChange($any($event.target).value)"
+            placeholder="Search by date, weight, height, head, bmi, notes..."
+          />
+        </div>
+      </div>
+    </section>
+
+    <div class="messages">
+      <div class="status" *ngIf="loading">Loading data...</div>
+      <div class="status error" *ngIf="!loading && error">{{ error }}</div>
+      <div class="status error" *ngIf="!loading && submitError">{{ submitError }}</div>
+      <div class="status success" *ngIf="!loading && submitSuccess">{{ submitSuccess }}</div>
+    </div>
+
+    <!-- Growth tracker + records side by side -->
+    <div class="gt-layout" *ngIf="form" [formGroup]="form" #formCard>
+
+      <!-- LEFT: Growth Tracker widget -->
+      <div class="gt-left">
+        <div class="gt-popup">
+
+          <!-- Top colored area with baby character + ruler -->
+          <div class="gt-top" [ngClass]="'gt-tab-' + activeTab">
+            <div class="gt-blob gt-blob1"></div>
+            <div class="gt-blob gt-blob2"></div>
+
+            <div class="gt-title-row">
+              <span class="gt-title">Growth tracker</span>
+              <div class="gt-chart-icon">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                  <rect x="1" y="9" width="3" height="6" rx="1" fill="#999"/>
+                  <rect x="6" y="5" width="3" height="10" rx="1" fill="#999"/>
+                  <rect x="11" y="2" width="3" height="13" rx="1" fill="#999"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="gt-character-area">
+              <!-- WEIGHT baby: swaddled sleeping -->
+              <svg *ngIf="activeTab === 'weight'" class="gt-baby-svg" viewBox="0 0 155 190" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="77" cy="168" rx="46" ry="14" fill="#d8b4fe" opacity="0.35"/>
+                <rect x="30" y="118" width="94" height="58" rx="30" fill="#e9d5ff"/>
+                <path d="M30 140 Q50 128 77 140 Q104 152 124 140" stroke="#c4b5fd" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M34 155 Q55 143 77 155 Q99 167 120 155" stroke="#c4b5fd" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
+                <ellipse cx="36" cy="132" rx="9" ry="7" fill="#fde68a" transform="rotate(-20 36 132)"/>
+                <ellipse cx="118" cy="132" rx="9" ry="7" fill="#fde68a" transform="rotate(20 118 132)"/>
+                <circle cx="30" cy="128" r="3.5" fill="#fcd34d"/><circle cx="28" cy="134" r="3" fill="#fcd34d"/><circle cx="32" cy="138" r="3" fill="#fcd34d"/>
+                <circle cx="124" cy="128" r="3.5" fill="#fcd34d"/><circle cx="126" cy="134" r="3" fill="#fcd34d"/><circle cx="122" cy="138" r="3" fill="#fcd34d"/>
+                <ellipse cx="77" cy="95" rx="38" ry="36" fill="#fde68a"/>
+                <ellipse cx="77" cy="65" rx="34" ry="16" fill="#c4b5fd"/>
+                <ellipse cx="77" cy="60" rx="28" ry="10" fill="#a78bfa"/>
+                <ellipse cx="77" cy="57" rx="8" ry="5" fill="#7c3aed"/>
+                <path d="M60 96 Q67 92 74 96" stroke="#92400e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M80 96 Q87 92 94 96" stroke="#92400e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <line x1="62" y1="95" x2="60" y2="90" stroke="#92400e" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="67" y1="93" x2="66" y2="88" stroke="#92400e" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="82" y1="95" x2="80" y2="90" stroke="#92400e" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="88" y1="93" x2="87" y2="88" stroke="#92400e" stroke-width="1.5" stroke-linecap="round"/>
+                <ellipse cx="77" cy="103" rx="4" ry="2.5" fill="#f59e0b" opacity="0.5"/>
+                <path d="M70 110 Q77 116 84 110" stroke="#d97706" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <ellipse cx="58" cy="105" rx="9" ry="6" fill="#fca5a5" opacity="0.55"/>
+                <ellipse cx="96" cy="105" rx="9" ry="6" fill="#fca5a5" opacity="0.55"/>
+                <circle cx="77" cy="116" r="5" fill="#f9a8d4" opacity="0.7"/>
+                <circle cx="77" cy="116" r="3" fill="#f472b6" opacity="0.8"/>
+              </svg>
+
+              <!-- HEIGHT baby: standing onesie -->
+              <svg *ngIf="activeTab === 'height'" class="gt-baby-svg" viewBox="0 0 155 190" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="77" cy="178" rx="32" ry="10" fill="#99f6e4" opacity="0.4"/>
+                <ellipse cx="60" cy="170" rx="14" ry="10" fill="#5eead4"/><ellipse cx="94" cy="170" rx="14" ry="10" fill="#5eead4"/>
+                <ellipse cx="56" cy="176" rx="11" ry="7" fill="#2dd4bf"/><ellipse cx="98" cy="176" rx="11" ry="7" fill="#2dd4bf"/>
+                <circle cx="49" cy="178" r="4" fill="#0d9488"/><circle cx="55" cy="181" r="3.5" fill="#0d9488"/><circle cx="61" cy="182" r="3" fill="#0d9488"/>
+                <circle cx="91" cy="181" r="3.5" fill="#0d9488"/><circle cx="97" cy="178" r="4" fill="#0d9488"/><circle cx="103" cy="182" r="3" fill="#0d9488"/>
+                <rect x="42" y="110" width="70" height="65" rx="18" fill="#5eead4"/>
+                <circle cx="70" cy="174" r="3" fill="#0d9488"/><circle cx="77" cy="175" r="3" fill="#0d9488"/><circle cx="84" cy="174" r="3" fill="#0d9488"/>
+                <path d="M52 118 Q77 108 102 118" stroke="#2dd4bf" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <ellipse cx="30" cy="128" rx="16" ry="10" fill="#5eead4" transform="rotate(-25 30 128)"/>
+                <ellipse cx="124" cy="128" rx="16" ry="10" fill="#5eead4" transform="rotate(25 124 128)"/>
+                <ellipse cx="18" cy="122" rx="11" ry="9" fill="#fde68a"/>
+                <circle cx="11" cy="118" r="4" fill="#fcd34d"/><circle cx="10" cy="125" r="3.5" fill="#fcd34d"/><circle cx="15" cy="130" r="3.5" fill="#fcd34d"/>
+                <ellipse cx="136" cy="122" rx="11" ry="9" fill="#fde68a"/>
+                <circle cx="143" cy="118" r="4" fill="#fcd34d"/><circle cx="144" cy="125" r="3.5" fill="#fcd34d"/><circle cx="139" cy="130" r="3.5" fill="#fcd34d"/>
+                <ellipse cx="77" cy="88" rx="36" ry="34" fill="#fde68a"/>
+                <ellipse cx="64" cy="60" rx="9" ry="12" fill="#fbbf24" transform="rotate(-15 64 60)"/>
+                <ellipse cx="77" cy="56" rx="10" ry="13" fill="#f59e0b"/>
+                <ellipse cx="90" cy="60" rx="9" ry="12" fill="#fbbf24" transform="rotate(15 90 60)"/>
+                <circle cx="62" cy="88" r="13" fill="#fff"/><circle cx="92" cy="88" r="13" fill="#fff"/>
+                <circle cx="62" cy="89" r="8" fill="#1e3a5f"/><circle cx="92" cy="89" r="8" fill="#1e3a5f"/>
+                <circle cx="65" cy="86" r="3" fill="#fff"/><circle cx="95" cy="86" r="3" fill="#fff"/>
+                <path d="M55 78 Q62 75 69 78" stroke="#d97706" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M85 78 Q92 75 99 78" stroke="#d97706" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <ellipse cx="50" cy="100" rx="10" ry="7" fill="#fca5a5" opacity="0.5"/>
+                <ellipse cx="104" cy="100" rx="10" ry="7" fill="#fca5a5" opacity="0.5"/>
+                <path d="M67 107 Q77 116 87 107" stroke="#d97706" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              </svg>
+
+              <!-- HEAD baby: sitting big head -->
+              <svg *ngIf="activeTab === 'head'" class="gt-baby-svg" viewBox="0 0 155 190" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="77" cy="178" rx="36" ry="11" fill="#fed7aa" opacity="0.4"/>
+                <ellipse cx="77" cy="168" rx="36" ry="18" fill="#fff7ed"/>
+                <ellipse cx="77" cy="158" rx="30" ry="14" fill="#fed7aa"/>
+                <rect x="60" y="152" width="34" height="16" rx="8" fill="#fff" opacity="0.6"/>
+                <ellipse cx="47" cy="170" rx="18" ry="13" fill="#fde68a" transform="rotate(20 47 170)"/>
+                <ellipse cx="107" cy="170" rx="18" ry="13" fill="#fde68a" transform="rotate(-20 107 170)"/>
+                <ellipse cx="36" cy="178" rx="13" ry="9" fill="#fcd34d" transform="rotate(10 36 178)"/>
+                <ellipse cx="118" cy="178" rx="13" ry="9" fill="#fcd34d" transform="rotate(-10 118 178)"/>
+                <circle cx="28" cy="174" r="4" fill="#f59e0b"/><circle cx="32" cy="170" r="3.5" fill="#f59e0b"/><circle cx="37" cy="168" r="3" fill="#f59e0b"/>
+                <circle cx="126" cy="174" r="4" fill="#f59e0b"/><circle cx="122" cy="170" r="3.5" fill="#f59e0b"/><circle cx="117" cy="168" r="3" fill="#f59e0b"/>
+                <ellipse cx="77" cy="140" rx="28" ry="22" fill="#fb923c"/>
+                <ellipse cx="40" cy="128" rx="13" ry="9" fill="#fb923c" transform="rotate(-35 40 128)"/>
+                <ellipse cx="114" cy="128" rx="13" ry="9" fill="#fb923c" transform="rotate(35 114 128)"/>
+                <ellipse cx="28" cy="115" rx="10" ry="8" fill="#fde68a"/>
+                <circle cx="21" cy="111" r="3.5" fill="#fcd34d"/><circle cx="21" cy="118" r="3" fill="#fcd34d"/><circle cx="26" cy="122" r="3" fill="#fcd34d"/>
+                <ellipse cx="126" cy="115" rx="10" ry="8" fill="#fde68a"/>
+                <circle cx="133" cy="111" r="3.5" fill="#fcd34d"/><circle cx="133" cy="118" r="3" fill="#fcd34d"/><circle cx="128" cy="122" r="3" fill="#fcd34d"/>
+                <ellipse cx="77" cy="85" rx="44" ry="42" fill="#fde68a"/>
+                <circle cx="77" cy="85" r="46" fill="none" stroke="#fb923c" stroke-width="2" stroke-dasharray="5 4" opacity="0.5"/>
+                <ellipse cx="77" cy="46" rx="20" ry="12" fill="#fbbf24"/>
+                <ellipse cx="60" cy="50" rx="12" ry="9" fill="#f59e0b"/><ellipse cx="94" cy="50" rx="12" ry="9" fill="#f59e0b"/>
+                <circle cx="62" cy="87" r="14" fill="#fff"/><circle cx="92" cy="87" r="14" fill="#fff"/>
+                <circle cx="62" cy="88" r="9" fill="#7c3aed"/><circle cx="92" cy="88" r="9" fill="#7c3aed"/>
+                <circle cx="65" cy="85" r="3.5" fill="#fff"/><circle cx="95" cy="85" r="3.5" fill="#fff"/>
+                <circle cx="77" cy="99" r="4" fill="#f59e0b" opacity="0.5"/>
+                <ellipse cx="77" cy="110" rx="7" ry="6" fill="#ea580c" opacity="0.6"/>
+                <ellipse cx="45" cy="100" rx="12" ry="8" fill="#fca5a5" opacity="0.6"/>
+                <ellipse cx="109" cy="100" rx="12" ry="8" fill="#fca5a5" opacity="0.6"/>
+                <ellipse cx="33" cy="87" rx="8" ry="10" fill="#fcd34d"/><ellipse cx="121" cy="87" rx="8" ry="10" fill="#fcd34d"/>
+              </svg>
+
+              <!-- Dynamic SVG Ruler -->
+              <div class="gt-ruler-wrap">
+                <svg class="gt-ruler-svg" viewBox="0 0 54 160" xmlns="http://www.w3.org/2000/svg">
+                  <!-- vertical bar -->
+                  <line x1="28" y1="2" x2="28" y2="158" stroke="#cbd5e1" stroke-width="1.5"/>
+                  <!-- ticks -->
+                  <ng-container *ngFor="let tick of rulerTicks; let i = index">
+                    <line
+                      [attr.x1]="tick.isMain ? 28 : 28"
+                      [attr.y1]="2 + i * (156 / (rulerTicks.length - 1))"
+                      [attr.x2]="tick.isMain ? 40 : 36"
+                      [attr.y2]="2 + i * (156 / (rulerTicks.length - 1))"
+                      stroke="#94a3b8"
+                      [attr.stroke-width]="tick.isMain ? 1.5 : 1"/>
+                    <text
+                      *ngIf="tick.label"
+                      [attr.x]="26"
+                      [attr.y]="2 + i * (156 / (rulerTicks.length - 1)) + 3.5"
+                      text-anchor="end"
+                      font-size="9"
+                      font-weight="700"
+                      fill="#64748b"
+                      font-family="inherit">{{ tick.label }}</text>
+                  </ng-container>
+                  <!-- Moving arrow indicator -->
+                  <g [attr.transform]="'translate(0,' + (2 + arrowPositionPct / 100 * 156) + ')'"
+                     style="transition: transform 0.4s cubic-bezier(.34,1.56,.64,1)">
+                    <!-- arrow shape -->
+                    <polygon
+                      [attr.points]="'28,0 42,-7 42,7'"
+                      [attr.fill]="activeTab === 'weight' ? '#a78bfa' : activeTab === 'height' ? '#2dd4bf' : '#fb923c'"/>
+                    <!-- value label pill -->
+                    <rect *ngIf="arrowLabel" x="-2" y="-9" width="30" height="18" rx="9"
+                      [attr.fill]="activeTab === 'weight' ? '#a78bfa' : activeTab === 'height' ? '#2dd4bf' : '#fb923c'"/>
+                    <text *ngIf="arrowLabel" x="13" y="4"
+                      text-anchor="middle" font-size="7.5" font-weight="800" fill="#fff" font-family="inherit">
+                      {{ arrowLabel }}
+                    </text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Tabs inside top area — with fill indicator dot -->
+            <div class="gt-tabs">
+              <button type="button" class="gt-tab" [class.gt-tab-active]="activeTab === 'weight'" (click)="setTab('weight')">
+                Weight
+                <span class="gt-tab-dot" *ngIf="form.get('weight')?.value"></span>
+              </button>
+              <button type="button" class="gt-tab" [class.gt-tab-active]="activeTab === 'height'" (click)="setTab('height')">
+                Height
+                <span class="gt-tab-dot" *ngIf="form.get('height')?.value"></span>
+              </button>
+              <button type="button" class="gt-tab" [class.gt-tab-active]="activeTab === 'head'" (click)="setTab('head')">
+                Head
+                <span class="gt-tab-dot" *ngIf="form.get('headCircumference')?.value"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom: only the active tab's field is shown -->
+          <div class="gt-body">
+
+            <!-- Weight field: visible ONLY on weight tab -->
+            <div *ngIf="activeTab === 'weight'" class="gt-field-wrap gt-field-active">
+              <div class="gt-field-header">
+                <span class="gt-field-label">Weight (kg)</span>
+                <span class="gt-field-check" *ngIf="form.get('weight')?.value">✓ {{ form.get('weight')?.value }} kg</span>
+              </div>
+              <input class="gt-input" type="number" step="0.001" placeholder="0.000 kg" formControlName="weight" />
+              <small class="gt-err" *ngIf="hasError('weight')">Weight is required.</small>
+            </div>
+
+            <!-- Height field: visible ONLY on height tab -->
+            <div *ngIf="activeTab === 'height'" class="gt-field-wrap gt-field-active">
+              <div class="gt-field-header">
+                <span class="gt-field-label">Height (cm)</span>
+                <span class="gt-field-check" *ngIf="form.get('height')?.value">✓ {{ form.get('height')?.value }} cm</span>
+              </div>
+              <input class="gt-input" type="number" step="0.1" placeholder="00 cm" formControlName="height" />
+              <small class="gt-err" *ngIf="hasError('height')">Height is required.</small>
+            </div>
+
+            <!-- Head field: visible ONLY on head tab -->
+            <div *ngIf="activeTab === 'head'" class="gt-field-wrap gt-field-active">
+              <div class="gt-field-header">
+                <span class="gt-field-label">Head circumference (cm)</span>
+                <span class="gt-field-check" *ngIf="form.get('headCircumference')?.value">✓ {{ form.get('headCircumference')?.value }} cm</span>
+              </div>
+              <input class="gt-input" type="number" step="0.1" placeholder="00 cm" formControlName="headCircumference" />
+            </div>
+
+            <!-- Separator -->
+            <div class="gt-divider"></div>
+
+            <!-- Date — always visible, shared -->
+            <input class="gt-input" type="date" formControlName="recordDate" />
+            <small class="gt-err" *ngIf="hasError('recordDate')">Date is required.</small>
+
+            <!-- Notes — optional, always visible -->
+            <textarea class="gt-input gt-textarea" rows="2" placeholder="Notes (optional)" formControlName="notes"></textarea>
+
+            <!-- Progress pills showing fill status -->
+            <div class="gt-progress-pills">
+              <span class="gt-pill" [class.gt-pill-done]="form.get('weight')?.value">W</span>
+              <span class="gt-pill-sep">·</span>
+              <span class="gt-pill" [class.gt-pill-done]="form.get('height')?.value">H</span>
+              <span class="gt-pill-sep">·</span>
+              <span class="gt-pill" [class.gt-pill-done]="form.get('headCircumference')?.value">Head</span>
+              <span class="gt-pill-sep">·</span>
+              <span class="gt-pill" [class.gt-pill-done]="form.get('recordDate')?.value">Date</span>
+            </div>
+
+            <!-- Save: active only when weight + height + head + date all filled -->
+            <button type="button" class="gt-save-btn"
+              [disabled]="submitting
+                || !form.get('weight')?.value
+                || !form.get('height')?.value
+                || !form.get('headCircumference')?.value
+                || !form.get('recordDate')?.value"
+              (click)="submit()">
+              {{ submitting ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Update entry' : 'Save') }}
+            </button>
+
+            <button *ngIf="isEditMode" type="button" class="gt-cancel-btn" (click)="cancelEdit()">
+              Cancel edit
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: records list -->
+      <div class="gt-right">
+        <div *ngIf="!loading && !error && records.length === 0" class="empty-state">
+          <h3>No growth records yet</h3>
+          <p>Add the first entry to start tracking growth gently.</p>
+        </div>
+
+        <div class="documents-grid growth-grid" *ngIf="!loading && !error && paginatedRecords.length > 0">
+          <article class="document-card growth-record-card" *ngFor="let item of paginatedRecords; let i = index" [style.--delay]="(i * 60) + 'ms'">
+            <div class="document-body">
+              <div class="growth-record-head compact-head">
+                <div>
+                  <p class="growth-record-kicker">Growth entry</p>
+                  <h3 class="growth-record-title">{{ item.recordDate | date:'mediumDate' }}</h3>
+                </div>
+              </div>
+
+              <div class="growth-record-summary colorful-summary">
+                <div class="summary-chip summary-weight">
+                  <span>Weight</span>
+                  <strong>{{ item.weight }}</strong>
+                </div>
+                <div class="summary-chip summary-height">
+                  <span>Height</span>
+                  <strong>{{ item.height }}</strong>
+                </div>
+                <div class="summary-chip summary-head" *ngIf="item.headCircumference !== null && item.headCircumference !== undefined && item.headCircumference !== ''">
+                  <span>Head</span>
+                  <strong>{{ item.headCircumference }}</strong>
+                </div>
+                <div class="summary-chip summary-bmi">
+                  <span>BMI</span>
+                  <strong>{{ item.bmi }}</strong>
+                </div>
+                <div class="summary-chip summary-notes" *ngIf="item.notes">
+                  <span>Notes</span>
+                  <strong>{{ item.notes }}</strong>
+                </div>
+              </div>
+
+              <div class="document-footer">
+                <div class="card-actions">
+                  <button type="button" class="update-btn" (click)="openUpdateRecord(item)">Update</button>
+                  <button type="button" class="delete-btn" (click)="deleteRecord(item.id)">Remove</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="pagination" *ngIf="!loading && !error && hasMultiplePages && filteredRecords.length > 0">
+          <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="previousPage()">Prev</button>
+
+          <button
+            type="button"
+            class="page-btn number"
+            *ngFor="let page of pageNumbers"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">Next</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>

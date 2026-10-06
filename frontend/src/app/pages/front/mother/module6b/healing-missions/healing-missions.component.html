@@ -1,0 +1,966 @@
+<!-- ═══════════════ RPG AVATAR TEMPLATE ═══════════════ -->
+<ng-template #rpgAvatar let-variant="variant">
+  <div class="rpg-avatar" [ngClass]="'rpg-avatar--' + variant" aria-hidden="true">
+    <div class="rpg-avatar-aura"></div>
+    <div class="rpg-avatar-hair-back"></div>
+    <div class="rpg-avatar-face">
+      <span class="rpg-avatar-eye left"></span>
+      <span class="rpg-avatar-eye right"></span>
+      <span class="rpg-avatar-cheek left"></span>
+      <span class="rpg-avatar-cheek right"></span>
+      <span class="rpg-avatar-lips"></span>
+    </div>
+    <div class="rpg-avatar-hair-front"></div>
+    <div class="rpg-avatar-neck"></div>
+    <div class="rpg-avatar-dress"></div>
+    <div class="rpg-avatar-gem"></div>
+    <span class="rpg-avatar-sparkle sparkle-1">✦</span>
+    <span class="rpg-avatar-sparkle sparkle-2">✦</span>
+    <span class="rpg-avatar-sparkle sparkle-3">✦</span>
+  </div>
+</ng-template>
+
+<!-- ═══════════════ BG EFFECTS ═══════════════ -->
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+<div class="bg-orb orb-3"></div>
+<div class="star-field">
+  <span *ngFor="let s of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]" class="star"></span>
+</div>
+
+<div class="healing-header-stack">
+
+  <!-- ═══════════════ HERO CARD ═══════════════ -->
+  <section class="hero-card">
+    <div class="hero-card-copy">
+      <h2>One soft quest at a time</h2>
+      <p class="hero-text">
+        Tap a mission, open the game popup, and move forward with a calmer voice,
+        a prettier rhythm, and rewards that feel light and premium.
+      </p>
+    </div>
+
+    <div class="hero-card-meta" *ngIf="dashboard?.stats as stats">
+      <div class="hero-card-stats">
+        <div class="hero-pill">
+          <span>🔥 Streak</span>
+          <strong>{{ stats.currentStreak }}</strong>
+        </div>
+        <div class="hero-pill">
+          <span>⭐ Level</span>
+          <strong>{{ stats.currentLevel }}</strong>
+        </div>
+        <div class="hero-pill gold">
+          <span>💰 Coins</span>
+          <strong>{{ displayCoins }}</strong>
+        </div>
+      </div>
+
+      <div class="hero-progress-panel">
+        <div class="hero-progress-head">
+          <div>
+            <p class="hero-progress-kicker">Level progress</p>
+            <h3>Keep the momentum glowing</h3>
+          </div>
+          <span class="hero-progress-percent">{{ getLevelProgressPercent() }}%</span>
+        </div>
+
+        <div class="hero-progress-track">
+          <div class="hero-progress-fill" [style.width.%]="getLevelProgressPercent()"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+ 
+
+  <section class="view-switcher-card" aria-label="Healing missions navigation">
+    <div class="view-switcher-copy">
+      <p class="view-switcher-kicker">Navigate the journey</p>
+      <h3>Pick the section you want to open</h3>
+    </div>
+
+    <div class="view-switcher-actions" role="tablist" aria-label="Healing mission sections">
+      <button
+        class="view-switcher-btn"
+        [class.active]="activeTab === 'map'"
+        (click)="setTab('map')"
+        type="button"
+        role="tab"
+        [attr.aria-selected]="activeTab === 'map'"
+      >
+        <span class="view-switcher-icon">🗺️</span>
+        <span class="view-switcher-text">
+          <strong>Today's Challenges</strong>
+          <small>Open the map</small>
+        </span>
+      </button>
+
+      <button
+        class="view-switcher-btn"
+        [class.active]="activeTab === 'badges'"
+        (click)="setTab('badges')"
+        type="button"
+        role="tab"
+        [attr.aria-selected]="activeTab === 'badges'"
+      >
+        <span class="view-switcher-icon">🏅</span>
+        <span class="view-switcher-text">
+          <strong>Badges</strong>
+          <small>Collect your wins</small>
+        </span>
+      </button>
+
+      <button
+        class="view-switcher-btn"
+        [class.active]="activeTab === 'history'"
+        (click)="setTab('history')"
+        type="button"
+        role="tab"
+        [attr.aria-selected]="activeTab === 'history'"
+      >
+        <span class="view-switcher-icon">📜</span>
+        <span class="view-switcher-text">
+          <strong>History</strong>
+          <small>Review your path</small>
+        </span>
+      </button>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- TAB: MAP (Today's Challenges)                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="tab-content" *ngIf="activeTab === 'map'">
+  <div class="map-scroll-shell" #mapScrollShell (scroll)="updateMapPreviewPosition()">
+    <div class="map-scene map-scene--image"
+      [style.background-image]="'linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.18)), url(' + mapBackgroundUrl + ')'">
+      <div class="map-scene-blur"></div>
+      <div class="map-scene-sparkles">
+        <span class="map-sparkle sparkle-a">✦</span>
+        <span class="map-sparkle sparkle-b">✦</span>
+        <span class="map-sparkle sparkle-c">✦</span>
+        <span class="map-sparkle sparkle-d">✦</span>
+      </div>
+
+      <div class="map-corner-badge start-badge">Start</div>
+      <div class="map-corner-badge finish-badge">Goal</div>
+
+      <div class="map-nodes">
+        <button *ngFor="let node of getMapNodes(); let i = index; trackBy: trackMapNode" class="map-node"
+          [class.completed]="node.mission ? isMissionCompleted(node.mission) : false" [class.locked]="node.isLocked"
+          [class.active]="node.mission ? selectedMission?.id === node.mission.id : false" [class.failed]="node.mission ? isMissionFailed(node.mission) : false" [class.failed-skipped]="node.mission ? isMissionSkippedAfterFail(node.mission) : false" [class.placeholder]="node.isPlaceholder" [ngStyle]="getNodePosition(i)"
+          (click)="node.mission ? onMapNodeClick(node.mission, i) : onBlockedNodeClick(i)" type="button">
+          <div class="map-node-glow"></div>
+          <div class="map-node-ring"></div>
+          <div class="map-node-inner">
+            <span class="map-node-num">{{ i + 1 }}</span>
+          </div>
+          <div class="map-node-icon">{{ node.icon }}</div>
+          <div class="map-node-label">{{ node.title }}</div>
+          <div class="map-node-lock" *ngIf="node.isLocked">🔒</div>
+          <div class="map-node-check" *ngIf="node.mission && isMissionCompleted(node.mission)">✓</div>
+          <div class="map-node-failed" *ngIf="node.mission && isMissionFailed(node.mission)">✕</div>
+          <div class="map-node-stars" *ngIf="node.mission && isMissionCompleted(node.mission)">
+            <span>⭐</span><span>⭐</span><span>⭐</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="map-mission-preview" *ngIf="mapPreviewMission as mission" [class.visible]="mapPreviewMission"
+        [style.top.px]="mapPreviewTopPx" [hidden]="isPopupGameMode">
+        <div class="preview-helper" [class.is-speaking]="avatarTalking">
+          <div class="preview-helper-glow"></div>
+          <span class="preview-helper-heart heart-a">💖</span>
+          <span class="preview-helper-heart heart-b">✨</span>
+          <span class="preview-helper-heart heart-c">💗</span>
+          <img class="preview-helper-img" [src]="helperAvatarUrl" alt="Mission helper avatar" />
+        </div>
+
+        <div class="preview-card-shell">
+          <button class="preview-close" type="button" (click)="closeMapPreview()" aria-label="Close mission preview">✕</button>
+
+          <div class="preview-main-row">
+            <div class="preview-icon">{{ getMissionIcon(mission.missionType) }}</div>
+
+            <div class="preview-info">
+              <p class="preview-type">{{ getMissionTypeLabel(mission.missionType) }}</p>
+              <h3>{{ mission.title }}</h3>
+              <p class="preview-desc">{{ mission.description }}</p>
+
+              <div class="preview-meta">
+                <span>⏱ {{ mission.durationSeconds }}s</span>
+                <span>⚡ {{ mission.difficulty }}</span>
+                <span>+{{ mission.pointsReward }} pts</span>
+              </div>
+            </div>
+
+            <div class="preview-actions">
+              <button class="btn-primary pulse" type="button" (click)="launchPopupMission(mission)">
+                ▶ Start Mission
+              </button>
+              <button class="btn-secondary" type="button" (click)="skipMission(mission)">
+                Skip
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="popup-game-portal" *ngIf="isPopupGameMode && selectedMission as gameMission">
+  <div class="popup-game-backdrop" (click)="closePopupGame()" aria-hidden="true"></div>
+  <div class="popup-game-shell">
+    <button class="preview-close popup-game-close" type="button" (click)="closePopupGame()" aria-label="Close game popup">✕</button>
+
+    <div class="popup-game-topbar">
+      <div class="popup-game-kicker-wrap">
+        <p class="preview-type popup-game-kicker">{{ getMissionTypeLabel(gameMission.missionType) }}</p>
+        <h3 class="popup-game-title">{{ gameMission.title }}</h3>
+        <p class="popup-game-subtitle">A soft challenge with a cleaner, more premium game layout.</p>
+      </div>
+
+      <div class="popup-game-pills">
+        <div class="timer-pill">
+          <svg viewBox="0 0 36 36" class="timer-svg">
+            <path class="timer-bg" d="M18 2 a 16 16 0 0 1 0 32 a 16 16 0 0 1 0 -32" />
+            <path class="timer-progress" [attr.stroke-dasharray]="gratitudeTimerProgress + ', 100'" d="M18 2 a 16 16 0 0 1 0 32 a 16 16 0 0 1 0 -32" />
+          </svg>
+          <span class="timer-text">{{ activeGame === 'GRATITUDE' ? gratitudeTimeLeft : gameMission.durationSeconds }}s</span>
+        </div>
+        <span>⚡ {{ gameMission.difficulty }}</span>
+        <span>+{{ gameMission.pointsReward }} pts</span>
+      </div>
+    </div>
+
+    <div class="popup-guide-bubble" *ngIf="avatarMessage">
+      <span class="popup-guide-badge">Guide</span>
+      <span>✨ {{ avatarMessage }}</span>
+    </div>
+
+    <div class="popup-loading-state" *ngIf="popupGameLoading">
+      <div class="popup-loader"></div>
+      <p>Preparing your mission...</p>
+    </div>
+
+    <ng-container *ngIf="!popupGameLoading">
+      <div class="popup-game-stage popup-game-stage--breathing" *ngIf="missionRunning && activeGame === 'BREATHING'">
+  <div class="popup-stage-header breathing-stage-header">
+    <div>
+      <h4>Breathe with the rhythm</h4>
+      <p>Slow down, follow the pulse, and let your body soften step by step.</p>
+    </div>
+
+    <div class="breathing-phase-pill" [ngClass]="getPhaseClass()">
+      <span class="phase-dot"></span>
+      <span>{{ breathingPhase }}</span>
+    </div>
+  </div>
+
+  <div class="popup-stage-card popup-stage-card--centered breathing-stage-card">
+    <div class="breathing-ambient">
+      <span class="breathing-sparkle bs-1">✦</span>
+      <span class="breathing-sparkle bs-2">✨</span>
+      <span class="breathing-sparkle bs-3">✦</span>
+      <span class="breathing-sparkle bs-4">💖</span>
+    </div>
+
+    <div class="breathing-scene popup-breathing-scene breathing-scene-deluxe">
+      <div class="breathing-orbit orbit-outer"></div>
+      <div class="breathing-orbit orbit-middle"></div>
+      <div class="breathing-orbit orbit-inner"></div>
+
+      <div
+        class="breathing-orb breathing-orb-deluxe"
+        [ngClass]="getPhaseClass()"
+        [style.transform]="'scale(' + breathingCircleScale + ')'">
+
+        <div class="breathing-core-glow"></div>
+
+        <div class="orb-inner orb-inner-deluxe">
+          <span class="orb-phase">{{ breathingPhase }}</span>
+          <strong class="orb-instruction">{{ breathingInstruction }}</strong>
+          <small class="orb-support">Stay soft and follow the motion</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="breathing-stats-row">
+      <div class="breathing-stat-card">
+        <span class="breathing-stat-label">Time left</span>
+        <strong class="breathing-stat-value">{{ breathingTimeLeft }}s</strong>
+      </div>
+
+      <div class="breathing-stat-card breathing-stat-card--wide">
+        <div class="breathing-progress-head">
+          <span>Session progress</span>
+          <strong>{{ breathingProgress }}%</strong>
+        </div>
+
+        <div class="progress-shell breathing-progress-shell">
+          <div class="progress-fill hot breathing-progress-fill" [style.width.%]="breathingProgress"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <div class="popup-game-stage popup-game-stage--gratitude" *ngIf="missionRunning && activeGame === 'GRATITUDE'">
+        <div class="popup-stage-header">
+          <h4>Choose one gratitude spark</h4>
+          <p>Tap one card to complete this soft reflection before the timer finishes.</p>
+        </div>
+
+        <div class="popup-stage-card popup-stage-card--gratitude-deluxe">
+          <div class="gratitude-deluxe-layout">
+            <div class="gratitude-helper-panel" [class.speaking]="avatarTalking">
+              <div class="gratitude-helper-glow"></div>
+              <img class="gratitude-helper-img" [src]="helperAvatarUrl" alt="Gratitude helper" />
+              <span class="gratitude-helper-sparkle gs-1">✨</span>
+              <span class="gratitude-helper-sparkle gs-2">💖</span>
+              <span class="gratitude-helper-sparkle gs-3">✦</span>
+            </div>
+
+            <div class="gratitude-content-panel">
+              <div class="choice-grid popup-choice-grid gratitude-choice-grid">
+                <button class="choice-box popup-choice-box gratitude-choice-box" *ngFor="let choice of gratitudeChoices" type="button" [class.selected]="selectedGratitudeChoice === choice" (click)="selectedGratitudeChoice = choice">
+                  <span class="popup-choice-icon">💖</span>
+                  <span class="popup-choice-text">{{ choice }}</span>
+                  <span class="gratitude-choice-shine"></span>
+                </button>
+              </div>
+<div class="gratitude-comment-wrap">
+  <label class="gratitude-comment-label" for="gratitudeComment">
+    Optional comment
+  </label>
+  <textarea
+    id="gratitudeComment"
+    class="gratitude-comment-input"
+    [(ngModel)]="gratitudeComment"
+    rows="3"
+    maxlength="250"
+    placeholder="Write a small note if you want..."></textarea>
+  <div class="gratitude-comment-counter">
+    {{ gratitudeComment.length }}/250
+  </div>
+</div>
+              <div class="game-actions popup-game-actions gratitude-actions">
+                <button class="btn-primary popup-wide-btn" type="button" [disabled]="!selectedGratitudeChoice" (click)="completeGratitudeMission()">
+                  Complete gratitude ✨
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="popup-game-stage popup-game-stage--voice" *ngIf="missionRunning && activeGame === 'VOICE_COMFORT'">
+  <div class="popup-stage-header">
+    <h4>Repeat the affirmation</h4>
+    <p>Listen, record your voice, then validate when ready.</p>
+  </div>
+
+  <div class="popup-stage-card popup-stage-card--stacked">
+    <div class="affirmation-card popup-affirmation-card">"{{ currentAffirmation }}"</div>
+
+    <div class="voice-mission-meta" *ngIf="voiceMissionConfig">
+      <div class="voice-meta-pill">
+        <strong>Style:</strong> {{ voiceMissionConfig.expectedVoiceStyle }}
+      </div>
+      <div class="voice-meta-pill">
+        <strong>Min:</strong> {{ voiceMissionConfig.minimumPassingScore }}%
+      </div>
+    </div>
+
+    <div class="voice-toolbar popup-toolbar-two">
+      <button class="btn-secondary" type="button" (click)="speakCurrentAffirmation()">🔊 Play voice</button>
+      <button class="btn-secondary" type="button" (click)="refreshAffirmation()">🔄 Reset phrase</button>
+    </div>
+
+    <div class="record-zone popup-record-zone" [class.recording]="isRecordingVoice">
+      <div class="record-ring"></div>
+      <div class="record-center"><strong>{{ isRecordingVoice ? 'REC' : 'MIC' }}</strong></div>
+    </div>
+
+    <div class="voice-wave" *ngIf="isRecordingVoice || voiceRunning">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="voice-score-card popup-score-card" *ngIf="voiceSimilarityScore !== null">
+      <div class="score-circle"><strong>{{ voiceSimilarityScore }}%</strong><span>match</span></div>
+      <div class="score-text">
+        <h4>{{ getVoiceResultTitle() }}</h4>
+        <p>{{ getVoiceResultMessage() }}</p>
+      </div>
+    </div>
+
+    <div class="voice-eval-details" *ngIf="voiceEvaluationResult">
+      <div><strong>Transcript:</strong> {{ voiceEvaluationResult.transcript || '—' }}</div>
+      <div><strong>Detected style:</strong> {{ voiceEvaluationResult.detectedVoiceStyle || '—' }}</div>
+      <div><strong>Text score:</strong> {{ voiceEvaluationResult.textScore }}%</div>
+      <div><strong>Energy score:</strong> {{ voiceEvaluationResult.energyScore }}%</div>
+      <div><strong>Pace score:</strong> {{ voiceEvaluationResult.paceScore }}%</div>
+      <div><strong>Stability score:</strong> {{ voiceEvaluationResult.stabilityScore }}%</div>
+      <div><strong>Pitch score:</strong> {{ voiceEvaluationResult.pitchScore }}%</div>
+    </div>
+
+    <div class="voice-toolbar popup-toolbar-two popup-toolbar-actions">
+      <button class="btn-primary" type="button" (click)="toggleVoiceRecording()" [disabled]="isEvaluatingVoice">
+        {{ isRecordingVoice ? 'Stop recording' : 'Record my voice' }}
+      </button>
+      <button class="btn-primary success" type="button" [disabled]="isRecordingVoice || isEvaluatingVoice" (click)="finishVoiceMissionWithScore()">
+        {{ isEvaluatingVoice ? 'Analyzing...' : 'Validate ✓' }}
+      </button>
+    </div>
+  </div>
+</div>
+      <div class="popup-game-stage popup-game-stage--audio" *ngIf="missionRunning && activeGame === 'CALM_AUDIO'">
+        <div class="popup-stage-header">
+          <h4>Stay present with the audio</h4>
+          <p>Press play and let the timer guide the session.</p>
+        </div>
+
+        <div class="popup-stage-card popup-stage-card--stacked">
+          <div class="audio-stage-card popup-audio-stage-card">
+            <div class="disc" [class.spin]="calmAudioRunning">🎧</div>
+            <div>
+              <h3>Calm Audio</h3>
+              <p>Listen and stay present...</p>
+            </div>
+          </div>
+
+          <div class="progress-shell">
+            <div class="progress-fill violet-fill" [style.width.%]="getCalmAudioProgress()"></div>
+          </div>
+          <div class="time-big">{{ calmAudioTimeLeft }}s</div>
+
+          <div class="center-actions" *ngIf="!calmAudioRunning && !calmAudioCompleted">
+            <button class="btn-primary popup-wide-btn" type="button" (click)="startCalmAudioGame()">Play calm session</button>
+          </div>
+        </div>
+      </div>
+
+     <div class="popup-game-stage popup-game-stage--movement" *ngIf="missionRunning && activeGame === 'GENTLE_MOVEMENT'">
+  <div class="popup-stage-header">
+    <h4>Follow the gentle movement</h4>
+    <p>Watch the coach, move softly, and stay until the video finishes.</p>
+  </div>
+
+  <div class="popup-stage-card popup-stage-card--movement-deluxe">
+    <div class="movement-deluxe-layout">
+
+      <div class="movement-video-panel">
+        <div class="movement-video-shell">
+  <div class="movement-video-topbar">
+    <span class="movement-live-pill">{{ getMovementStatusLabel() }}</span>
+    <span class="movement-time-pill">{{ getMovementTimeLeft() }}s left</span>
+  </div>
+
+  <div class="movement-youtube-frame">
+    <div class="movement-youtube-frame">
+  <div id="movementYoutubePlayer"></div>
+</div>
+  </div>
+
+  <div class="movement-video-glow"></div>
+</div>
+        <div class="movement-progress-card">
+          <div class="movement-progress-head">
+            <strong>Challenge progress</strong>
+            <span>{{ getMovementProgress() }}%</span>
+          </div>
+
+          <div class="progress-shell movement-progress-shell">
+            <div
+              class="progress-fill candy movement-progress-fill"
+              [style.width.%]="getMovementProgress()">
+            </div>
+          </div>
+
+          <div class="movement-progress-meta">
+            <span>{{ movementState.currentTime | number:'1.0-0' }}s watched</span>
+            <span>{{ movementState.videoDuration | number:'1.0-0' }}s total</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="movement-side-panel">
+        <div class="movement-instruction-card">
+          <div class="movement-step-badge">
+            <span>{{ movementSteps[currentMovementStepIndex]?.icon }}</span>
+            <strong>Step {{ currentMovementStepIndex + 1 }}</strong>
+          </div>
+
+          <h5>{{ currentMovementInstruction }}</h5>
+          <p>{{ currentMovementHint }}</p>
+        </div>
+
+        <div class="movement-rules-card">
+          <h6>Challenge rules</h6>
+          <ul>
+            <li>Stay until the video ends</li>
+            <li>Follow the coach gently</li>
+            <li>Do not skip ahead</li>
+            <li>Do not leave early</li>
+          </ul>
+        </div>
+
+        <div class="movement-score-card">
+          <h6>Potential score</h6>
+          <div class="movement-stars-preview">
+            <span [class.active]="getMovementStars() >= 1">⭐</span>
+            <span [class.active]="getMovementStars() >= 2">⭐</span>
+            <span [class.active]="getMovementStars() >= 3">⭐</span>
+          </div>
+          <p>Clean completion gives the best reward.</p>
+        </div>
+
+        <div class="input-card movement-note-card">
+          <label for="movementText">Body feeling note</label>
+          <textarea
+            id="movementText"
+            [(ngModel)]="completionNotes"
+            placeholder="My shoulders feel lighter and calmer."
+            rows="3"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+    </ng-container>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- TAB: MISSION DETAIL (shown when Start is clicked)   -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="tab-content mission-detail-screen" *ngIf="activeTab === 'mission'">
+  <div class="mission-layout">
+
+    <!-- LEFT: Avatar panel -->
+    <aside class="mission-avatar-col">
+      <div class="avatar-stage" [class.talking]="avatarTalking">
+        <div class="avatar-glow-ring"></div>
+        <ng-container *ngTemplateOutlet="rpgAvatar; context: { variant: 'hero' }"></ng-container>
+        <div class="avatar-speech-bubble" *ngIf="avatarMessage">
+          <p>{{ avatarMessage }}</p>
+        </div>
+      </div>
+      <div class="avatar-controls">
+        <button class="voice-ctrl-btn" type="button" (click)="speakText(avatarMessage)" title="Replay voice">
+          🔊 Replay
+        </button>
+        <button class="voice-ctrl-btn" type="button" (click)="stopVoice()" title="Stop">
+          ⏹ Stop
+        </button>
+      </div>
+      <button class="back-to-map-btn" type="button" (click)="setTab('map')">← Back to Map</button>
+    </aside>
+
+    <!-- RIGHT: Game area -->
+    <main class="mission-game-col" *ngIf="selectedMission as mission">
+
+      <!-- Mission intro (before start) -->
+      <div class="mission-intro-card" *ngIf="!missionRunning && !showVictoryCard">
+        <div class="mission-intro-header">
+          <div class="mission-big-icon">{{ getMissionIcon(mission.missionType) }}</div>
+          <div>
+            <p class="mission-type-tag">{{ getMissionTypeLabel(mission.missionType) }}</p>
+            <h2>{{ mission.title }}</h2>
+          </div>
+        </div>
+        <p class="mission-intro-desc">{{ mission.description }}</p>
+        <div class="mission-intro-stats">
+          <div class="intro-stat">⏱ <strong>{{ mission.durationSeconds }}s</strong></div>
+          <div class="intro-stat">⚡ <strong>{{ mission.difficulty }}</strong></div>
+          <div class="intro-stat">🏆 <strong>+{{ mission.pointsReward }} pts</strong></div>
+        </div>
+        <div class="mission-start-actions">
+          <button class="btn-primary pulse big-btn" type="button" (click)="startMission(mission)">
+            ▶ Start Game
+          </button>
+          <button class="btn-secondary" type="button" (click)="skipMission(mission)">
+            Skip →
+          </button>
+        </div>
+      </div>
+
+      <!-- ── BREATHING GAME ── -->
+      <div class="game-stage" *ngIf="missionRunning && activeGame === 'BREATHING'">
+        <div class="breathing-scene">
+          <div class="breathing-orb" [ngClass]="getPhaseClass()"
+            [style.transform]="'scale(' + breathingCircleScale + ')'">
+            <div class="orb-inner">{{ breathingInstruction }}</div>
+          </div>
+        </div>
+        <div class="game-progress-wrap">
+          <div class="progress-shell">
+            <div class="progress-fill hot" [style.width.%]="breathingProgress"></div>
+          </div>
+          <div class="time-big">{{ breathingTimeLeft }}s</div>
+        </div>
+      </div>
+
+      <!-- ── GRATITUDE GAME ── -->
+      <div class="game-stage" *ngIf="missionRunning && activeGame === 'GRATITUDE'">
+        <h3 class="game-title">What are you grateful for today?</h3>
+        <div class="choice-grid">
+          <button class="choice-box" *ngFor="let choice of gratitudeChoices" type="button"
+            [class.selected]="selectedGratitudeChoice === choice" (click)="selectedGratitudeChoice = choice">{{ choice
+            }}</button>
+        </div>
+        <div class="game-actions">
+          <button class="btn-primary" type="button" [disabled]="!selectedGratitudeChoice"
+            (click)="completeGratitudeMission()">
+            Complete gratitude ✨
+          </button>
+        </div>
+      </div>
+
+      <!-- ── VOICE GAME ── -->
+      <div class="game-stage" *ngIf="missionRunning && activeGame === 'VOICE_COMFORT'">
+        <div class="affirmation-card">"{{ currentAffirmation }}"</div>
+        <div class="voice-toolbar">
+<button class="btn-secondary" type="button" (click)="playVoiceSample()">🔊 Play voice</button>          <button class="btn-secondary" type="button" (click)="refreshAffirmation()">🔄 New phrase</button>
+        </div>
+        <div class="record-zone" [class.recording]="isRecordingVoice">
+          <div class="record-ring"></div>
+          <div class="record-center"><strong>{{ isRecordingVoice ? 'REC' : 'MIC' }}</strong></div>
+        </div>
+        <div class="voice-wave" *ngIf="isRecordingVoice || voiceRunning">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="voice-score-card" *ngIf="voiceSimilarityScore !== null">
+          <div class="score-circle"><strong>{{ voiceSimilarityScore }}%</strong><span>match</span></div>
+          <div class="score-text">
+            <h4>{{ getVoiceResultTitle() }}</h4>
+            <p>{{ getVoiceResultMessage() }}</p>
+          </div>
+        </div>
+        <div class="voice-toolbar">
+          <button class="btn-primary" type="button" (click)="toggleVoiceRecording()">
+            {{ isRecordingVoice ? 'Stop recording' : 'Record my voice' }}
+          </button>
+          <button class="btn-primary success" type="button" [disabled]="voiceSimilarityScore === null"
+            (click)="finishVoiceMissionWithScore()">
+            Validate ✓
+          </button>
+        </div>
+        <div class="input-card">
+          <label for="voiceText">How did it feel?</label>
+          <textarea id="voiceText" [(ngModel)]="completionNotes" placeholder="I felt..." rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- ── CALM AUDIO ── -->
+      <div class="game-stage" *ngIf="missionRunning && activeGame === 'CALM_AUDIO'">
+  <div class="audio-stage-card">
+    <div class="disc" [class.spin]="calmAudioRunning">🎧</div>
+    <div>
+      <h3>Calm Audio</h3>
+      <p>
+        Listen to the full audio session.
+        If you stop before the end, the mission fails.
+      </p>
+    </div>
+  </div>
+
+  <div class="progress-shell">
+    <div class="progress-fill violet-fill" [style.width.%]="getCalmAudioProgress()"></div>
+  </div>
+
+  <div class="time-big">{{ calmAudioTimeLeft }}s</div>
+
+  <div class="center-actions" *ngIf="!calmAudioRunning && !calmAudioCompleted">
+    <button class="btn-primary" type="button" (click)="startCalmAudioGame()">
+      ▶ Play calm audio
+    </button>
+  </div>
+
+  <div class="center-actions" *ngIf="calmAudioRunning">
+    <button class="btn-secondary" type="button" (click)="pauseCalmAudioGame()">
+      ⏸ Stop audio
+    </button>
+  </div>
+
+  <div class="input-card">
+    <label for="audioText">What did you feel?</label>
+    <textarea
+      id="audioText"
+      [(ngModel)]="completionNotes"
+      placeholder="I felt calmer because..."
+      rows="3"></textarea>
+  </div>
+</div>
+
+      <!-- ── MOVEMENT ── -->
+      <div class="game-stage" *ngIf="missionRunning && activeGame === 'GENTLE_MOVEMENT'">
+        <div class="movement-step-card big">
+          <div class="movement-emoji">💃</div>
+          <div>
+            <small>Step {{ currentMovementStepIndex + 1 }} / {{ movementSteps.length }}</small>
+            <strong>{{ movementSteps[currentMovementStepIndex] }}</strong>
+          </div>
+        </div>
+        <div class="progress-shell">
+          <div class="progress-fill candy" [style.width.%]="getMovementProgress()"></div>
+        </div>
+        <div class="center-actions">
+          <button class="btn-primary" type="button" (click)="completeMissionFromGame('Completed gentle movement challenge.')">
+            Finish 🎉
+          </button>
+        </div>
+        <div class="input-card">
+          <label for="movementText">Body feeling note</label>
+          <textarea id="movementText" [(ngModel)]="completionNotes" placeholder="My body feels..." rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- VICTORY OVERLAY -->
+      <div class="victory-overlay" *ngIf="showVictoryCard">
+        <div class="victory-fireworks">
+          <span class="firework firework-a">✦</span>
+          <span class="firework firework-b">✦</span>
+          <span class="firework firework-c">✦</span>
+          <span class="firework firework-d">✦</span>
+          <span class="firework firework-e">✦</span>
+        </div>
+        <div class="victory-garlands">
+          <span class="garland garland-left"></span>
+          <span class="garland garland-right"></span>
+        </div>
+        <div class="confetti-layer">
+          <span *ngFor="let c of confettiItems" class="confetti-piece">🎉</span>
+        </div>
+        <div class="victory-card victory-card--green">
+          <div class="victory-helper-wrap">
+            <div class="victory-helper-glow"></div>
+            <img [src]="helperAvatarHappyUrl" alt="Happy helper avatar" class="victory-helper-img" />
+          </div>
+          <div class="victory-copy">
+            <p class="preview-type victory-kicker">Winner unlocked</p>
+            <h2>Wow! Good job Mommy 💚</h2>
+            <p class="victory-meta">{{ missionCompletedMessage }}</p>
+            <p class="victory-subtext">You finished before time ended. The next challenge is now unlocked and ready for you.</p>
+            <div class="victory-rewards">
+              <div class="reward-box reward-box--green">💰 +{{ lastEarnedCoins }}</div>
+              <div class="reward-box reward-box--green">🟢 Circle cleared</div>
+              <div class="reward-box reward-box--green">✨ Next challenge unlocked</div>
+            </div>
+            <div class="victory-actions">
+              <button class="btn-primary pulse" type="button" (click)="closeVictoryCard()">Show next challenge 🗺️</button>
+              <button class="btn-secondary" type="button" (click)="avatarSpeakVictory()">🔊 Replay voice</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- TAB: BADGES                                         -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<section class="victory-overlay popup-victory-overlay" *ngIf="showVictoryCard && launchedFromPopup">
+  <div class="victory-fireworks">
+    <span class="firework firework-a">✦</span>
+    <span class="firework firework-b">✦</span>
+    <span class="firework firework-c">✦</span>
+    <span class="firework firework-d">✦</span>
+    <span class="firework firework-e">✦</span>
+  </div>
+  <div class="victory-garlands">
+    <span class="garland garland-left"></span>
+    <span class="garland garland-right"></span>
+  </div>
+  <div class="confetti-layer">
+    <span *ngFor="let c of confettiItems" class="confetti-piece">🎉</span>
+  </div>
+  <div class="victory-card victory-card--green popup-victory-card">
+    <div class="victory-helper-wrap">
+      <div class="victory-helper-glow"></div>
+      <img [src]="helperAvatarHappyUrl" alt="Happy helper avatar" class="victory-helper-img" />
+    </div>
+    <div class="victory-copy">
+      <p class="preview-type victory-kicker">Winner unlocked</p>
+      <h2>Wow! Good job Mommy 💚</h2>
+      <p class="victory-meta">{{ missionCompletedMessage }}</p>
+      <p class="victory-subtext">You finished the challenge, your circle is now green, and the next challenge is unlocked.</p>
+      <div class="victory-rewards">
+        <div class="reward-box reward-box--green">💰 +{{ lastEarnedCoins }}</div>
+        <div class="reward-box reward-box--green">🟢 Circle cleared</div>
+        <div class="reward-box reward-box--green">✨ Next challenge unlocked</div>
+      </div>
+      <div class="victory-actions">
+        <button class="btn-primary pulse" type="button" (click)="closeVictoryCard()">Show next challenge 🗺️</button>
+        <button class="btn-secondary" type="button" (click)="avatarSpeakVictory()">🔊 Replay voice</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="failed-mission-dialog" *ngIf="showFailedMissionDialog && failedMissionDialogMission as failedMission">
+  <div class="failed-mission-backdrop" (click)="closeFailedMissionDialog()"></div>
+
+  <div class="failed-mission-card">
+    <button
+      class="failed-mission-close"
+      type="button"
+      (click)="closeFailedMissionDialog()"
+      aria-label="Close failed mission dialog">
+      ✕
+    </button>
+
+    <div class="failed-mission-layout">
+      <div class="failed-mission-visual">
+        <img
+          class="failed-mission-image"
+          [src]="failedDialogImageUrl"
+          alt="Failed challenge helper" />
+      </div>
+
+      <div class="failed-mission-content">
+        <p class="failed-mission-kicker">{{ failedDialogBadge }}</p>
+        <h3>{{ failedDialogTitle }}</h3>
+        <p class="failed-mission-description">{{ failedDialogDescription }}</p>
+
+        <div class="failed-mission-actions">
+          <button
+            class="btn-primary failed-primary-btn"
+            type="button"
+            (click)="replayFailedMission(failedMission)">
+            {{ failedDialogPrimaryLabel }}
+          </button>
+
+          <button
+            class="btn-secondary failed-secondary-btn"
+            type="button"
+            (click)="skipFailedMission(failedMission)">
+            {{ failedDialogSecondaryLabel }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="winner-mission-portal" *ngIf="showCompletedMissionDialog && completedMissionDialogMission as completedMission">
+  <div class="winner-mission-backdrop" (click)="closeCompletedMissionDialog()" aria-hidden="true"></div>
+  <div class="winner-mission-dialog">
+    <button class="preview-close winner-mission-close" type="button" (click)="closeCompletedMissionDialog()" aria-label="Close winner dialog">✕</button>
+
+    <div class="winner-mission-visual">
+      <div class="winner-visual-glow"></div>
+      <img [src]="helperAvatarHappyUrl" alt="Happy helper avatar" class="winner-helper-img" />
+      <span class="winner-spark winner-spark-a">✨</span>
+      <span class="winner-spark winner-spark-b">🎊</span>
+      <span class="winner-spark winner-spark-c">🎉</span>
+    </div>
+
+    <div class="winner-mission-copy">
+      <p class="preview-type winner-mission-kicker">Winner</p>
+      <h3>Tu as déjà gagné ce défi 💚</h3>
+      <p>You already completed this challenge. Do you want to replay it for fun and try to beat your own rhythm again?</p>
+
+      <div class="winner-mission-actions">
+        <button class="btn-primary" type="button" (click)="replayCompletedMission(completedMission)">Replay</button>
+        <button class="btn-secondary" type="button" (click)="closeCompletedMissionDialog()">Exit</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tab-content" *ngIf="activeTab === 'badges'">
+  <div class="badges-screen">
+    <div class="section-head">
+      <h2>🏅 Your Badges</h2>
+      <p>Earn badges by completing missions and reaching milestones.</p>
+    </div>
+
+    <div class="badges-categories">
+      <div class="badge-category">
+        <h3 class="badge-cat-title">✅ Unlocked</h3>
+        <div class="badges-grid-big">
+          <div class="badge-card earned" *ngFor="let badge of earnedBadges; trackBy: trackBadge">
+            <div class="badge-shine"></div>
+            <div class="badge-emoji-big">{{ badge.icon }}</div>
+            <div class="badge-card-name">{{ badge.name }}</div>
+            <small class="badge-earned-tag">Earned ✓</small>
+          </div>
+          <div class="badge-empty" *ngIf="!earnedBadges.length">
+            <p>Complete missions to earn your first badge! 🌟</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="badge-category">
+        <h3 class="badge-cat-title">🔒 Locked</h3>
+        <div class="badges-grid-big">
+          <div class="badge-card locked" *ngFor="let badge of lockedBadges; trackBy: trackBadge">
+            <div class="badge-emoji-big">{{ badge.icon }}</div>
+            <div class="badge-card-name">{{ badge.name }}</div>
+            <small class="badge-locked-tag">Locked 🔒</small>
+          </div>
+          <div class="badge-empty" *ngIf="!lockedBadges.length">
+            <p>You've unlocked everything! 🎉</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- TAB: HISTORY                                        -->
+<!-- ═══════════════════════════════════════════════════ -->
+<section class="tab-content" *ngIf="activeTab === 'history'">
+  <div class="history-screen">
+    <div class="section-head">
+      <h2>📜 Quest History</h2>
+      <p>All your completed healing missions.</p>
+    </div>
+
+    <div class="history-stats-row" *ngIf="dashboard?.stats as stats">
+      <div class="h-stat-box">
+        <span>💎</span><strong>{{ stats.totalPoints }}</strong><small>Total pts</small>
+      </div>
+      <div class="h-stat-box">
+        <span>🏆</span><strong>{{ stats.currentLevel }}</strong><small>Level</small>
+      </div>
+      <div class="h-stat-box">
+        <span>🔥</span><strong>{{ stats.currentStreak }}</strong><small>Streak</small>
+      </div>
+      <div class="h-stat-box">
+        <span>🌟</span><strong>{{ stats.longestStreak }}</strong><small>Best streak</small>
+      </div>
+      <div class="h-stat-box">
+        <span>✅</span><strong>{{ stats.completedMissionsCount }}</strong><small>Completed</small>
+      </div>
+    </div>
+
+    <div class="history-timeline">
+      <div class="history-entry" *ngFor="let item of dashboard?.recentHistory; trackBy: trackMission">
+        <div class="history-entry-dot">{{ getMissionIcon(item.missionType) }}</div>
+        <div class="history-entry-body">
+          <div class="history-entry-title">{{ item.title }}</div>
+          <div class="history-entry-meta">
+            <span>{{ getMissionTypeLabel(item.missionType) }}</span>
+            <span>+{{ item.pointsReward }} pts</span>
+            <span>{{ item.difficulty }}</span>
+          </div>
+        </div>
+        <div class="history-entry-badge">✓</div>
+      </div>
+      <div class="history-empty" *ngIf="!dashboard?.recentHistory?.length">
+        <p>No missions completed yet. Start your journey! 🗺️</p>
+      </div>
+    </div>
+  </div>
+</section>

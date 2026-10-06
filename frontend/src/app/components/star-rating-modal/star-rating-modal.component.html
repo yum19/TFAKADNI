@@ -1,0 +1,86 @@
+<!-- src/app/components/star-rating-modal/star-rating-modal.component.html -->
+
+<div class="srm-backdrop" (click)="close.emit()"></div>
+
+<div class="srm-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+
+  <!-- Close -->
+  <button class="srm-close" (click)="close.emit()" type="button" aria-label="Close">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <!-- Success state -->
+  <div *ngIf="submitted" class="srm-success">
+    <div class="srm-success-icon">💕</div>
+    <h3>Thank you!</h3>
+    <p>Your rating for <strong>{{ ratedName }}</strong> has been saved.</p>
+  </div>
+
+  <!-- Rating form -->
+  <ng-container *ngIf="!submitted">
+    <div class="srm-header">
+      <div class="srm-avatar">{{ ratedName | slice:0:1 }}</div>
+      <div>
+        <h3 class="srm-title">Rate Your Experience</h3>
+        <p class="srm-sub">How was your marrainage with <strong>{{ ratedName }}</strong>?</p>
+      </div>
+    </div>
+
+    <!-- Stars -->
+    <div class="srm-stars"
+         (mouseleave)="leave()"
+         role="group"
+         aria-label="Star rating">
+      <button
+        *ngFor="let s of stars"
+        class="srm-star"
+        [class.filled]="s <= (hoveredStar || selectedStar)"
+        [class.hovered]="s <= hoveredStar"
+        (mouseenter)="hover(s)"
+        (click)="select(s)"
+        type="button"
+        [attr.aria-label]="s + ' stars'">
+        ★
+      </button>
+    </div>
+
+    <div class="srm-label" [class.visible]="hoveredStar || selectedStar">
+      {{ label }}
+    </div>
+
+    <!-- Comment -->
+    <div class="srm-comment-wrap">
+      <label class="srm-comment-label">Leave a comment <span>(optional)</span></label>
+      <textarea
+        class="srm-comment"
+        [(ngModel)]="comment"
+        placeholder="Share your experience with this marraine…"
+        maxlength="500"
+        rows="3">
+      </textarea>
+      <div class="srm-char">{{ comment.length }}/500</div>
+    </div>
+
+    <!-- Error -->
+    <p class="srm-error" *ngIf="error">{{ error }}</p>
+
+    <!-- Actions -->
+    <div class="srm-actions">
+      <button class="srm-btn-cancel" (click)="close.emit()" type="button">Cancel</button>
+      <button
+        class="srm-btn-submit"
+        (click)="submit()"
+        [disabled]="submitting || !selectedStar"
+        type="button">
+        <mat-icon *ngIf="submitting" class="srm-spin">autorenew</mat-icon>
+        <mat-icon *ngIf="!submitting">star</mat-icon>
+        {{ existing ? 'Update Rating' : 'Submit Rating' }}
+      </button>
+    </div>
+
+    <p class="srm-update-note" *ngIf="existing">
+      You previously gave {{ existing.stars }} star{{ existing.stars !== 1 ? 's' : '' }}.
+      Submitting will update your rating.
+    </p>
+  </ng-container>
+</div>

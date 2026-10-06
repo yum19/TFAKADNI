@@ -1,0 +1,492 @@
+<mat-drawer-container class="bg-none p-0 m-0 support-admin-shell" hasBackdrop="false">
+  <mat-drawer-content>
+
+    <div class="toast-stack">
+      <div
+        class="toast"
+        *ngFor="let toast of toasts"
+        [ngClass]="'toast-' + toast.type"
+      >
+        <div class="toast-content">
+          <mat-icon>
+            {{
+              toast.type === 'success'
+                ? 'check_circle'
+                : toast.type === 'error'
+                ? 'error'
+                : 'info'
+            }}
+          </mat-icon>
+          <span>{{ toast.text }}</span>
+        </div>
+        <button type="button" class="toast-close" (click)="removeToast(toast.id)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="container fade-in py-3 py-lg-4">
+      <div class="admin-hero-card">
+        <div class="admin-hero-content">
+          <div class="row gx-3 align-items-center">
+            <div class="col-12 col-md mb-3 mb-xl-0 py-1">
+              <p class="hero-kicker">Postpartum admin</p>
+              <h3 class="mb-2 hero-title">Support Resources</h3>
+              <p class="small hero-subtitle">
+                Manage postpartum support resources, articles, videos, audio, and hotline content with a richer admin experience.
+              </p>
+            </div>
+
+            <div class="col-12 col-md-auto mb-3 mb-xl-0">
+              <app-page-right></app-page-right>
+            </div>
+
+            <div class="col-12 col-lg-auto">
+              <button mat-flat-button class="add-resource-btn" (click)="openCreateForm()">
+                <mat-icon>add_circle</mat-icon>
+                <span>Add resource</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container fade-in">
+      <div class="row gx-3 gx-lg-4">
+        <div class="col-6 col-sm-6 col-lg-3">
+          <mat-card class="theme-orange mb-3 mb-lg-4 stat-card interactive-card">
+            <mat-card-header>
+              <div class="w-100">
+                <div class="row gx-3 align-items-center mb-3">
+                  <div class="col-auto">
+                    <div class="avatar avatar-40 text-theme rounded-xl glow-box">
+                      <span class="material-symbols-outlined">folder</span>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <h3 class="mb-0 text-theme">Total Resources</h3>
+                  </div>
+                </div>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <h1 class="fw-medium mb-1">{{ totalCount }}</h1>
+              <p class="small text-secondary"><span class="text-theme theme-red">{{ activeCount }}</span> Active resources</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <mat-card class="theme-red mb-3 mb-lg-4 stat-card interactive-card">
+            <mat-card-header>
+              <div class="w-100">
+                <div class="row gx-3 align-items-center mb-3">
+                  <div class="col-auto">
+                    <div class="avatar avatar-40 text-theme rounded-xl glow-box">
+                      <span class="material-symbols-outlined">article</span>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <h3 class="mb-1 text-theme">Articles</h3>
+                  </div>
+                </div>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <h1 class="mb-1">{{ articleCount }}</h1>
+              <p class="small text-secondary"><span class="text-theme theme-red">{{ mediaCount }}</span> Media items</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <mat-card class="mb-3 mb-lg-4 theme-green stat-card interactive-card">
+            <mat-card-header>
+              <div class="w-100">
+                <div class="row gx-3 align-items-center mb-3">
+                  <div class="col-auto">
+                    <div class="avatar avatar-40 text-theme rounded-xl glow-box">
+                      <span class="material-symbols-outlined">support_agent</span>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <h3 class="mb-0 text-theme">Hotlines</h3>
+                  </div>
+                </div>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <h1 class="mb-1">{{ hotlineCount }}</h1>
+              <p class="small text-secondary"><span class="text-theme theme-green">{{ languageCount }}</span> Languages</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <mat-card class="theme-sky mb-3 mb-lg-4 stat-card interactive-card">
+            <mat-card-header>
+              <div class="w-100">
+                <div class="row gx-3 align-items-center mb-3">
+                  <div class="col-auto">
+                    <div class="avatar avatar-40 text-theme rounded-xl glow-box">
+                      <span class="material-symbols-outlined">verified</span>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <h3 class="mb-0 text-theme">Visible</h3>
+                  </div>
+                </div>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <h1 class="mb-1">{{ visibleCount }}</h1>
+              <p class="small text-secondary"><span class="text-theme">{{ inactiveCount }}</span> Hidden</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <div class="row gx-3 gx-lg-4">
+        <div class="col-12 position-relative">
+          <mat-card class="mb-3 mb-lg-4 resource-table-card">
+            <mat-card-header>
+              <div class="w-100">
+                <div class="row gx-3 align-items-center">
+                  <div class="col-auto mb-3">
+                    <div class="avatar avatar-48 text-theme rounded-xl glow-box">
+                      <mat-icon class="material-icons-outlined">folder_open</mat-icon>
+                    </div>
+                  </div>
+                  <div class="col mb-3">
+                    <h3 class="mb-1">Support Resources</h3>
+                    <p class="text-secondary small">Create, edit, preview, hide, and reactivate resources.</p>
+                  </div>
+                  <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3">
+                    <mat-form-field appearance="outline" class="w-100 inline-small">
+                      <mat-label>Search</mat-label>
+                      <mat-icon matPrefix>search</mat-icon>
+                      <input matInput placeholder="Search resources" (keyup)="applyFilter($event)" #searchinput />
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+            </mat-card-header>
+
+            <table mat-table [dataSource]="dataSource" matSort class="bg-none mb-3 responsive-table fancy-table">
+
+              <ng-container matColumnDef="title">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+                <td mat-cell *matCellDef="let element">
+                  <p class="mat-mobile-label">Title</p>
+                  <div class="title-cell">
+                    <div class="type-dot" [ngClass]="getTypeClass(element.type)"></div>
+                    <div>
+                      <strong>{{ element.title }}</strong>
+                      <p class="text-secondary small mb-0">{{ element.description || 'No description' }}</p>
+                    </div>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+                <td mat-cell *matCellDef="let element">
+                  <p class="mat-mobile-label">Type</p>
+                  <span class="admin-badge" [ngClass]="getTypeClass(element.type)">{{ element.type }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+                <td mat-cell *matCellDef="let element">
+                  <p class="mat-mobile-label">Category</p>
+                  {{ element.category }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="language">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Language</th>
+                <td mat-cell *matCellDef="let element">
+                  <p class="mat-mobile-label">Language</p>
+                  {{ element.language?.toUpperCase() || 'N/A' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="riskLevelTarget">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Risk</th>
+                <td mat-cell *matCellDef="let element">
+                  <p class="mat-mobile-label">Risk</p>
+                  <span class="admin-badge" [ngClass]="getRiskClass(element.riskLevelTarget)">
+                    {{ element.riskLevelTarget }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="isActive">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                <td mat-cell *matCellDef="let element">
+                  <p class="mat-mobile-label">Status</p>
+                  <span class="admin-badge" [ngClass]="element.isActive ? 'theme-green' : 'theme-red'">
+                    {{ element.isActive ? 'Active' : 'Hidden' }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let element">
+                  <div class="table-actions">
+                    <button mat-icon-button class="action-btn preview" (click)="openResource(element)">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+
+                    <button mat-icon-button class="action-btn edit" (click)="openEditForm(element)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+
+                    <button
+                      *ngIf="element.isActive"
+                      mat-icon-button
+                      class="action-btn delete"
+                      (click)="deleteResource(element)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+
+                    <button
+                      *ngIf="!element.isActive"
+                      mat-icon-button
+                      class="action-btn activate"
+                      (click)="activateResource(element)"
+                    >
+                      <mat-icon>restart_alt</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+                  No data matching the filter "{{ searchinput.value }}"
+                </td>
+              </tr>
+            </table>
+
+            <mat-card-content>
+              <mat-paginator
+                [pageSizeOptions]="[5, 10, 25, 100]"
+                aria-label="Select page of support resources"
+                class="bg-none"
+              ></mat-paginator>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" *ngIf="isFormOpen" (click)="closeForm()"></div>
+
+    <section class="resource-form-modal" *ngIf="isFormOpen">
+      <div class="resource-form-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div>
+            <p class="modal-kicker">Admin resource form</p>
+            <h2>{{ editingId ? 'Edit resource' : 'Add resource' }}</h2>
+            <p class="text-secondary mb-0">
+              Configure postpartum articles, videos, audio, and hotline entries.
+            </p>
+          </div>
+
+          <button type="button" class="close-btn" (click)="closeForm()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <form class="admin-form-grid" (ngSubmit)="submitForm()">
+          <div class="form-field full">
+            <label>Title *</label>
+            <input [(ngModel)]="form.title" name="title" type="text" placeholder="Resource title" />
+          </div>
+
+          <div class="form-field">
+            <label>Type *</label>
+            <select [(ngModel)]="form.type" name="type" (ngModelChange)="onTypeChange()">
+              <option value="ARTICLE">ARTICLE</option>
+              <option value="VIDEO">VIDEO</option>
+              <option value="AUDIO">AUDIO</option>
+              <option value="HOTLINE">HOTLINE</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>Category *</label>
+            <select [(ngModel)]="form.category" name="category">
+              <option value="General">General</option>
+              <option value="Anxiety">Anxiety</option>
+              <option value="Baby Blues">Baby Blues</option>
+              <option value="Depression">Depression</option>
+              <option value="Emergency">Emergency</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>Language *</label>
+            <select [(ngModel)]="form.language" name="language">
+              <option value="FR">FR</option>
+              <option value="AR">AR</option>
+              <option value="EN">EN</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>Risk level *</label>
+            <select [(ngModel)]="form.riskLevelTarget" name="riskLevelTarget">
+              <option value="ALL">ALL</option>
+              <option value="LOW">LOW</option>
+              <option value="MODERATE">MODERATE</option>
+              <option value="HIGH">HIGH</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>Display mode</label>
+            <select [(ngModel)]="form.displayMode" name="displayMode">
+              <option value="TEXT">TEXT</option>
+              <option value="MEDIA">MEDIA</option>
+              <option value="PHONE">PHONE</option>
+              <option value="LINK">LINK</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>Estimated minutes</label>
+            <input [(ngModel)]="form.estimatedMinutes" name="estimatedMinutes" type="number" min="1" placeholder="5" />
+          </div>
+
+          <div class="form-field full">
+            <label>Description</label>
+            <textarea [(ngModel)]="form.description" name="description" rows="3" placeholder="Short description"></textarea>
+          </div>
+
+          <div class="form-field full" *ngIf="isArticle">
+            <label>Article content</label>
+            <textarea [(ngModel)]="form.contentText" name="contentText" rows="6" placeholder="Full article content"></textarea>
+          </div>
+
+          <div class="form-field full" *ngIf="isVideo || isAudio || isArticle">
+            <label>URL</label>
+            <input [(ngModel)]="form.url" name="url" type="text" placeholder="Media URL or article URL" />
+          </div>
+
+          <div class="form-field full" *ngIf="isVideo || isArticle">
+            <label>Thumbnail URL</label>
+            <input [(ngModel)]="form.thumbnailUrl" name="thumbnailUrl" type="text" placeholder="Preview image URL" />
+          </div>
+
+          <div class="form-field full" *ngIf="isHotline">
+            <label>Phone number</label>
+            <input [(ngModel)]="form.phoneNumber" name="phoneNumber" type="text" placeholder="+216..." />
+          </div>
+
+          <div class="toggle-row full">
+            <mat-slide-toggle [(ngModel)]="form.isRecommended" name="isRecommended">
+              Mark as recommended
+            </mat-slide-toggle>
+
+            <mat-slide-toggle [(ngModel)]="form.isActive" name="isActive">
+              Active
+            </mat-slide-toggle>
+          </div>
+
+          <div class="form-actions full">
+            <button type="submit" class="submit-btn" [disabled]="saving">
+              <mat-icon>{{ editingId ? 'edit' : 'add_circle' }}</mat-icon>
+              <span>{{ saving ? 'Saving...' : (editingId ? 'Update resource' : 'Create resource') }}</span>
+            </button>
+
+            <button type="button" class="cancel-btn" (click)="closeForm()">
+              <mat-icon>close</mat-icon>
+              <span>Cancel</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <div class="modal-backdrop" *ngIf="isPreviewOpen" (click)="closePreview()"></div>
+
+    <section class="preview-modal" *ngIf="isPreviewOpen && previewResource">
+      <div class="preview-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div>
+            <p class="modal-kicker">Resource preview</p>
+            <h2>{{ previewResource.title }}</h2>
+            <p class="text-secondary mb-0">{{ previewResource.description }}</p>
+          </div>
+
+          <button type="button" class="close-btn" (click)="closePreview()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="preview-body" [ngSwitch]="previewResource.type.toUpperCase()">
+          <ng-container *ngSwitchCase="'VIDEO'">
+            <video
+              *ngIf="isDirectVideo(previewResource.url)"
+              [src]="previewResource.url"
+              controls
+              class="media-preview"
+            ></video>
+            <div *ngIf="!isDirectVideo(previewResource.url)" class="preview-fallback">
+              <mat-icon>play_circle</mat-icon>
+              <p>Video URL is not a direct playable file.</p>
+            </div>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'AUDIO'">
+            <div class="audio-preview-admin">
+              <div class="audio-bars">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+
+              <audio
+                *ngIf="isDirectAudio(previewResource.url)"
+                [src]="previewResource.url"
+                controls
+                class="audio-preview-player"
+              ></audio>
+
+              <div *ngIf="!isDirectAudio(previewResource.url)" class="preview-fallback">
+                <mat-icon>music_note</mat-icon>
+                <p>Audio URL is not a direct playable file.</p>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'HOTLINE'">
+            <div class="phone-preview-admin">
+              <mat-icon>call</mat-icon>
+              <h3>{{ previewResource.phoneNumber || 'No number available' }}</h3>
+              <p>{{ previewResource.description }}</p>
+            </div>
+          </ng-container>
+
+          <ng-container *ngSwitchDefault>
+            <div class="article-preview-admin">
+              <img *ngIf="previewResource.thumbnailUrl" [src]="previewResource.thumbnailUrl" alt="thumbnail" />
+              <div class="article-content-box">
+                {{ previewResource.contentText || previewResource.description || 'No article content available.' }}
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </section>
+
+  </mat-drawer-content>
+</mat-drawer-container>

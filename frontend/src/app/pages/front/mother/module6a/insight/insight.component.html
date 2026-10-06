@@ -1,0 +1,256 @@
+<div class="tl-page">
+
+  <div class="tl-topbar">
+    <div class="tl-topbar-links"></div>
+  </div>
+
+  <section class="tl-hero">
+    <div class="tl-hero-copy">
+      <p class="tl-eyebrow">Baby Intelligence</p>
+      <h1>Smart <span>Insights</span></h1>
+      <p class="tl-hero-sub">
+        Automatically generated insights based on baby data:
+        sleep, growth, feeding, diapers, teething, and milestones.
+      </p>
+    </div>
+
+    <div class="tl-hero-right">
+      <div class="tl-stats-panel">
+        <div class="tl-stats-row">
+          <div class="tl-stat">
+            <span class="tl-stat-num">{{ totalCount }}</span>
+            <span class="tl-stat-lbl">Total</span>
+          </div>
+
+          <div class="tl-stat accent-important">
+            <span class="tl-stat-num">{{ unreadCount }}</span>
+            <span class="tl-stat-lbl">Unread</span>
+          </div>
+
+          <div class="tl-stat accent-done">
+            <span class="tl-stat-num">{{ resolvedCount }}</span>
+            <span class="tl-stat-lbl">Resolved</span>
+          </div>
+        </div>
+
+        <div class="tl-hero-chips">
+          <button
+            class="tl-mini-chip"
+            type="button"
+            (click)="markAllAsRead()"
+            [disabled]="unreadCount === 0"
+          >
+            ✓ Mark all as read
+          </button>
+
+          <button
+            class="tl-mini-chip"
+            type="button"
+            (click)="refresh()"
+            [disabled]="loading || generating"
+          >
+            🔄 Refresh & sync
+          </button>
+
+          <button
+            class="tl-mini-chip"
+            type="button"
+            (click)="generateManually()"
+            [disabled]="loading || generating"
+          >
+            ✨ Generate now
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tl-controls">
+    <input
+      class="tl-control-input"
+      type="text"
+      placeholder="Search by title, message, module, rule..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="resetPagination()"
+    />
+
+    <select class="tl-control-select" [(ngModel)]="selectedStatus" (ngModelChange)="resetPagination()">
+      <option value="ALL">All statuses</option>
+      <option value="ACTIVE">Active</option>
+      <option value="DISMISSED">Dismissed</option>
+      <option value="RESOLVED">Resolved</option>
+    </select>
+
+    <select class="tl-control-select" [(ngModel)]="selectedPriority" (ngModelChange)="resetPagination()">
+      <option value="ALL">All priorities</option>
+      <option value="HIGH">High</option>
+      <option value="MEDIUM">Medium</option>
+      <option value="LOW">Low</option>
+    </select>
+
+    <select class="tl-control-select" [(ngModel)]="selectedSource" (ngModelChange)="resetPagination()">
+      <option value="ALL">All modules</option>
+      <option value="SLEEP">Sleep</option>
+      <option value="GROWTH">Growth</option>
+      <option value="FEEDING">Feeding</option>
+      <option value="DIAPER">Diaper</option>
+      <option value="TEETHING">Teething</option>
+      <option value="MILESTONE">Milestone</option>
+    </select>
+
+    <select class="tl-control-select" [(ngModel)]="sortBy" (ngModelChange)="resetPagination()">
+      <option value="NEWEST">Newest</option>
+      <option value="OLDEST">Oldest</option>
+      <option value="PRIORITY">Priority</option>
+      <option value="UNREAD">Unread first</option>
+    </select>
+
+    <label class="tl-checkbox">
+      <input type="checkbox" [(ngModel)]="showUnreadOnly" (ngModelChange)="resetPagination()" />
+      <span>Unread only</span>
+    </label>
+  </section>
+
+  <div class="tl-messages">
+    <div class="tl-status loading" *ngIf="loading || generating">
+      <span class="tl-spinner"></span>
+      {{ generating ? 'Generating and syncing insights...' : 'Loading insights...' }}
+    </div>
+
+    <div class="tl-status error" *ngIf="error">
+      {{ error }}
+    </div>
+  </div>
+
+  <div class="tl-body">
+    <div class="tl-empty" *ngIf="!loading && filteredInsights.length === 0">
+      <span class="tl-empty-icon">✨</span>
+      <h3>No insights found</h3>
+      <p>No insights match the current filters.</p>
+    </div>
+
+    <div class="tl-track" *ngIf="filteredInsights.length > 0">
+      <div
+        class="tl-event"
+        *ngFor="let insight of paginatedInsights"
+        [ngClass]="{
+          'priority-important': insight.priority === 'HIGH',
+          'type-insight': true
+        }"
+      >
+        <div class="tl-event-left">
+          <div class="tl-event-time">
+            {{ insight.generatedAt | date:'dd/MM HH:mm' }}
+          </div>
+
+          <div class="tl-dot-wrap">
+            <span class="tl-dot-ring"></span>
+            <div class="tl-dot">
+              <span *ngIf="insight.sourceModule === 'SLEEP'">🌙</span>
+              <span *ngIf="insight.sourceModule === 'GROWTH'">📏</span>
+              <span *ngIf="insight.sourceModule === 'FEEDING'">🍼</span>
+              <span *ngIf="insight.sourceModule === 'DIAPER'">🧷</span>
+              <span *ngIf="insight.sourceModule === 'TEETHING'">🦷</span>
+              <span *ngIf="insight.sourceModule === 'MILESTONE'">🏅</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-card">
+          <div class="tl-card-top">
+            <div class="tl-card-title-row">
+              <h3 class="tl-card-title">{{ insight.title }}</h3>
+
+              <div class="tl-card-head">
+                <span class="tl-type-badge badge-insight">{{ insight.insightType }}</span>
+
+                <span class="tl-priority-badge" [ngClass]="getPriorityClass(insight.priority)">
+                  {{ insight.priority }}
+                </span>
+
+                <span class="tl-unread-pill" *ngIf="!insight.isRead">Unread</span>
+
+                <span class="tl-status-pill" [ngClass]="getStatusClass(insight.status)">
+                  <span class="tl-status-dot"></span>
+                  {{ insight.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <p class="tl-card-desc">{{ insight.message }}</p>
+
+          <div class="tl-meta-block" *ngIf="insight.reason || insight.evidenceSummary || insight.ruleCode">
+            <div class="tl-meta-line" *ngIf="insight.reason">
+              <strong>Reason:</strong> {{ insight.reason }}
+            </div>
+            <div class="tl-meta-line" *ngIf="insight.evidenceSummary">
+              <strong>Evidence:</strong> {{ insight.evidenceSummary }}
+            </div>
+            <div class="tl-meta-line" *ngIf="insight.ruleCode">
+              <strong>Rule:</strong> {{ insight.ruleCode }}
+            </div>
+          </div>
+
+          <div class="tl-card-actions">
+            <a
+              *ngIf="getSourceCta(insight.sourceModule) as cta"
+              [routerLink]="cta.link"
+              class="tl-action-btn"
+            >
+              {{ cta.text }} →
+            </a>
+
+            <button
+              class="tl-action-btn muted"
+              *ngIf="canMarkAsRead(insight)"
+              (click)="markAsRead(insight)"
+            >
+              Mark as read
+            </button>
+
+            <button
+              class="tl-action-btn success"
+              *ngIf="canResolve(insight)"
+              (click)="resolveInsight(insight)"
+            >
+              Resolve
+            </button>
+
+            <button
+              class="tl-action-btn muted"
+              *ngIf="insight.status === 'ACTIVE'"
+              (click)="dismissInsight(insight)"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-pagination" *ngIf="filteredInsights.length > pageSize">
+        <button
+          type="button"
+          class="tl-refresh-btn"
+          (click)="prevPage()"
+          [disabled]="currentPage === 1"
+        >
+          ← Prev
+        </button>
+
+        <span class="tl-mini-chip secondary">
+          Page {{ currentPage }} / {{ totalPages }}
+        </span>
+
+        <button
+          type="button"
+          class="tl-refresh-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

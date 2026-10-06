@@ -1,0 +1,331 @@
+<div class="prediction-page">
+  <div class="prediction-shell">
+
+    <section class="prediction-hero">
+      <div class="hero-content">
+        <div class="hero-kicker">
+          <mat-icon>auto_graph</mat-icon>
+          <span>Postpartum service</span>
+        </div>
+
+        <h1 class="hero-title">Screening <span>prediction</span> results</h1>
+
+        <p class="hero-lead">
+          View every prediction result in one elegant space, compare confidence levels,
+          and follow the postpartum risk evolution over time.
+        </p>
+
+        <div class="hero-actions">
+          <a routerLink="/mother/postpartum" class="hero-secondary-btn">
+            Back to postpartum hub
+          </a>
+
+          <a routerLink="/mother/postpartum/appointments" class="hero-primary-btn">
+            Plan follow-up appointment
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-stats-card">
+        <div class="hero-stats-head">
+          <span class="hero-stats-kicker">Prediction overview</span>
+          <h2 class="hero-stats-title">Risk counts</h2>
+        </div>
+
+        <div class="hero-stats-list">
+          <article class="hero-stat-item risk-high">
+            <div class="hero-stat-icon">
+              <mat-icon>warning</mat-icon>
+            </div>
+            <div class="hero-stat-copy">
+              <span class="hero-stat-label">High predictions</span>
+              <strong class="hero-stat-value">{{ highPredictionCount }}</strong>
+            </div>
+          </article>
+
+          <article class="hero-stat-item risk-moderate">
+            <div class="hero-stat-icon">
+              <mat-icon>sentiment_neutral</mat-icon>
+            </div>
+            <div class="hero-stat-copy">
+              <span class="hero-stat-label">Moderate predictions</span>
+              <strong class="hero-stat-value">{{ moderatePredictionCount }}</strong>
+            </div>
+          </article>
+
+          <article class="hero-stat-item risk-low">
+            <div class="hero-stat-icon">
+              <mat-icon>sentiment_satisfied</mat-icon>
+            </div>
+            <div class="hero-stat-copy">
+              <span class="hero-stat-label">Low predictions</span>
+              <strong class="hero-stat-value">{{ lowPredictionCount }}</strong>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls-card">
+      <div class="controls-left">
+        <div class="filter-group">
+          <span class="filter-label">Filter by risk</span>
+
+          <div class="filter-pills">
+            <button
+              type="button"
+              class="filter-pill"
+              [class.active]="selectedRiskFilter === 'ALL'"
+              (click)="onRiskFilterChange('ALL')"
+            >
+              All
+            </button>
+
+            <button
+              type="button"
+              class="filter-pill low"
+              [class.active]="selectedRiskFilter === 'LOW'"
+              (click)="onRiskFilterChange('LOW')"
+            >
+              Low
+            </button>
+
+            <button
+              type="button"
+              class="filter-pill moderate"
+              [class.active]="selectedRiskFilter === 'MODERATE'"
+              (click)="onRiskFilterChange('MODERATE')"
+            >
+              Moderate
+            </button>
+
+            <button
+              type="button"
+              class="filter-pill high"
+              [class.active]="selectedRiskFilter === 'HIGH'"
+              (click)="onRiskFilterChange('HIGH')"
+            >
+              High
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-right">
+        <button type="button" class="sort-btn" (click)="toggleSortDirection()">
+          <mat-icon>swap_vert</mat-icon>
+          <span>Sort by date: {{ sortDirection === 'desc' ? 'Newest first' : 'Oldest first' }}</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="state-card" *ngIf="loading">
+      <div class="state-loading">
+        <div class="spinner"></div>
+        <p>Loading prediction results...</p>
+      </div>
+    </section>
+
+    <section class="state-card" *ngIf="!loading && errorMessage">
+      <div class="state-error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </section>
+
+    <section class="state-card" *ngIf="!loading && !errorMessage && filteredResults.length === 0">
+      <div class="state-empty">
+        <mat-icon>insights</mat-icon>
+        <h3>No prediction results found</h3>
+        <p>Try another filter or complete a new screening assessment first.</p>
+      </div>
+    </section>
+
+    <section class="results-grid" *ngIf="!loading && !errorMessage && filteredResults.length > 0">
+      <article
+        class="result-card"
+        *ngFor="let result of paginatedResults; trackBy: trackByResultId"
+        [ngClass]="getRiskClass(result.riskLevel)"
+      >
+        <div class="result-glow"></div>
+
+        <div class="result-top">
+          <div class="result-icon-wrap">
+            <mat-icon>{{ getRiskIcon(result.riskLevel) }}</mat-icon>
+          </div>
+
+          <div class="result-badge">
+            {{ result.riskLevel | titlecase }} Risk
+          </div>
+        </div>
+
+        <div class="result-main">
+          <h2 class="result-title">Prediction #{{ result.id }}</h2>
+
+          <p class="result-summary">
+            {{ getRiskSummary(result) }}
+          </p>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Confidence</span>
+            <strong class="metric-value">{{ getConfidencePercent(result.confidence) }}%</strong>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">Model</span>
+            <strong class="metric-value model-text">{{ result.modelVersion }}</strong>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">Low</span>
+            <strong class="metric-value">{{ formatProbability(result.probabilityLow) }}</strong>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">Moderate</span>
+            <strong class="metric-value">{{ formatProbability(result.probabilityModerate) }}</strong>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">High</span>
+            <strong class="metric-value">{{ formatProbability(result.probabilityHigh) }}</strong>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">Screening</span>
+            <strong class="metric-value">#{{ result.screeningId }}</strong>
+          </div>
+        </div>
+
+        <div class="result-footer">
+          <div class="result-date">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ result.predictionDate | date:'MMM d, y • shortTime' }}</span>
+          </div>
+
+          <div class="result-actions">
+            <button
+              type="button"
+              class="download-btn"
+              (click)="downloadPdf(result)"
+            >
+              <mat-icon>download</mat-icon>
+              <span>PDF</span>
+            </button>
+
+            <button
+              type="button"
+              class="view-answers-btn"
+              (click)="openAnswersModal(result)"
+            >
+              <mat-icon>quiz</mat-icon>
+              <span>View my answers</span>
+            </button>
+
+            <button
+              type="button"
+              class="delete-btn"
+              (click)="deleteResult(result.screeningId)"
+            >
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <div class="answers-backdrop" *ngIf="showAnswersModal" (click)="closeAnswersModal()"></div>
+
+    <section class="answers-modal" *ngIf="showAnswersModal" role="dialog" aria-modal="true">
+      <div class="answers-dialog">
+        <div class="answers-modal-header">
+          <div>
+            <p class="answers-kicker">Screening answers</p>
+            <h2 class="answers-title">
+              Prediction #{{ selectedPrediction?.id }}
+            </h2>
+          </div>
+
+          <button type="button" class="answers-close-btn" (click)="closeAnswersModal()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="answers-modal-summary" *ngIf="selectedPrediction">
+          <div class="answers-summary-pill">
+            <span class="summary-label">Screening ID</span>
+            <strong>#{{ selectedPrediction.screeningId }}</strong>
+          </div>
+
+          <div class="answers-summary-pill">
+            <span class="summary-label">Risk level</span>
+            <strong>{{ selectedPrediction.riskLevel | titlecase }}</strong>
+          </div>
+
+          <div class="answers-summary-pill">
+            <span class="summary-label">Confidence</span>
+            <strong>{{ getConfidencePercent(selectedPrediction.confidence) }}%</strong>
+          </div>
+        </div>
+
+        <div class="answers-loading" *ngIf="answersLoading">
+          <div class="spinner"></div>
+          <p>Loading screening answers...</p>
+        </div>
+
+        <div class="answers-error" *ngIf="!answersLoading && answersError">
+          <mat-icon>error_outline</mat-icon>
+          <p>{{ answersError }}</p>
+        </div>
+
+        <div class="answers-grid" *ngIf="!answersLoading && !answersError">
+          <article
+            class="answer-card"
+            *ngFor="let item of screeningAnswerItems; trackBy: trackByAnswerLabel"
+          >
+            <span class="answer-label">{{ item.label }}</span>
+            <strong class="answer-value">{{ item.value }}</strong>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="pagination-wrap" *ngIf="!loading && !errorMessage && shouldShowPagination">
+      <button
+        type="button"
+        class="page-nav-btn"
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 1"
+      >
+        <mat-icon>chevron_left</mat-icon>
+        <span>Previous</span>
+      </button>
+
+      <div class="page-numbers">
+        <button
+          type="button"
+          class="page-number-btn"
+          *ngFor="let page of pageNumbers"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="page-nav-btn"
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+      >
+        <span>Next</span>
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </section>
+
+  </div>
+</div>

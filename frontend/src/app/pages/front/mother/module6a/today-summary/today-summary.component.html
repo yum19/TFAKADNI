@@ -1,0 +1,39 @@
+<section class="feature-page">
+  <header class="feature-header">
+    <div class="header-links">
+      <a [routerLink]="'/mother/baby-profiles'">Back to profiles</a>
+      <a [routerLink]="['/mother/babies', babyId]">Back to baby profile</a>
+    </div>
+    <button type="button" class="ghost-btn" (click)="loadSummary()">Refresh</button>
+  </header>
+
+  <section class="hero-card">
+    <div>
+      <p class="eyebrow">Module 6A</p>
+      <h1>Today Summary</h1>
+      <p>Daily aggregated snapshot of baby care metrics.</p>
+    </div>
+    <div class="hero-metrics">
+      <span class="chip">Baby ID: {{ babyId }}</span>
+      <span class="chip secondary">Attention: {{ summary?.attentionNeeded ? 'Yes' : 'No' }}</span>
+    </div>
+  </section>
+
+  <div *ngIf="loading" class="status">Loading data...</div>
+  <div class="status error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <section class="details-card" *ngIf="!loading && summary">
+    <h2>{{ summary.summaryTitle }}</h2>
+    <div class="details-grid">
+      <div class="detail-row"><span>Feeding count</span><strong>{{ summary.feedingCount }}</strong></div>
+      <div class="detail-row"><span>Total feeding quantity</span><strong>{{ summary.totalFeedingQuantity }}</strong></div>
+      <div class="detail-row"><span>Sleep count</span><strong>{{ summary.sleepCount }}</strong></div>
+      <div class="detail-row"><span>Total sleep minutes</span><strong>{{ summary.totalSleepMinutes }}</strong></div>
+      <div class="detail-row"><span>Diaper count</span><strong>{{ summary.diaperCount }}</strong></div>
+      <div class="detail-row"><span>Appointments today</span><strong>{{ summary.appointmentCountToday }}</strong></div>
+      <div class="detail-row"><span>Reminders today</span><strong>{{ summary.reminderCountToday }}</strong></div>
+      <div class="detail-row"><span>Unread insights</span><strong>{{ summary.unreadInsightCount }}</strong></div>
+      <div class="detail-row"><span>Summary</span><strong>{{ summary.summaryText }}</strong></div>
+    </div>
+  </section>
+</section>

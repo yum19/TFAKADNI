@@ -1,0 +1,934 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --rose:        #c94d6a;
+  --rose-light:  #f5c6d0;
+  --peach:       #d97b58;
+  --peach-light: #fce3d6;
+  --sage:        #4d8c52;
+  --sage-light:  #c8e6ca;
+  --gold:        #a8722e;
+  --gold-light:  #f5e0c0;
+  --sky:         #3a8fb5;
+  --sky-light:   #bde3f5;
+  --cream:       #f7ede4;
+  --text-dark:   #1e1215;
+  --text-mid:    #4a3038;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+}
+
+/* ─── BACKGROUND ─── */
+.fetal-page-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.fetal-bg-img  { width: 100%; height: 100%; background-size: cover; background-position: center; }
+.fetal-bg-overlay { position: absolute; inset: 0; background: rgba(247,237,228,0.75); }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(233,30,99,0.25); }
+  50%       { box-shadow: 0 0 0 12px rgba(233,30,99,0); }
+}
+@keyframes shimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.fade-in         { animation: fadeUp 0.7s ease both; }
+.fade-in-delay-1 { animation: fadeUp 0.7s 0.15s ease both; }
+.fade-in-delay-2 { animation: fadeUp 0.7s 0.3s ease both; }
+
+/* ─── HERO ─── */
+.fetal-hero {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 2rem; padding: 3rem 2.5rem 2rem;
+  max-width: 1400px; margin: 0 auto;
+}
+.fetal-hero__left { flex: 1; }
+.fetal-hero__eyebrow {
+  display: inline-block;
+  font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--rose); background: var(--rose-light);
+  padding: 4px 14px; border-radius: 20px; margin-bottom: 1rem;
+}
+.fetal-hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 700; line-height: 1.1;
+  color: var(--text-dark); margin-bottom: 0.8rem;
+}
+.fetal-hero__sub {
+  font-family: var(--font-body); font-size: 1rem;
+  color: var(--text-mid); max-width: 480px; line-height: 1.7; margin-bottom: 1.5rem;
+}
+.fetal-hero__pills { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.fetal-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 30px;
+  font-family: var(--font-body); font-size: 0.82rem; font-weight: 500;
+}
+.fetal-pill .material-symbols-outlined { font-size: 1rem; }
+.fetal-pill--rose { background: var(--rose-light); color: var(--rose); border: 1.5px solid rgba(201,77,106,0.35); }
+.fetal-pill--gold { background: var(--gold-light); color: var(--gold); border: 1.5px solid rgba(168,114,46,0.35); }
+
+/* ── Baby Name Pill Button ── */
+.fetal-pill--name {
+  background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(201,77,106,0.08));
+  color: #7c3aed;
+  border: 1.5px solid rgba(124,58,237,0.35);
+  cursor: pointer; transition: all 0.2s ease;
+}
+.fetal-pill--name:hover {
+  background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(201,77,106,0.15));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.25);
+}
+
+/* ─── RING ─── */
+.fetal-hero__right { flex-shrink: 0; }
+.fetal-hero__ring {
+  width: 130px; height: 130px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(233,30,99,0.08), rgba(255,152,0,0.06));
+  border: 2px solid;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  animation: pulse 3s ease-in-out infinite; transition: border-color 0.5s ease;
+}
+.fetal-ring-icon  { font-size: 1.8rem; }
+.fetal-ring-value { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-dark); line-height: 1; }
+.fetal-ring-unit  { font-family: var(--font-body); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+
+/* ─── LOADING ─── */
+.fetal-loading { max-width: 1400px; margin: 0 auto; padding: 0 2.5rem; }
+
+/* ─── NAV ─── */
+.fetal-nav { max-width: 1400px; margin: 0 auto 1.5rem; padding: 0 2.5rem; }
+.fetal-nav__card {
+  display: flex; align-items: center; gap: 1rem;
+  background: rgba(255,255,255,0.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-radius: 24px; padding: 1.4rem 1.8rem;
+  border: 1.5px solid rgba(255,255,255,0.75);
+  box-shadow: 0 2px 16px rgba(30,18,21,0.1);
+}
+.fetal-nav__center { flex: 1; }
+.fetal-nav__title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.fetal-nav__title h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+.fetal-trimester-badge { font-family: var(--font-body); font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.fetal-current-badge { font-family: var(--font-body); font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--rose-light); color: var(--rose); }
+.fetal-nav-btn {
+  width: 40px; height: 40px; border-radius: 12px; border: none;
+  background: var(--cream); color: var(--text-mid);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.fetal-nav-btn:hover:not([disabled]) { background: var(--rose-light); color: var(--rose); transform: scale(1.05); }
+.fetal-nav-btn[disabled] { opacity: 0.4; cursor: default; }
+.fetal-nav-btn .material-symbols-outlined { font-size: 1.4rem; }
+.fetal-week-select-wrap { flex-shrink: 0; }
+.fetal-week-select { width: 180px; }
+
+/* PROGRESS BAR */
+.fetal-progress-track { height: 8px; border-radius: 20px; background: rgba(30,18,21,0.08); position: relative; overflow: visible; margin-bottom: 6px; }
+.fetal-progress-fill { height: 100%; border-radius: 20px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.4s ease; }
+.fetal-progress-marker {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--rose); border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(201,77,106,0.4); transition: left 0.3s;
+}
+.fetal-progress-labels { display: flex; justify-content: space-between; font-family: var(--font-body); font-size: 0.68rem; color: var(--text-mid); }
+
+/* ─── BENTO GRID ─── */
+.fetal-bento {
+  display: grid; grid-template-columns: 1.2fr 0.8fr; grid-template-rows: auto auto;
+  gap: 1.2rem; max-width: 1400px; margin: 0 auto; padding: 0 2.5rem 1.5rem;
+}
+.fetal-bento__card {
+  background: rgba(255,255,255,0.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-radius: 28px; padding: 1.8rem 2rem;
+  box-shadow: 0 2px 16px rgba(30,18,21,0.1); border: 1.5px solid rgba(255,255,255,0.75);
+  animation: scaleIn 0.5s ease both; transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.fetal-bento__card:hover { transform: translateY(-4px); box-shadow: 0 8px 36px rgba(201,77,106,0.15); }
+.fetal-bento__card--baby   { grid-column: 1; grid-row: 1 / 3; }
+.fetal-bento__card--mother { grid-column: 2; grid-row: 1; }
+.fetal-bento__card--advice { grid-column: 2; grid-row: 2; }
+
+/* ─── CARD COMMONS ─── */
+.fetal-card-tag {
+  display: inline-block; font-family: var(--font-body);
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--rose); background: var(--rose-light);
+  padding: 3px 12px; border-radius: 20px; margin-bottom: 0.8rem;
+}
+.fetal-card-tag--rose { color: var(--rose); background: var(--rose-light); }
+.fetal-card-tag--gold { color: var(--gold); background: var(--gold-light); }
+.fetal-card-title { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; color: var(--text-dark); margin-bottom: 1.2rem; line-height: 1.2; }
+.fetal-card-title small { font-size: 0.9rem; font-weight: 400; font-style: italic; color: var(--text-mid); }
+
+/* ─── BABY CARD ─── */
+.fetal-baby-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.4rem; }
+.fetal-baby-avatar { width: 80px; height: 80px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 2px solid; transition: border-color 0.5s ease; }
+.fetal-baby-avatar .material-symbols-outlined { font-size: 2.4rem; }
+.fetal-measures { display: flex; align-items: center; gap: 1rem; }
+.fetal-measure { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.fetal-measure__num { font-family: var(--font-display); font-size: 2rem; font-weight: 700; line-height: 1; }
+.fetal-measure--rose .fetal-measure__num { color: var(--rose); }
+.fetal-measure--gold .fetal-measure__num { color: var(--gold); }
+.fetal-measure__unit { font-family: var(--font-body); font-size: 0.85rem; color: var(--text-mid); }
+.fetal-measure__lbl  { font-family: var(--font-body); font-size: 0.65rem; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.06em; }
+.fetal-measure-divider { width: 1px; height: 50px; background: linear-gradient(to bottom, transparent, var(--rose-light), transparent); }
+.fetal-comparison { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.fetal-comparison__emoji { font-size: 1.8rem; line-height: 1; }
+.fetal-comparison__text { font-family: var(--font-display); font-size: 0.8rem; font-weight: 600; color: var(--text-dark); text-align: center; }
+.fetal-comparison__lbl  { font-family: var(--font-body); font-size: 0.62rem; color: var(--text-mid); text-transform: uppercase; }
+.fetal-desc-box {
+  padding: 16px 20px; border-radius: 16px; background: rgba(247,237,228,0.6);
+  border-left: 3px solid; font-family: var(--font-body); font-size: 0.9rem; color: var(--text-mid); line-height: 1.7;
+}
+.fetal-desc-box p { margin: 0; }
+
+/* ─── MOTHER / ADVICE CARDS ─── */
+.fetal-symptoms-box {
+  display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border-radius: 16px;
+  background: rgba(245,198,208,0.3); border-left: 3px solid var(--rose);
+  font-family: var(--font-body); font-size: 0.88rem; color: var(--text-mid); line-height: 1.7;
+}
+.fetal-symptoms-box .material-symbols-outlined { font-size: 1.2rem; color: var(--rose); flex-shrink: 0; margin-top: 2px; }
+.fetal-symptoms-box p { margin: 0; }
+.fetal-advice-box {
+  display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border-radius: 16px;
+  background: rgba(245,224,192,0.4); border-left: 3px solid var(--gold);
+  font-family: var(--font-body); font-size: 0.88rem; color: var(--text-mid); line-height: 1.7;
+}
+.fetal-advice-box .material-symbols-outlined { font-size: 1.2rem; color: var(--gold); flex-shrink: 0; margin-top: 2px; }
+.fetal-advice-box p { margin: 0; }
+
+/* ─── EMPTY ─── */
+.fetal-empty { max-width: 1400px; margin: 0 auto; padding: 2rem 2.5rem; }
+.fetal-empty__card {
+  background: rgba(255,255,255,0.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-radius: 28px; padding: 3rem; text-align: center;
+  border: 1.5px solid rgba(255,255,255,0.75); box-shadow: 0 2px 16px rgba(30,18,21,0.1);
+}
+.fetal-empty__icon  { font-size: 4rem; color: var(--rose-light); display: block; margin-bottom: 1rem; }
+.fetal-empty__title { font-family: var(--font-display); font-size: 1.8rem; color: var(--text-dark); margin-bottom: 0.5rem; }
+.fetal-empty__sub   { font-family: var(--font-body); color: var(--text-mid); }
+
+/* ─── TIMELINE SECTION ─── */
+.fetal-timeline-section { max-width: 1400px; margin: 0 auto; padding: 0 2.5rem 3rem; }
+.fetal-timeline-card {
+  background: rgba(255,255,255,0.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-radius: 28px; padding: 1.8rem 2rem;
+  border: 1.5px solid rgba(255,255,255,0.75); box-shadow: 0 2px 16px rgba(30,18,21,0.1);
+  animation: scaleIn 0.5s 0.2s ease both;
+}
+.fetal-milestones-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.fetal-milestone-chip {
+  display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px;
+  background: rgba(247,237,228,0.7); border: 1.5px solid transparent;
+  cursor: pointer; transition: all 0.2s ease; font-family: var(--font-body);
+}
+.fetal-milestone-chip:hover { background: var(--rose-light); border-color: rgba(201,77,106,0.3); transform: translateY(-2px); }
+.fetal-milestone--active  { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(201,77,106,0.2); }
+.fetal-milestone--past    { opacity: 0.65; }
+.fetal-milestone-week  { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; }
+.fetal-milestone-title { font-size: 0.75rem; font-weight: 500; color: var(--text-dark); }
+.fetal-milestone-dot   { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; animation: pulse 2s ease-in-out infinite; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 960px) {
+  .fetal-bento { grid-template-columns: 1fr; }
+  .fetal-bento__card--baby, .fetal-bento__card--mother, .fetal-bento__card--advice { grid-column: 1; grid-row: auto; }
+  .fetal-nav__card { flex-wrap: wrap; }
+  .fetal-week-select-wrap { width: 100%; }
+  .fetal-week-select { width: 100% !important; }
+}
+@media (max-width: 600px) {
+  .fetal-hero { flex-direction: column; padding: 2rem 1.5rem 1.5rem; }
+  .fetal-nav  { padding: 0 1.5rem; }
+  .fetal-bento { padding: 0 1.5rem 1.5rem; }
+  .fetal-timeline-section { padding: 0 1.5rem 2rem; }
+  .fetal-baby-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* ════════════════════════════════════════════════════ */
+/* ══  BABY NAME AI POPUP                           ══ */
+/* ════════════════════════════════════════════════════ */
+
+@keyframes nameScaleIn {
+  from { opacity: 0; transform: scale(0.93) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes nameDot {
+  0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+  40%          { transform: scale(1);   opacity: 1; }
+}
+
+/* Overlay */
+.name-popup-overlay {
+  position: fixed; inset: 0;
+  background: rgba(30,18,21,0.5); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+  animation: fadeUp 0.2s ease both;
+}
+
+/* Box */
+.name-popup-box {
+  background: rgba(255,255,255,0.98); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+  border-radius: 28px; padding: 2rem;
+  width: 100%; max-width: 780px; max-height: 92vh; overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(124,58,237,0.2), 0 4px 16px rgba(0,0,0,0.1);
+  border: 1.5px solid rgba(124,58,237,0.15);
+  animation: nameScaleIn 0.3s ease both;
+}
+.name-popup-box::-webkit-scrollbar { width: 4px; }
+.name-popup-box::-webkit-scrollbar-thumb { background: var(--rose-light); border-radius: 4px; }
+
+/* Header */
+.name-popup-header {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 1.5rem;
+  padding-bottom: 1.2rem; border-bottom: 1.5px solid rgba(124,58,237,0.1);
+}
+.name-popup-icon {
+  width: 50px; height: 50px; border-radius: 16px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(201,77,106,0.1));
+  border: 1.5px solid rgba(124,58,237,0.2);
+  display: flex; align-items: center; justify-content: center; color: #7c3aed;
+}
+.name-popup-icon .material-symbols-outlined { font-size: 1.5rem; }
+.name-popup-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+.name-popup-sub   { font-family: var(--font-body); font-size: 0.8rem; color: #9b59b6; margin: 0; }
+
+/* Preferences */
+.name-prefs { display: flex; flex-direction: column; gap: 1.2rem; }
+.name-pref-label {
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 700;
+  color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px;
+}
+.name-pref-pills { display: flex; gap: 8px; }
+.name-pref-pills--wrap { flex-wrap: wrap; }
+.name-pref-pill {
+  padding: 8px 16px; border-radius: 20px;
+  font-family: var(--font-body); font-size: 0.82rem; font-weight: 500;
+  border: 1.5px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.03);
+  cursor: pointer; color: var(--text-mid); transition: all 0.18s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.name-pref-pill:hover { border-color: rgba(124,58,237,0.4); color: #7c3aed; background: rgba(124,58,237,0.05); }
+.name-pref-pill--active {
+  background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(201,77,106,0.08));
+  border-color: #7c3aed; color: #7c3aed; font-weight: 600;
+  box-shadow: 0 2px 10px rgba(124,58,237,0.2);
+}
+.name-pref-pill--sm { padding: 6px 12px; font-size: 0.78rem; }
+.name-pref-pill--xs { padding: 4px 10px; font-size: 0.74rem; min-width: 36px; justify-content: center; }
+
+/* Meaning input */
+.name-meaning-input {
+  width: 100%; padding: 10px 16px; border-radius: 12px;
+  border: 1.5px solid rgba(124,58,237,0.2); background: rgba(124,58,237,0.03);
+  font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dark);
+  outline: none; transition: border-color 0.2s;
+}
+.name-meaning-input:focus { border-color: #7c3aed; }
+.name-meaning-input::placeholder { color: #b39da3; }
+
+/* Generate button */
+.name-generate-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 13px 30px; border-radius: 30px; border: none;
+  background: linear-gradient(135deg, #7c3aed, #c94d6a);
+  color: white; font-family: var(--font-body); font-size: 0.92rem; font-weight: 700;
+  cursor: pointer; transition: all 0.25s;
+  box-shadow: 0 4px 18px rgba(124,58,237,0.35); margin-top: 0.5rem;
+}
+.name-generate-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,58,237,0.45); }
+.name-generate-btn .material-symbols-outlined { font-size: 1.1rem; }
+
+/* Loading */
+.name-loading { display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem; gap: 1rem; }
+.name-loading__dots { display: flex; gap: 8px; }
+.name-loading__dots span {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #c94d6a);
+  animation: nameDot 1.2s ease-in-out infinite;
+}
+.name-loading__dots span:nth-child(2) { animation-delay: 0.2s; }
+.name-loading__dots span:nth-child(3) { animation-delay: 0.4s; }
+.name-loading__text { font-family: var(--font-body); font-size: 0.9rem; color: var(--text-mid); font-style: italic; text-align: center; }
+
+/* Error */
+.name-error {
+  display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 12px;
+  background: rgba(244,67,54,0.07); border: 1px solid rgba(244,67,54,0.2);
+  color: #c62828; font-family: var(--font-body); font-size: 0.85rem; margin-bottom: 1rem;
+}
+.name-error .material-symbols-outlined { font-size: 1.1rem; flex-shrink: 0; }
+
+/* Results bar */
+.name-results-bar {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  padding: 10px 14px; border-radius: 14px;
+  background: rgba(124,58,237,0.05); border: 1px solid rgba(124,58,237,0.12); margin-bottom: 1.2rem;
+}
+.name-results-info {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-body); font-size: 0.8rem; color: #7c3aed; font-weight: 600;
+}
+.name-results-info .material-symbols-outlined { font-size: 0.9rem; }
+.name-results-actions { display: flex; align-items: center; gap: 8px; }
+.name-fav-count {
+  display: flex; align-items: center; gap: 4px;
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 600; color: var(--rose);
+}
+.name-fav-count .material-symbols-outlined { font-size: 0.9rem; }
+
+/* Action buttons */
+.name-action-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 20px; border: none;
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.name-action-btn .material-symbols-outlined { font-size: 0.85rem; }
+.name-action-btn--copy  { background: rgba(77,140,82,0.1);   color: var(--sage); border: 1.5px solid rgba(77,140,82,0.3); }
+.name-action-btn--copy:hover  { background: rgba(77,140,82,0.18); }
+.name-action-btn--regen { background: rgba(124,58,237,0.08); color: #7c3aed; border: 1.5px solid rgba(124,58,237,0.25); }
+.name-action-btn--regen:hover { background: rgba(124,58,237,0.15); }
+.name-action-btn--back  { background: rgba(0,0,0,0.05);       color: var(--text-mid); border: 1.5px solid rgba(0,0,0,0.1); }
+.name-action-btn--back:hover  { background: rgba(0,0,0,0.1); }
+.name-action-btn--close { background: var(--rose-light);      color: var(--rose); border: 1.5px solid rgba(201,77,106,0.3); }
+.name-action-btn--close:hover { background: rgba(201,77,106,0.2); }
+
+/* Names grid */
+.name-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.2rem; }
+
+.name-card {
+  background: rgba(247,237,228,0.5); border-radius: 18px;
+  padding: 1rem 1.1rem; border: 1.5px solid transparent; transition: all 0.2s ease;
+}
+.name-card:hover { background: rgba(247,237,228,0.9); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(124,58,237,0.1); }
+.name-card--fav  { background: rgba(252,236,240,0.7); border-color: rgba(201,77,106,0.3); box-shadow: 0 2px 12px rgba(201,77,106,0.12); }
+
+.name-card__top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.name-card__num {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(124,58,237,0.12); color: #7c3aed;
+  font-family: var(--font-display); font-size: 0.72rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.name-card__name { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--text-dark); margin: 0; flex: 1; }
+.name-card__fav-btn {
+  width: 30px; height: 30px; border-radius: 50%; border: none; background: transparent;
+  cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.name-card__fav-btn:hover { background: rgba(201,77,106,0.1); }
+.name-card__fav-btn .material-symbols-outlined { font-size: 1.1rem; color: var(--rose); }
+.name-card__origin {
+  display: flex; align-items: center; gap: 4px;
+  font-family: var(--font-body); font-size: 0.7rem; font-weight: 600;
+  color: #7c3aed; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;
+}
+.name-card__origin .material-symbols-outlined { font-size: 0.8rem; }
+.name-card__meaning {
+  display: flex; align-items: flex-start; gap: 5px;
+  font-family: var(--font-body); font-size: 0.8rem; color: var(--text-mid);
+  margin: 0 0 6px; line-height: 1.5;
+}
+.name-card__meaning .material-symbols-outlined { font-size: 0.85rem; color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+.name-card__poem {
+  font-family: var(--font-display); font-size: 0.78rem; font-style: italic;
+  color: var(--text-mid); margin: 0; line-height: 1.5;
+  border-top: 1px solid rgba(124,58,237,0.1); padding-top: 6px;
+}
+
+/* Favorites */
+.name-favorites {
+  padding: 12px 14px; border-radius: 14px;
+  background: rgba(252,236,240,0.6); border: 1.5px solid rgba(201,77,106,0.2); margin-bottom: 1rem;
+}
+.name-favorites__title {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 700;
+  color: var(--rose); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
+}
+.name-favorites__title .material-symbols-outlined { font-size: 0.9rem; }
+.name-favorites__chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.name-fav-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 10px 5px 12px; border-radius: 20px;
+  background: var(--rose-light); color: var(--rose);
+  font-family: var(--font-display); font-size: 0.85rem; font-weight: 700;
+}
+.name-fav-chip button {
+  width: 18px; height: 18px; border-radius: 50%; border: none;
+  background: rgba(201,77,106,0.15); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+}
+.name-fav-chip button:hover { background: rgba(201,77,106,0.3); }
+.name-fav-chip button .material-symbols-outlined { font-size: 0.7rem; color: var(--rose); }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .name-cards-grid { grid-template-columns: 1fr; }
+  .name-results-bar { flex-direction: column; align-items: flex-start; }
+}
+/* ════════════════════════════════════════════════════ */
+/* ══  BABY PORTRAIT PILL BUTTON                    ══ */
+/* ════════════════════════════════════════════════════ */
+.fetal-pill--portrait {
+  background: linear-gradient(135deg, rgba(201,77,106,0.12), rgba(217,123,88,0.10));
+  color: var(--rose);
+  border: 1.5px solid rgba(201,77,106,0.35);
+  cursor: pointer; transition: all 0.2s ease;
+}
+.fetal-pill--portrait:hover {
+  background: linear-gradient(135deg, rgba(201,77,106,0.22), rgba(217,123,88,0.18));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(201,77,106,0.25);
+}
+
+/* ════════════════════════════════════════════════════ */
+/* ══  BABY PORTRAIT POPUP                          ══ */
+/* ════════════════════════════════════════════════════ */
+
+@keyframes portraitIn {
+  from { opacity: 0; transform: scale(0.93) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes heartBeat {
+  0%,100% { transform: scale(1); }
+  25%      { transform: scale(1.15); }
+  50%      { transform: scale(1); }
+  75%      { transform: scale(1.08); }
+}
+@keyframes sparkle {
+  0%,100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50%      { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+@keyframes portraitDot {
+  0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+  40%          { transform: scale(1);   opacity: 1; }
+}
+@keyframes glowPulse {
+  0%,100% { opacity: 0.4; transform: scale(0.9); }
+  50%      { opacity: 0.8; transform: scale(1.1); }
+}
+
+/* Overlay */
+.portrait-overlay {
+  position: fixed; inset: 0;
+  background: rgba(30,18,21,0.55); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+  animation: fadeUp 0.2s ease both;
+}
+
+/* Box */
+.portrait-box {
+  background: rgba(255,255,255,0.98); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+  border-radius: 32px; padding: 2rem;
+  width: 100%; max-width: 680px; max-height: 92vh; overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(201,77,106,0.2), 0 4px 16px rgba(0,0,0,0.08);
+  border: 1.5px solid rgba(201,77,106,0.15);
+  animation: portraitIn 0.3s ease both;
+}
+.portrait-box::-webkit-scrollbar { width: 4px; }
+.portrait-box::-webkit-scrollbar-thumb { background: var(--rose-light); border-radius: 4px; }
+
+/* Header */
+.portrait-header {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 1.5rem;
+  padding-bottom: 1.2rem; border-bottom: 1.5px solid rgba(201,77,106,0.12);
+}
+.portrait-header-icon {
+  width: 50px; height: 50px; border-radius: 16px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(201,77,106,0.15), rgba(217,123,88,0.1));
+  border: 1.5px solid rgba(201,77,106,0.25);
+  display: flex; align-items: center; justify-content: center; color: var(--rose);
+}
+.portrait-header-icon .material-symbols-outlined { font-size: 1.5rem; }
+.portrait-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+.portrait-sub   { font-family: var(--font-body); font-size: 0.8rem; color: var(--rose); margin: 0; }
+
+/* Form intro */
+.portrait-form-intro {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(201,77,106,0.06), rgba(217,123,88,0.04));
+  border: 1px solid rgba(201,77,106,0.15);
+  font-family: var(--font-body); font-size: 0.85rem; color: var(--text-mid);
+  margin-bottom: 1.4rem;
+}
+.portrait-form-intro .material-symbols-outlined { font-size: 1rem; color: var(--rose); flex-shrink: 0; }
+
+/* Form grid */
+.portrait-form-grid { display: flex; flex-direction: column; gap: 1.1rem; margin-bottom: 1.2rem; }
+
+.portrait-field-label {
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 700;
+  color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px;
+}
+.portrait-pills { display: flex; gap: 7px; flex-wrap: wrap; }
+.portrait-pill {
+  padding: 7px 14px; border-radius: 20px;
+  font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+  border: 1.5px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.03);
+  cursor: pointer; color: var(--text-mid); transition: all 0.18s;
+}
+.portrait-pill:hover { border-color: rgba(201,77,106,0.4); color: var(--rose); background: rgba(201,77,106,0.05); }
+.portrait-pill--active {
+  background: rgba(201,77,106,0.10); border-color: var(--rose); color: var(--rose); font-weight: 600;
+  box-shadow: 0 2px 10px rgba(201,77,106,0.15);
+}
+
+
+/* Input */
+.portrait-input {
+  width: 100%; padding: 10px 16px; border-radius: 12px;
+  border: 1.5px solid rgba(201,77,106,0.2); background: rgba(201,77,106,0.03);
+  font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dark);
+  outline: none; transition: border-color 0.2s; box-sizing: border-box;
+}
+.portrait-input:focus { border-color: var(--rose); }
+.portrait-input::placeholder { color: #b39da3; }
+
+/* Error */
+.portrait-error {
+  display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 12px;
+  background: rgba(244,67,54,0.07); border: 1px solid rgba(244,67,54,0.2);
+  color: #c62828; font-family: var(--font-body); font-size: 0.85rem; margin-bottom: 1rem;
+}
+.portrait-error .material-symbols-outlined { font-size: 1.1rem; flex-shrink: 0; }
+
+/* Generate button */
+.portrait-generate-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 13px 30px; border-radius: 30px; border: none;
+  background: linear-gradient(135deg, var(--rose), var(--peach));
+  color: white; font-family: var(--font-body); font-size: 0.92rem; font-weight: 700;
+  cursor: pointer; transition: all 0.25s;
+  box-shadow: 0 4px 18px rgba(201,77,106,0.35);
+}
+.portrait-generate-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(201,77,106,0.45); }
+.portrait-generate-btn .material-symbols-outlined { font-size: 1.1rem; }
+
+/* Loading */
+.portrait-loading {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 3rem 1rem; gap: 1rem;
+}
+.portrait-loading__heart {
+  font-size: 3rem;
+  animation: heartBeat 1.5s ease-in-out infinite;
+}
+.portrait-loading__dots { display: flex; gap: 8px; }
+.portrait-loading__dots span {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose), var(--peach));
+  animation: portraitDot 1.2s ease-in-out infinite;
+}
+.portrait-loading__dots span:nth-child(2) { animation-delay: 0.2s; }
+.portrait-loading__dots span:nth-child(3) { animation-delay: 0.4s; }
+.portrait-loading__text {
+  font-family: var(--font-display); font-size: 1.1rem; font-weight: 700;
+  color: var(--text-dark); font-style: italic; text-align: center; margin: 0;
+}
+.portrait-loading__sub {
+  font-family: var(--font-body); font-size: 0.82rem; color: var(--text-mid);
+  text-align: center; margin: 0; max-width: 340px; line-height: 1.5;
+}
+
+/* Result */
+.portrait-result { display: flex; flex-direction: column; gap: 1.2rem; }
+
+/* Baby visual */
+.portrait-baby-visual {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  height: 140px;
+}
+.portrait-baby-glow {
+  position: absolute; width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,77,106,0.2), rgba(217,123,88,0.1), transparent);
+  animation: glowPulse 2.5s ease-in-out infinite;
+}
+.portrait-baby-emoji {
+  font-size: 4rem; position: relative; z-index: 1;
+  animation: heartBeat 3s ease-in-out infinite;
+}
+.portrait-baby-sparkles {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.portrait-baby-sparkles span {
+  position: absolute; font-size: 1.2rem;
+  animation: sparkle 3s ease-in-out infinite;
+}
+.portrait-baby-sparkles span:nth-child(1) { top: 10%; left: 20%;  animation-delay: 0s; }
+.portrait-baby-sparkles span:nth-child(2) { top: 10%; right: 20%; animation-delay: 0.75s; }
+.portrait-baby-sparkles span:nth-child(3) { bottom: 10%; left: 25%;  animation-delay: 1.5s; }
+.portrait-baby-sparkles span:nth-child(4) { bottom: 10%; right: 25%; animation-delay: 2.25s; }
+.portrait-week-badge {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 700;
+  color: var(--rose); background: var(--rose-light);
+  padding: 3px 12px; border-radius: 20px;
+  border: 1px solid rgba(201,77,106,0.3);
+}
+
+/* Text card */
+.portrait-text-card {
+  background: linear-gradient(135deg, rgba(247,237,228,0.8), rgba(245,198,208,0.3));
+  border: 1.5px solid rgba(201,77,106,0.15);
+  border-radius: 20px; padding: 1.4rem 1.6rem;
+}
+.portrait-text-icon { font-size: 1.4rem; margin-bottom: 0.7rem; }
+.portrait-text {
+  font-family: var(--font-display); font-size: 0.95rem; font-style: italic;
+  color: var(--text-dark); line-height: 1.9; margin: 0; white-space: pre-wrap;
+}
+
+/* Traits summary */
+.portrait-traits-summary { display: flex; gap: 8px; flex-wrap: wrap; }
+.portrait-trait-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 20px;
+  background: var(--rose-light); color: var(--rose);
+  font-family: var(--font-body); font-size: 0.8rem; font-weight: 600;
+  border: 1px solid rgba(201,77,106,0.25);
+}
+
+/* Actions */
+.portrait-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.portrait-action-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 16px; border-radius: 20px; border: none;
+  font-family: var(--font-body); font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.portrait-action-btn .material-symbols-outlined { font-size: 0.9rem; }
+.portrait-action-btn--copy  { background: rgba(77,140,82,0.1);   color: var(--sage); border: 1.5px solid rgba(77,140,82,0.3); }
+.portrait-action-btn--copy:hover  { background: rgba(77,140,82,0.18); }
+.portrait-action-btn--regen { background: rgba(201,77,106,0.08); color: var(--rose); border: 1.5px solid rgba(201,77,106,0.25); }
+.portrait-action-btn--regen:hover { background: rgba(201,77,106,0.15); }
+.portrait-action-btn--close { background: var(--rose-light); color: var(--rose); border: 1.5px solid rgba(201,77,106,0.3); }
+.portrait-action-btn--close:hover { background: rgba(201,77,106,0.2); }
+
+@media (max-width: 600px) {
+  .portrait-pills { gap: 5px; }
+  .portrait-pill  { padding: 5px 10px; font-size: 0.75rem; }
+  .portrait-actions { justify-content: center; }
+}
+/* ══ PARENTS 2-COLUMN GRID ══════════════════════════ */
+.portrait-parents-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  align-items: start;
+}
+
+/* Divider central */
+.portrait-parents-divider {
+  display: flex; align-items: center; justify-content: center;
+  padding-top: 3rem;
+  font-family: var(--font-display); font-size: 1.4rem;
+  color: var(--rose-light); font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Colonnes */
+.portrait-parent-col {
+  display: flex; flex-direction: column; gap: 1rem;
+  padding: 1.2rem; border-radius: 20px;
+}
+.portrait-parent-col--mom {
+  background: rgba(245,198,208,0.2);
+  border: 1.5px solid rgba(201,77,106,0.15);
+}
+.portrait-parent-col--dad {
+  background: rgba(189,227,245,0.2);
+  border: 1.5px solid rgba(58,143,181,0.15);
+}
+
+/* Header parent */
+.portrait-parent-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 0.2rem;
+}
+.portrait-parent-avatar { font-size: 1.4rem; }
+.portrait-parent-label {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* Pills maman — rose */
+.portrait-pill--mom.portrait-pill--active {
+  background: rgba(201,77,106,0.12);
+  border-color: var(--rose);
+  color: var(--rose);
+  box-shadow: 0 2px 10px rgba(201,77,106,0.15);
+}
+.portrait-pill--mom:hover {
+  border-color: rgba(201,77,106,0.4);
+  color: var(--rose);
+  background: rgba(201,77,106,0.05);
+}
+
+/* Pills papa — sky */
+.portrait-pill--dad.portrait-pill--active {
+  background: rgba(58,143,181,0.12);
+  border-color: var(--sky);
+  color: var(--sky);
+  box-shadow: 0 2px 10px rgba(58,143,181,0.15);
+}
+.portrait-pill--dad:hover {
+  border-color: rgba(58,143,181,0.4);
+  color: var(--sky);
+  background: rgba(58,143,181,0.05);
+}
+
+/* Input maman */
+.portrait-input--mom:focus { border-color: var(--rose); }
+
+/* Input papa */
+.portrait-input--dad {
+  border-color: rgba(58,143,181,0.2);
+  background: rgba(58,143,181,0.03);
+}
+.portrait-input--dad:focus { border-color: var(--sky); }
+
+/* Traits résumé result */
+.portrait-traits-parents {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; flex-wrap: wrap;
+  padding: 12px 16px; border-radius: 16px;
+  background: rgba(247,237,228,0.5);
+  border: 1px solid rgba(201,77,106,0.1);
+}
+.portrait-traits-col {
+  display: flex; flex-direction: column; gap: 5px; align-items: center;
+}
+.portrait-traits-parent-label {
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 700;
+  color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 3px;
+}
+.portrait-traits-arrow {
+  font-family: var(--font-display); font-size: 1.2rem;
+  color: var(--rose-light); flex-shrink: 0;
+}
+.portrait-traits-baby { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.portrait-trait-chip--baby {
+  background: linear-gradient(135deg, var(--rose-light), rgba(189,227,245,0.6));
+  color: var(--text-dark);
+  border-color: rgba(201,77,106,0.2);
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 680px) {
+  .portrait-parents-grid {
+    grid-template-columns: 1fr;
+  }
+  .portrait-parents-divider {
+    padding-top: 0; font-size: 1.8rem;
+    transform: rotate(90deg);
+  }
+  .portrait-traits-parents {
+    flex-direction: column;
+  }
+  .portrait-traits-arrow { transform: rotate(90deg); }
+}
+/* ══ AVATAR SVG ═══════════════════════════════════════ */
+.portrait-avatar-wrap {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  height: 200px; margin-bottom: 0.5rem;
+}
+.portrait-avatar-glow {
+  position: absolute; width: 180px; height: 180px; border-radius: 50%;
+  animation: glowPulse 2.5s ease-in-out infinite;
+}
+.portrait-avatar-svg {
+  width: 160px; height: 176px;
+  position: relative; z-index: 1;
+  filter: drop-shadow(0 4px 16px rgba(201,77,106,0.2));
+  animation: heartBeat 4s ease-in-out infinite;
+}
+.portrait-week-badge {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 700;
+  color: var(--rose); background: var(--rose-light);
+  padding: 3px 12px; border-radius: 20px;
+  border: 1px solid rgba(201,77,106,0.3);
+}
+
+/* ══ SECTIONS DESCRIPTIVES ════════════════════════════ */
+.portrait-sections {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 1rem;
+}
+.portrait-section {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px; border-radius: 14px;
+  background: rgba(247,237,228,0.6);
+  border: 1px solid rgba(201,77,106,0.08);
+  transition: transform 0.2s;
+}
+.portrait-section:hover { transform: translateX(4px); }
+.portrait-section--dream {
+  background: linear-gradient(135deg, rgba(124,58,237,0.06), rgba(201,77,106,0.04));
+  border-color: rgba(124,58,237,0.12);
+}
+.portrait-section-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.portrait-section-label {
+  font-family: var(--font-body); font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--rose); display: block; margin-bottom: 2px;
+}
+.portrait-section--dream .portrait-section-label { color: #7c3aed; }
+.portrait-section-text {
+  font-family: var(--font-body); font-size: 0.85rem;
+  color: var(--text-dark); line-height: 1.6; margin: 0;
+}
+
+/* ══ POÈME ════════════════════════════════════════════ */
+.portrait-poem-card {
+  padding: 1rem 1.4rem;
+  background: linear-gradient(135deg, rgba(201,77,106,0.06), rgba(217,123,88,0.04));
+  border: 1.5px solid rgba(201,77,106,0.15);
+  border-radius: 18px; margin-bottom: 0.8rem;
+  text-align: center;
+}
+.portrait-poem-icon { font-size: 1.3rem; margin-bottom: 6px; }
+.portrait-poem-text {
+  font-family: var(--font-display); font-size: 0.95rem; font-style: italic;
+  color: var(--text-dark); line-height: 1.8; margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ══ MESSAGE MAMAN ════════════════════════════════════ */
+.portrait-message-card {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 1rem 1.2rem; border-radius: 16px;
+  background: rgba(245,198,208,0.3);
+  border-left: 3px solid var(--rose);
+  margin-bottom: 1rem;
+}
+.portrait-message-card .material-symbols-outlined {
+  font-size: 1.1rem; color: var(--rose); flex-shrink: 0; margin-top: 2px;
+}
+.portrait-message-text {
+  font-family: var(--font-body); font-size: 0.88rem;
+  color: var(--text-dark); line-height: 1.7; margin: 0;
+  font-style: italic;
+}
+.portrait-generate-btn {
+  display: block;
+  margin: 0 auto;
+}

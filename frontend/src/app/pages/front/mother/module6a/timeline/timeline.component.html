@@ -1,0 +1,224 @@
+<section class="tl-page">
+
+  <!-- ── Topbar ── -->
+  <header class="tl-topbar">
+    <div class="tl-topbar-links">
+   
+    </div>
+   
+  </header>
+
+  <!-- ── Hero ── -->
+  <section class="tl-hero">
+    <div class="tl-hero-copy">
+      <p class="tl-eyebrow">Baby · Medical archive</p>
+      <h1>Timeline <span>for baby</span></h1>
+      <p class="tl-hero-sub">Every important moment, organized chronologically.</p>
+    </div>
+
+    <div class="tl-hero-right">
+      <div class="tl-stats-row">
+        <div class="tl-stat">
+          <span class="tl-stat-num">{{ timelineEvents.length }}</span>
+          <span class="tl-stat-lbl">Events</span>
+        </div>
+        <div class="tl-stat accent-important">
+          <span class="tl-stat-num">{{ importantCount }}</span>
+          <span class="tl-stat-lbl">Important</span>
+        </div>
+        <div class="tl-stat accent-done">
+          <span class="tl-stat-num">{{ doneCount }}</span>
+          <span class="tl-stat-lbl">Completed</span>
+        </div>
+      </div>
+
+      <!-- Day filter chips -->
+      <div class="tl-day-filters">
+        <button
+          type="button"
+          class="tl-day-chip"
+          [ngClass]="{ active: selectedDays === 7 }"
+          (click)="setDays(7)"
+        >7d</button>
+        <button
+          type="button"
+          class="tl-day-chip"
+          [ngClass]="{ active: selectedDays === 14 }"
+          (click)="setDays(14)"
+        >14d</button>
+        <button
+          type="button"
+          class="tl-day-chip"
+          [ngClass]="{ active: selectedDays === 30 }"
+          (click)="setDays(30)"
+        >30d</button>
+        <button
+          type="button"
+          class="tl-day-chip"
+          [ngClass]="{ active: selectedDays === 0 }"
+          (click)="setDays(0)"
+        >All</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Messages ── -->
+  <div class="tl-messages">
+    <div class="tl-status loading" *ngIf="loading">
+      <span class="tl-spinner"></span> Loading events...
+    </div>
+    <div class="tl-status error" *ngIf="errorMessage">⚠ {{ errorMessage }}</div>
+  </div>
+
+  <!-- ── Type filter bar ── -->
+  <div class="tl-type-filters" *ngIf="!loading && timelineEvents.length > 0">
+    <button
+      type="button"
+      class="tl-type-chip"
+      [ngClass]="{ active: activeType === 'ALL' }"
+      (click)="setType('ALL')"
+    >All</button>
+    <button
+      type="button"
+      class="tl-type-chip type-feeding"
+      [ngClass]="{ active: activeType === 'FEEDING' }"
+      (click)="setType('FEEDING')"
+    >🍼 Feeding</button>
+    <button
+      type="button"
+      class="tl-type-chip type-sleep"
+      [ngClass]="{ active: activeType === 'SLEEP' }"
+      (click)="setType('SLEEP')"
+    >🌙 Sleep</button>
+    <button
+      type="button"
+      class="tl-type-chip type-diaper"
+      [ngClass]="{ active: activeType === 'DIAPER' }"
+      (click)="setType('DIAPER')"
+    >🧷 Diaper</button>
+    <button
+      type="button"
+      class="tl-type-chip type-vaccine"
+      [ngClass]="{ active: activeType === 'VACCINE' }"
+      (click)="setType('VACCINE')"
+    >💉 Vaccines</button>
+    <button
+      type="button"
+      class="tl-type-chip type-milestone"
+      [ngClass]="{ active: activeType === 'MILESTONE' }"
+      (click)="setType('MILESTONE')"
+    >⭐ Milestones</button>
+    <button
+      type="button"
+      class="tl-type-chip type-appointment"
+      [ngClass]="{ active: activeType === 'APPOINTMENT' }"
+      (click)="setType('APPOINTMENT')"
+    >🩺 Appointments</button>
+    <button
+      type="button"
+      class="tl-type-chip type-growth"
+      [ngClass]="{ active: activeType === 'GROWTH' }"
+      (click)="setType('GROWTH')"
+    >📏 Growth</button>
+    <button
+      type="button"
+      class="tl-type-chip type-teething"
+      [ngClass]="{ active: activeType === 'TEETHING' }"
+      (click)="setType('TEETHING')"
+    >🦷 Teething</button>
+    <button
+      type="button"
+      class="tl-type-chip type-reminder"
+      [ngClass]="{ active: activeType === 'REMINDER' }"
+      (click)="setType('REMINDER')"
+    >🔔 Reminders</button>
+    <button
+      type="button"
+      class="tl-type-chip type-insight"
+      [ngClass]="{ active: activeType === 'INSIGHT' }"
+      (click)="setType('INSIGHT')"
+    >💡 Insights</button>
+  </div>
+
+  <!-- ── Timeline ── -->
+  <section class="tl-body" *ngIf="!loading">
+
+    <div *ngIf="filteredEvents.length === 0" class="tl-empty">
+      <div class="tl-empty-icon">🌸</div>
+      <h3>No events for this period</h3>
+      <p>Try expanding the date range or changing the filter.</p>
+    </div>
+
+    <div class="tl-track" *ngIf="filteredEvents.length > 0">
+
+      <!-- Group by date -->
+      <ng-container *ngFor="let group of groupedEvents; trackBy: trackByDate">
+
+        <!-- Date separator -->
+        <div class="tl-date-sep">
+          <div class="tl-date-line"></div>
+          <div class="tl-date-badge">
+            <span class="tl-date-day">{{ group.label }}</span>
+          </div>
+          <div class="tl-date-line"></div>
+        </div>
+
+        <!-- Events for this day -->
+        <div
+          class="tl-event"
+          *ngFor="let event of group.events; trackBy: trackByTimelineId; let i = index"
+          [ngClass]="[
+            'priority-' + (event.priority || 'NORMAL').toLowerCase(),
+            'type-' + (event.eventType || 'other').toLowerCase(),
+            isDone(event) ? 'is-done' : ''
+          ]"
+          [style.animation-delay]="(i * 0.07) + 's'"
+        >
+          <!-- Left: time + dot -->
+          <div class="tl-event-left">
+            <span class="tl-event-time">{{ event.eventDateTime | date:'HH:mm' }}</span>
+            <div class="tl-dot-wrap">
+              <div class="tl-dot-ring"></div>
+              <div class="tl-dot">
+                <span class="tl-dot-icon">{{ getIcon(event.eventType) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connector line (hidden for last in group) -->
+          <div class="tl-connector"></div>
+
+          <!-- Right: card -->
+          <div class="tl-card">
+            <div class="tl-card-top">
+              <div class="tl-card-head">
+                <span class="tl-type-badge" [ngClass]="'badge-' + (event.eventType || 'other').toLowerCase()">
+                  {{ formatType(event.eventType) }}
+                </span>
+                <span class="tl-priority-badge" [ngClass]="'pri-' + (event.priority || 'NORMAL').toLowerCase()">
+                  {{ formatPriority(event.priority) }}
+                </span>
+              </div>
+              <span class="tl-status-pill" [ngClass]="'st-' + (event.status || 'unknown').toLowerCase()">
+                <span class="tl-status-dot"></span>{{ event.status || '—' }}
+              </span>
+            </div>
+
+            <h3 class="tl-card-title">{{ event.title }}</h3>
+
+            <p class="tl-card-desc" *ngIf="event.description">{{ event.description }}</p>
+
+            <a
+              *ngIf="event.actionUrl"
+              [href]="event.actionUrl"
+              class="tl-card-link"
+              target="_blank"
+            >View details →</a>
+          </div>
+        </div>
+
+      </ng-container>
+    </div>
+  </section>
+
+</section>

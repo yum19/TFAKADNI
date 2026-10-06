@@ -1,0 +1,263 @@
+<div class="size-page">
+  <div
+    class="size-card"
+    [style.background-image]="'url(' + backgroundImage + ')'"
+  >
+    <button class="back-btn" type="button" (click)="goBack()">&#8592;</button>
+
+    <div class="content">
+      <div class="form-panel" [ngClass]="themeClass">
+        <h1 class="panel-title">Birth Details</h1>
+
+        <form [formGroup]="form" class="size-form" novalidate>
+          <div class="row-fields">
+            <div class="field-block">
+              <label class="field-label">Weight at birth</label>
+              <input
+                type="text"
+                class="form-input"
+                formControlName="birthWeight"
+                placeholder="0.000 kg"
+                (input)="allowDecimalInput($event, 'birthWeight')"
+              />
+
+              <div
+                class="error-msg"
+                *ngIf="form.get('birthWeight')?.touched && form.get('birthWeight')?.errors?.['required']"
+              >
+                Weight is required
+              </div>
+              <div
+                class="error-msg"
+                *ngIf="form.get('birthWeight')?.touched && form.get('birthWeight')?.errors?.['invalidNumber']"
+              >
+                Enter a valid weight
+              </div>
+              <div
+                class="error-msg"
+                *ngIf="form.get('birthWeight')?.touched && form.get('birthWeight')?.errors?.['minValue']"
+              >
+                Weight must be at least 2.5 kg
+              </div>
+              <div
+                class="error-msg"
+                *ngIf="form.get('birthWeight')?.touched && form.get('birthWeight')?.errors?.['maxValue']"
+              >
+                Weight must not exceed 4 kg
+              </div>
+              <div
+                class="error-msg"
+                *ngIf="form.get('birthWeight')?.touched && form.get('birthWeight')?.errors?.['tooManyDecimals']"
+              >
+                Maximum 3 decimal places
+              </div>
+            </div>
+
+            <div class="field-block">
+              <label class="field-label">Height at birth</label>
+              <input
+                type="text"
+                class="form-input"
+                formControlName="birthHeight"
+                placeholder="00 cm"
+                (input)="allowDecimalInput($event, 'birthHeight')"
+              />
+
+              <div
+                class="error-msg"
+                *ngIf="form.get('birthHeight')?.touched && form.get('birthHeight')?.errors?.['required']"
+              >
+                Height is required
+              </div>
+              <div
+                class="error-msg"
+                *ngIf="form.get('birthHeight')?.touched && form.get('birthHeight')?.errors?.['invalidNumber']"
+              >
+                Enter a valid height
+              </div>
+              <div
+                class="error-msg"
+                *ngIf="form.get('birthHeight')?.touched && form.get('birthHeight')?.errors?.['minValue']"
+              >
+                Height must be at least 46 cm
+              </div>
+              <div
+                class="error-msg"
+                *ngIf="form.get('birthHeight')?.touched && form.get('birthHeight')?.errors?.['maxValue']"
+              >
+                Height must not exceed 54 cm
+              </div>
+              <div
+                class="error-msg"
+                *ngIf="form.get('birthHeight')?.touched && form.get('birthHeight')?.errors?.['tooManyDecimals']"
+              >
+                Maximum 1 decimal place
+              </div>
+            </div>
+          </div>
+
+          <div class="row-fields second-row">
+            <div class="field-block">
+              <label class="field-label">Blood type</label>
+              <select class="form-input" formControlName="bloodType">
+                <option value="">Select blood type</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+
+              <div
+                class="error-msg"
+                *ngIf="form.get('bloodType')?.touched && form.get('bloodType')?.errors?.['required']"
+              >
+                Blood type is required
+              </div>
+            </div>
+
+            <div class="field-block">
+              <label class="field-label">Delivery type</label>
+              <select class="form-input" formControlName="deliveryType">
+                <option value="">Select delivery type</option>
+                <option value="Natural">Natural</option>
+                <option value="C-Section">C-Section</option>
+                <option value="Assisted">Assisted</option>
+              </select>
+
+              <div
+                class="error-msg"
+                *ngIf="form.get('deliveryType')?.touched && form.get('deliveryType')?.errors?.['required']"
+              >
+                Delivery type is required
+              </div>
+            </div>
+          </div>
+
+          <div class="single-field">
+            <label class="field-label">Gestational age at birth</label>
+            <input
+              type="text"
+              class="form-input"
+              formControlName="gestationalAgeAtBirth"
+              placeholder="e.g. 40 weeks"
+              (input)="allowWeeksInput($event)"
+            />
+
+            <div
+              class="error-msg"
+              *ngIf="form.get('gestationalAgeAtBirth')?.touched && form.get('gestationalAgeAtBirth')?.errors?.['required']"
+            >
+              Gestational age is required
+            </div>
+            <div
+              class="error-msg"
+              *ngIf="form.get('gestationalAgeAtBirth')?.touched && form.get('gestationalAgeAtBirth')?.errors?.['invalidNumber']"
+            >
+              Enter a valid number of weeks
+            </div>
+            <div
+              class="error-msg"
+              *ngIf="form.get('gestationalAgeAtBirth')?.touched && form.get('gestationalAgeAtBirth')?.errors?.['minValue']"
+            >
+              Gestational age must be at least 24 weeks
+            </div>
+            <div
+              class="error-msg"
+              *ngIf="form.get('gestationalAgeAtBirth')?.touched && form.get('gestationalAgeAtBirth')?.errors?.['maxValue']"
+            >
+              Gestational age must not exceed 42 weeks
+            </div>
+          </div>
+
+          <div class="single-field">
+            <label class="field-label">Photo</label>
+
+            <input
+              type="text"
+              class="form-input"
+              formControlName="photoUrl"
+              placeholder="Image will be inserted automatically after upload"
+              readonly
+            />
+          </div>
+
+          <div class="single-field">
+            <input
+              #fileInput
+              type="file"
+              accept=".png,.jpg,.jpeg,.webp"
+              class="file-input"
+              (change)="onImageSelected($event)"
+              hidden
+            />
+
+            <button
+              type="button"
+              class="next-btn"
+              (click)="triggerFileInput(fileInput)"
+            >
+              Upload photo
+            </button>
+          </div>
+
+          <div class="single-field" *ngIf="imagePreview">
+            <div class="upload-box">
+              <div class="preview-wrapper">
+                <img [src]="imagePreview" alt="Baby preview" class="preview-image" />
+                <button
+                  type="button"
+                  class="remove-image-btn"
+                  (click)="removeImage(fileInput)"
+                >
+                  Remove image
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="single-field">
+            <label class="field-label">Special notes</label>
+            <textarea
+              class="form-textarea"
+              formControlName="notes"
+              placeholder="Write any additional information..."
+            ></textarea>
+
+            <div class="notes-counter">
+              {{ form.get('notes')?.value?.length || 0 }}/500
+            </div>
+
+            <div
+              class="error-msg"
+              *ngIf="form.get('notes')?.touched && form.get('notes')?.errors?.['maxlength']"
+            >
+              Notes must not exceed 500 characters
+            </div>
+          </div>
+
+          <div class="single-field" *ngIf="submitError">
+            <div class="error-msg">
+              {{ submitError }}
+            </div>
+          </div>
+
+          <div class="single-field" *ngIf="submitSuccess">
+            <div class="success-msg">
+              {{ submitSuccess }}
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="bottom-action">
+      <button class="next-btn" type="button" (click)="nextStep()" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Saving...' : 'Finish' }}
+      </button>
+    </div>
+  </div>
+</div>

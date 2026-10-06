@@ -1,0 +1,313 @@
+<div class="cp-wrap">
+
+  <!-- ══ TOAST ════════════════════════════════════════════════ -->
+  <div class="cp-toast" *ngIf="toast"
+    [class.success]="toast.type === 'success'"
+    [class.error]="toast.type === 'error'">
+    <mat-icon>{{ toast.type === 'success' ? 'check_circle' : 'error_outline' }}</mat-icon>
+    {{ toast.message }}
+  </div>
+
+  <!-- ══ HEADER ══════════════════════════════════════════════ -->
+  <div class="cp-header">
+    <button class="cp-back-btn" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon> Back to products
+    </button>
+    <div class="cp-header-content">
+      <div class="cp-header-icon">
+        <mat-icon>{{ isEdit ? 'edit' : 'add_shopping_cart' }}</mat-icon>
+      </div>
+      <div>
+        <h1 class="cp-header-title">{{ isEdit ? 'Edit product' : 'New product' }}</h1>
+        <p class="cp-header-sub">{{ isEdit ? 'Update the information below' : 'Fill in the form to add a product' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LAYOUT ══════════════════════════════════════════════ -->
+  <div class="cp-layout">
+
+    <!-- ─── LEFT COLUMN ──────────────────────────────────── -->
+    <div class="cp-main">
+
+      <!-- General information -->
+      <div class="cp-card">
+        <div class="cp-card-title">
+          <div class="cp-card-ico pink"><mat-icon>info_outline</mat-icon></div>
+          General information
+        </div>
+
+        <!-- Name -->
+        <div class="cp-field">
+          <label class="cp-label">Product name <span class="cp-req">*</span></label>
+          <input class="cp-input" [class.err]="nomInvalid"
+            type="text" placeholder="e.g. Maternity moisturising cream"
+            [(ngModel)]="produit.nom" />
+          <span *ngIf="nomInvalid" class="cp-err-msg">
+            <mat-icon>error_outline</mat-icon> Product name is required.
+          </span>
+        </div>
+
+        <!-- Description -->
+        <div class="cp-field">
+          <label class="cp-label">
+            Description
+            <span class="cp-char-count" [class.over]="descriptionLength > 500">
+              {{ descriptionLength }}/500
+            </span>
+          </label>
+          <textarea class="cp-input cp-textarea" rows="4"
+            [class.err]="descriptionInvalid"
+            placeholder="Describe the product and its benefits..."
+            [(ngModel)]="produit.description">
+          </textarea>
+          <span *ngIf="descriptionInvalid" class="cp-err-msg">
+            <mat-icon>error_outline</mat-icon> Description must not exceed 500 characters.
+          </span>
+        </div>
+
+        <!-- Price & Stock -->
+        <div class="cp-row">
+          <div class="cp-field">
+            <label class="cp-label">Price (TND) <span class="cp-req">*</span></label>
+            <div class="cp-prefix-wrap" [class.err-wrap]="prixInvalid">
+              <span class="cp-prefix">TND</span>
+              <input class="cp-input cp-input-inner" type="number" min="0.01" step="0.01"
+                placeholder="0.00" [(ngModel)]="produit.prix" />
+            </div>
+            <span *ngIf="prixInvalid" class="cp-err-msg">
+              <mat-icon>error_outline</mat-icon> Price must be greater than 0.
+            </span>
+          </div>
+          <div class="cp-field">
+            <label class="cp-label">Stock <span class="cp-req">*</span></label>
+            <div class="cp-prefix-wrap" [class.err-wrap]="stockInvalid">
+              <span class="cp-prefix">Qty</span>
+              <input class="cp-input cp-input-inner" type="number" min="0" step="1"
+                placeholder="0" [(ngModel)]="produit.stock" />
+            </div>
+            <span *ngIf="stockInvalid" class="cp-err-msg">
+              <mat-icon>error_outline</mat-icon> Stock must be a whole number ≥ 0.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="cp-card" [class.card-err]="categorieInvalid">
+        <div class="cp-card-title">
+          <div class="cp-card-ico purple"><mat-icon>category</mat-icon></div>
+          Category <span class="cp-req">*</span>
+          <button class="cp-add-cat-toggle" (click)="toggleAddCat()" [class.active]="showAddCatPanel">
+            <mat-icon>{{ showAddCatPanel ? 'close' : 'add' }}</mat-icon>
+            {{ showAddCatPanel ? 'Cancel' : 'New category' }}
+          </button>
+        </div>
+
+        <!-- Inline add category panel -->
+        <div class="cp-add-cat-panel" *ngIf="showAddCatPanel">
+          <div class="cp-add-cat-inner">
+            <h4 class="cp-add-cat-title">
+              <mat-icon>add_circle_outline</mat-icon>
+              Create a new category
+            </h4>
+            <div class="cp-row">
+              <div class="cp-field">
+                <label class="cp-label">Category name <span class="cp-req">*</span></label>
+                <input class="cp-input" type="text" placeholder="e.g. Baby care"
+                  [(ngModel)]="newCatNom" />
+              </div>
+              <div class="cp-field">
+                <label class="cp-label">Parent category <span class="cp-opt">(optional)</span></label>
+                <select class="cp-input cp-select" [(ngModel)]="newCatParentId">
+                  <option [ngValue]="null">— None (top-level category) —</option>
+                  <option *ngFor="let c of parentCategories" [ngValue]="c.id">{{ c.nom }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="cp-add-cat-footer">
+              <div class="cp-cat-saved-msg" *ngIf="catSaved">
+                <mat-icon>check_circle</mat-icon> Category created!
+              </div>
+              <button class="cp-save-cat-btn" (click)="saveNewCategory()"
+                [disabled]="!newCatNom.trim() || savingCat">
+                <span class="cp-mini-spinner" *ngIf="savingCat"></span>
+                <mat-icon *ngIf="!savingCat">save</mat-icon>
+                {{ savingCat ? 'Saving...' : 'Create category' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 1: Parent category pills -->
+        <div class="cp-field" *ngIf="!showAddCatPanel">
+          <label class="cp-label">Main category</label>
+          <div class="cp-cat-grid">
+            <button class="cp-cat-pill"
+              [class.active]="selectedParentId === null"
+              (click)="onParentChange(null)">
+              <mat-icon>block</mat-icon> None
+            </button>
+            <button *ngFor="let cat of parentCategories"
+              class="cp-cat-pill" [class.active]="selectedParentId === cat.id"
+              (click)="onParentChange(cat.id!)">
+              {{ cat.nom }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Sub-category pills -->
+        <div class="cp-field" *ngIf="!showAddCatPanel && childCategories.length > 0">
+          <label class="cp-label">Sub-category</label>
+          <div class="cp-subcat-grid">
+            <button *ngFor="let child of childCategories"
+              class="cp-subcat-pill" [class.active]="produit.categorie?.id === child.id"
+              (click)="onChildChange(child.id!)">
+              {{ child.nom }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Selection badge -->
+        <div class="cp-cat-selected" *ngIf="produit.categorie && !showAddCatPanel">
+          <mat-icon>check_circle</mat-icon>
+          Selected: <strong>{{ produit.categorie.nom }}</strong>
+        </div>
+
+        <!-- Validation error -->
+        <span *ngIf="categorieInvalid" class="cp-err-msg" style="margin-top: 8px;">
+          <mat-icon>error_outline</mat-icon> Please select a category.
+        </span>
+
+        <p class="cp-hint" *ngIf="!showAddCatPanel">
+          <mat-icon>info</mat-icon>
+          Category not listed? Click "New category" above.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- ─── RIGHT COLUMN ─────────────────────────────────── -->
+    <div class="cp-side">
+
+      <!-- Images -->
+      <div class="cp-card">
+        <div class="cp-card-title">
+          <div class="cp-card-ico teal"><mat-icon>photo_library</mat-icon></div>
+          Images
+          <span class="cp-img-count-lbl" *ngIf="imagePreviews.length > 0">
+            {{ imagePreviews.length }} image(s)
+          </span>
+        </div>
+
+        <div class="cp-dropzone"
+          [class.drag-on]="isDragOver"
+          [class.compact]="imagePreviews.length > 0"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave()"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()">
+          <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFileSelected($event)" />
+          <div class="cp-drop-ico">
+            <mat-icon>{{ isDragOver ? 'file_download' : 'cloud_upload' }}</mat-icon>
+          </div>
+          <span class="cp-drop-label">
+            {{ isDragOver ? 'Drop here' : (imagePreviews.length > 0 ? 'Add more' : 'Drag & drop or browse') }}
+          </span>
+          <span class="cp-drop-hint" *ngIf="imagePreviews.length === 0">PNG, JPG, WEBP</span>
+        </div>
+
+        <!-- URL row -->
+        <div class="cp-url-row">
+          <div class="cp-prefix-wrap" style="flex:1">
+            <span class="cp-prefix"><mat-icon class="cp-link-ico">link</mat-icon></span>
+            <input #urlInput class="cp-input cp-input-inner" type="url"
+              placeholder="Or paste an image URL..."
+              (keyup.enter)="onImageUrlAdd(urlInput)" />
+          </div>
+          <button class="cp-url-btn" (click)="onImageUrlAdd(urlInput)">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+
+        <!-- Preview grid -->
+        <div *ngIf="imagePreviews.length > 0" class="cp-img-grid">
+          <div *ngFor="let img of imagePreviews; let i = index" class="cp-img-item">
+            <img [src]="img" [alt]="'img-' + i" />
+            <span *ngIf="i === 0" class="cp-img-main-badge">
+              <mat-icon>star</mat-icon> Main
+            </span>
+            <button class="cp-img-del" (click)="removeImage(i)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="imagePreviews.length === 0" class="cp-no-img">
+          <mat-icon>image_not_supported</mat-icon>
+          <span>No images</span>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="cp-card cp-summary">
+        <div class="cp-card-title">
+          <div class="cp-card-ico orange"><mat-icon>receipt_long</mat-icon></div>
+          Summary
+        </div>
+        <div class="cp-sum-rows">
+          <div class="cp-sum-row">
+            <span>Name</span>
+            <span>{{ produit.nom || '—' }}</span>
+          </div>
+          <div class="cp-sum-row">
+            <span>Price</span>
+            <span class="cp-sum-price">{{ (produit.prix ?? 0) | number:'1.2-2' }} TND</span>
+          </div>
+          <div class="cp-sum-row">
+            <span>Stock</span>
+            <span>
+              <span class="cp-sum-stock" [class.low]="(produit.stock ?? 0) < 5">
+                {{ produit.stock ?? 0 }} unit(s)
+              </span>
+            </span>
+          </div>
+          <div class="cp-sum-row">
+            <span>Category</span>
+            <span>{{ produit.categorie?.nom || '—' }}</span>
+          </div>
+          <div class="cp-sum-row">
+            <span>Images</span>
+            <span class="cp-sum-imgs">
+              <mat-icon>image</mat-icon> {{ imagePreviews.length }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="cp-progress-wrap">
+          <div class="cp-progress-label">
+            Completeness <span>{{ completenessPercent }}%</span>
+          </div>
+          <div class="cp-progress-track">
+            <div class="cp-progress-fill" [style.width]="completenessPercent + '%'"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ FOOTER ══════════════════════════════════════════════ -->
+  <div class="cp-footer">
+    <button class="cp-cancel-btn" (click)="cancel()" [disabled]="loading">
+      <mat-icon>close</mat-icon> Cancel
+    </button>
+    <button class="cp-submit-btn" (click)="soumettre()" [disabled]="loading">
+      <span class="cp-spinner" *ngIf="loading"></span>
+      <mat-icon *ngIf="!loading">{{ isEdit ? 'save' : 'add_circle' }}</mat-icon>
+      {{ loading ? 'Saving...' : (isEdit ? 'Save changes' : 'Add product') }}
+    </button>
+  </div>
+
+</div>

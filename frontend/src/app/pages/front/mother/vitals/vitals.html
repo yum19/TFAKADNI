@@ -1,0 +1,589 @@
+<!-- ░░ BACKGROUND ░░ -->
+<div class="vitals-page-bg">
+  <div class="vitals-bg-img" style="background-image: url('assets/img/bg-pregnancy.jpg')"></div>
+  <div class="vitals-bg-overlay"></div>
+</div>
+
+<!-- ░░ HERO ░░ -->
+<section class="vitals-hero fade-in">
+  <div class="vitals-hero__left">
+    <span class="vitals-hero__eyebrow">❤️ Your health tracking</span>
+    <h1 class="vitals-hero__title">
+      My <span style="font-style:italic; background:linear-gradient(135deg,#e91e63,#4caf50,#03a9f4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; background-size:200% auto; display:inline-block;">Vitals</span>
+    </h1>
+    <p class="vitals-hero__sub">Monitor your health signs and track your wellbeing throughout your pregnancy.</p>
+    <div class="vitals-hero__actions">
+      <button class="vitals-btn vitals-btn--primary" (click)="openForm()">
+        <span class="material-symbols-outlined">add_circle</span>
+        Add a vital
+      </button>
+      @if(dataSource.data.length > 0) {
+      <button class="vitals-btn vitals-btn--sky" (click)="openEvolution()">
+        <span class="material-symbols-outlined">show_chart</span>
+        View Evolution
+      </button>
+      <button class="vitals-btn vitals-btn--ai" (click)="analyzeVitals()">
+        <span class="material-symbols-outlined">psychology</span>
+        Analyze my vitals
+      </button>
+      }
+    </div>
+  </div>
+  <div class="vitals-hero__right">
+    @if(latestVital) {
+    <div class="vitals-hero__ring">
+      <span class="material-symbols-outlined vitals-ring-icon">monitor_heart</span>
+      <span class="vitals-ring-value">{{ latestVital.heartRate }}</span>
+      <span class="vitals-ring-unit">bpm</span>
+    </div>
+    }
+  </div>
+</section>
+
+<!-- ░░ STATS ░░ -->
+@if(latestVital && !loading) {
+<section class="vitals-stats fade-in-delay-1">
+  <div class="vitals-stat-card vitals-stat--rose">
+    <div class="vitals-stat__icon"><span class="material-symbols-outlined">favorite</span></div>
+    <div class="vitals-stat__body">
+      <span class="vitals-stat__value">{{ latestVital.systolicBp }}/{{ latestVital.diastolicBp }}</span>
+      <span class="vitals-stat__label">Blood pressure · mmHg</span>
+    </div>
+    <div class="vitals-stat__badge" [class]="'bp-' + getBloodPressureStatus(latestVital.systolicBp, latestVital.diastolicBp)">
+      {{ getBloodPressureLabel(latestVital.systolicBp, latestVital.diastolicBp) }}
+    </div>
+    <div class="vitals-stat__deco">♥</div>
+  </div>
+  <div class="vitals-stat-card vitals-stat--gold">
+    <div class="vitals-stat__icon"><span class="material-symbols-outlined">monitor_weight</span></div>
+    <div class="vitals-stat__body"><span class="vitals-stat__value">{{ latestVital.weightKg }}</span><span class="vitals-stat__label">Weight · kg</span></div>
+    <div class="vitals-stat__deco">kg</div>
+  </div>
+  <div class="vitals-stat-card vitals-stat--green">
+    <div class="vitals-stat__icon"><span class="material-symbols-outlined">monitor_heart</span></div>
+    <div class="vitals-stat__body"><span class="vitals-stat__value">{{ latestVital.heartRate }}</span><span class="vitals-stat__label">Heart rate · bpm</span></div>
+    <div class="vitals-stat__deco">♡</div>
+  </div>
+  <div class="vitals-stat-card vitals-stat--sky">
+    <div class="vitals-stat__icon"><span class="material-symbols-outlined">air</span></div>
+    <div class="vitals-stat__body"><span class="vitals-stat__value">{{ latestVital.oxygenPct || '--' }}</span><span class="vitals-stat__label">Oxygen saturation · %</span></div>
+    <div class="vitals-stat__deco">O₂</div>
+  </div>
+</section>
+}
+
+@if(loading) {
+<div class="vitals-loading"><mat-progress-bar mode="indeterminate"></mat-progress-bar></div>
+}
+
+@if(!loading && dataSource.data.length === 0) {
+<section class="vitals-empty fade-in-delay-1">
+  <div class="vitals-empty__card">
+    <span class="material-symbols-outlined vitals-empty__icon">monitor_heart</span>
+    <h2 class="vitals-empty__title">No vitals recorded yet</h2>
+    <p class="vitals-empty__sub">Start tracking your health signs today.</p>
+    <button class="vitals-btn vitals-btn--primary" (click)="openForm()">
+      <span class="material-symbols-outlined">add_circle</span>
+      Add my first vital
+    </button>
+  </div>
+</section>
+}
+
+@if(!loading && dataSource.data.length > 0) {
+<section class="vitals-bento fade-in-delay-2">
+  @if(latestVital) {
+  <div class="vitals-bento__card vitals-bento__card--latest">
+    <div class="vitals-card-tag">💊 Latest measurement</div>
+    <h2 class="vitals-card-title">Latest record<small>{{ latestVital.measuredAt | date:'MMMM dd, yyyy' }}</small></h2>
+    <div class="vitals-metrics-grid">
+      <div class="vitals-metric vitals-metric--rose">
+        <div class="vitals-metric__icon"><span class="material-symbols-outlined">favorite</span></div>
+        <div class="vitals-metric__body">
+          <span class="vitals-metric__value">{{ latestVital.systolicBp }}/{{ latestVital.diastolicBp }}</span>
+          <span class="vitals-metric__label">Blood Pressure</span>
+          <span class="vitals-metric__badge" [class]="'bp-' + getBloodPressureStatus(latestVital.systolicBp, latestVital.diastolicBp)">{{ getBloodPressureLabel(latestVital.systolicBp, latestVital.diastolicBp) }}</span>
+        </div>
+      </div>
+      <div class="vitals-metric vitals-metric--gold">
+        <div class="vitals-metric__icon"><span class="material-symbols-outlined">monitor_weight</span></div>
+        <div class="vitals-metric__body"><span class="vitals-metric__value">{{ latestVital.weightKg }} <small>kg</small></span><span class="vitals-metric__label">Weight</span></div>
+      </div>
+      <div class="vitals-metric vitals-metric--green">
+        <div class="vitals-metric__icon"><span class="material-symbols-outlined">monitor_heart</span></div>
+        <div class="vitals-metric__body"><span class="vitals-metric__value">{{ latestVital.heartRate }} <small>bpm</small></span><span class="vitals-metric__label">Heart Rate</span></div>
+      </div>
+      <div class="vitals-metric vitals-metric--sky">
+        <div class="vitals-metric__icon"><span class="material-symbols-outlined">air</span></div>
+        <div class="vitals-metric__body"><span class="vitals-metric__value">{{ latestVital.oxygenPct || '--' }} <small>%</small></span><span class="vitals-metric__label">O₂ Saturation</span></div>
+      </div>
+      @if(latestVital.temperatureC) {
+      <div class="vitals-metric vitals-metric--peach">
+        <div class="vitals-metric__icon"><span class="material-symbols-outlined">thermostat</span></div>
+        <div class="vitals-metric__body"><span class="vitals-metric__value">{{ latestVital.temperatureC }} <small>°C</small></span><span class="vitals-metric__label">Temperature</span></div>
+      </div>
+      }
+      @if(latestVital.glucoseMmol) {
+      <div class="vitals-metric vitals-metric--purple">
+        <div class="vitals-metric__icon"><span class="material-symbols-outlined">water_drop</span></div>
+        <div class="vitals-metric__body"><span class="vitals-metric__value">{{ latestVital.glucoseMmol }} <small>mmol</small></span><span class="vitals-metric__label">Glucose</span></div>
+      </div>
+      }
+    </div>
+    @if(latestVital.notes) {
+    <div class="vitals-notes-box">
+      <span class="material-symbols-outlined">notes</span>
+      {{ latestVital.notes }}
+    </div>
+    }
+  </div>
+  }
+
+  <div class="vitals-bento__card vitals-bento__card--history">
+    <div class="vitals-card-tag">📋 History</div>
+    <h2 class="vitals-card-title">All records <small>{{ dataSource.data.length }} entries</small></h2>
+    <div class="vitals-history-list">
+      @for(v of dataSource.data; track v.id) {
+      <div class="vitals-history-item">
+        <div class="vitals-history__date">
+          <span class="vitals-history__day">{{ v.measuredAt | date:'dd' }}</span>
+          <span class="vitals-history__month">{{ v.measuredAt | date:'MMM' }}</span>
+        </div>
+        <div class="vitals-history__metrics">
+          <div class="vitals-history__row">
+            <span class="vitals-bp-badge" [class]="'bp-' + getBloodPressureStatus(v.systolicBp, v.diastolicBp)">{{ v.systolicBp }}/{{ v.diastolicBp }}</span>
+            <span class="vitals-history__val">{{ v.weightKg }} kg</span>
+            <span class="vitals-history__val">{{ v.heartRate }} bpm</span>
+            @if(v.oxygenPct) { <span class="vitals-history__val">{{ v.oxygenPct }}% O₂</span> }
+            <!-- ─── ADD inside vitals-history-item, after vitals-history__time ─── -->
+            @if(v.mlRiskLevel) {
+            <span class="ml-history-badge ml-history-badge--{{ v.mlRiskLevel | lowercase }}">
+              {{ v.mlRiskLevel === 'Low' ? '🟢' :
+                v.mlRiskLevel === 'Moderate' ? '🟡' :
+                v.mlRiskLevel === 'High' ? '🟠' : '🔴' }}
+              {{ v.mlRiskLevel }}
+            </span>
+            }
+
+
+            <!-- ─── ADD inside vitals-bento__card--latest, after the notes box ─── -->
+            @if(latestVital?.mlRiskLevel) {
+            <div class="ml-latest-badge ml-latest-badge--{{ latestVital!.mlRiskLevel | lowercase }}">
+              <span class="material-symbols-outlined" style="font-size:1rem">
+                {{ latestVital!.mlRiskLevel === 'Critical' || latestVital!.mlRiskLevel === 'High'
+                  ? 'warning' : 'check_circle' }}
+              </span>
+              <span>
+                AI assessed this vital as
+                <strong>{{ latestVital!.mlRiskLevel }} Risk</strong>
+                (score {{ latestVital!.mlRiskScore }}/100)
+              </span>
+            </div>
+            }
+          </div>
+          <span class="vitals-history__time">{{ v.measuredAt | date:'HH:mm' }}</span>
+        </div>
+        <div class="vitals-history__actions">
+          <button class="vitals-action-btn vitals-action-btn--edit" (click)="openEditForm(v)"><span class="material-symbols-outlined">edit</span></button>
+          <button class="vitals-action-btn vitals-action-btn--delete" (click)="deleteVital(v)"><span class="material-symbols-outlined">delete</span></button>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</section>
+}
+
+<!-- ░░ NO PREGNANCY ALERT ░░ -->
+@if(showNoPregnancyAlert) {
+<div class="vitals-popup-overlay" (click)="showNoPregnancyAlert = false">
+  <div class="vitals-popup-box no-preg-box" (click)="$event.stopPropagation()">
+    <div class="no-preg-emoji">🤰</div>
+    <h3 class="no-preg-title">No active pregnancy</h3>
+    <p class="no-preg-desc">You need to create a pregnancy record before adding vital measurements.</p>
+    <div class="no-preg-actions">
+      <a routerLink="/mother/pregnancy/pregnancy" class="vitals-btn vitals-btn--primary" style="text-decoration:none" (click)="showNoPregnancyAlert = false">
+        <span class="material-symbols-outlined">pregnant_woman</span> Create my pregnancy record
+      </a>
+      <button class="vitals-btn" style="background:rgba(0,0,0,0.05);color:#666" (click)="showNoPregnancyAlert = false">Close</button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ░░ ADD POPUP ░░ -->
+@if(showForm) {
+<div class="vitals-popup-overlay" (click)="closeForm()">
+  <div class="vitals-popup-box" (click)="$event.stopPropagation()">
+    <div class="vitals-popup-header">
+      <div class="vitals-popup-icon"><span class="material-symbols-outlined">add_circle</span></div>
+      <div><h3 class="vitals-popup-title">New vital measurement</h3><p class="vitals-popup-sub">Record your health signs</p></div>
+      <button mat-icon-button (click)="closeForm()" class="ms-auto"><mat-icon>close</mat-icon></button>
+    </div>
+    <form [formGroup]="vitalForm" (ngSubmit)="save()">
+      <div class="row gx-3">
+        <div class="col-12 mb-2"><p class="small fw-medium mb-0" style="color:#e91e63">🩺 Required</p></div>
+        <div class="col-12 col-md-6 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Systolic BP (mmHg) *</mat-label><input matInput type="number" formControlName="systolicBp" placeholder="120" /></mat-form-field></div>
+        <div class="col-12 col-md-6 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Diastolic BP (mmHg) *</mat-label><input matInput type="number" formControlName="diastolicBp" placeholder="80" /></mat-form-field></div>
+        <div class="col-12 col-md-6 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Weight (kg) *</mat-label><input matInput type="number" formControlName="weightKg" placeholder="65" /></mat-form-field></div>
+        <div class="col-12 col-md-6 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Heart rate (bpm) *</mat-label><input matInput type="number" formControlName="heartRate" placeholder="75" /></mat-form-field></div>
+        <div class="col-12 mb-2"><p class="small fw-medium text-secondary mb-0">➕ Optional</p></div>
+        <div class="col-12 col-md-4 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Glucose (mmol/L)</mat-label><input matInput type="number" formControlName="glucoseMmol" placeholder="5.5" /></mat-form-field></div>
+        <div class="col-12 col-md-4 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Temperature (°C)</mat-label><input matInput type="number" formControlName="temperatureC" placeholder="37.0" /></mat-form-field></div>
+        <div class="col-12 col-md-4 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Oxygen (%)</mat-label><input matInput type="number" formControlName="oxygenPct" placeholder="98" /></mat-form-field></div>
+        <div class="col-12 mb-2"><mat-form-field appearance="outline" class="w-100"><mat-label>Notes</mat-label><textarea matInput formControlName="notes" rows="2"></textarea></mat-form-field></div>
+      </div>
+      <!-- ░░ ML ANALYZE BUTTON — shows when all 4 required fields are valid ░░ -->
+        @if(
+          vitalForm.get('systolicBp')?.valid &&
+          vitalForm.get('diastolicBp')?.valid &&
+          vitalForm.get('weightKg')?.valid &&
+          vitalForm.get('heartRate')?.valid
+        ) {
+        <div class="col-12 mb-2">
+          <button
+            type="button"
+            class="vitals-btn vitals-btn--ml w-100"
+            (click)="analyzeWithML()"
+            [disabled]="mlLoading">
+            <span class="material-symbols-outlined">
+              {{ mlLoading ? 'hourglass_top' : 'biotech' }}
+            </span>
+            {{ mlLoading ? 'Analyzing vitals...' : '🤖 Analyze my vitals with AI' }}
+          </button>
+        </div>
+        }
+
+        <!-- ░░ ML RESULT CARD ░░ -->
+        @if(mlResult && !mlResult.error && !mlLoading) {
+        <div class="col-12 mb-2">
+          <div class="ml-result-card ml-result--{{ mlResult.risk_level | lowercase }}">
+
+            <!-- Header: risk badge + score + confidence -->
+            <div class="ml-result__header">
+              <span class="ml-risk-badge">
+                {{ mlResult.risk_level === 'Low' ? '🟢' :
+                   mlResult.risk_level === 'Moderate' ? '🟡' :
+                   mlResult.risk_level === 'High' ? '🟠' : '🔴' }}
+                {{ mlResult.risk_level }} Risk
+              </span>
+              <span class="ml-score">Score: {{ mlResult.risk_score }}/100</span>
+              <span class="ml-confidence">Confidence: {{ (mlResult.confidence * 100).toFixed(0) }}%</span>
+            </div>
+
+            <!-- Individual vital statuses -->
+            <div class="ml-individual">
+              @for(entry of mlResult.individual_status | keyvalue; track entry.key) {
+              <span class="ml-vital-status"
+                    [class.ml-status--normal]="entry.value === 'Normal'"
+                    [class.ml-status--moderate]="entry.value === 'Moderate'"
+                    [class.ml-status--high]="entry.value === 'High'"
+                    [class.ml-status--critical]="entry.value === 'Critical'">
+                {{ entry.value === 'Normal' ? '✅' :
+                   entry.value === 'Moderate' ? '⚠️' : '🚨' }}
+                {{ $any(entry.key) | titlecase }}
+              </span>
+              }
+            </div>
+
+            <!-- Risk factors -->
+            @if(mlResult.factors?.length > 0) {
+            <div class="ml-factors">
+              @for(factor of mlResult.factors; track factor) {
+              <span class="ml-factor">⚠️ {{ factor }}</span>
+              }
+            </div>
+            }
+
+            <!-- Recommendation -->
+            <p class="ml-recommendation">💡 {{ mlResult.recommendation }}</p>
+
+            <!-- Week context -->
+            <p class="ml-week-context">🗓️ {{ mlResult.week_context }}</p>
+
+            <!-- Estimated fields notice -->
+            @if(mlResult.used_defaults?.length > 0) {
+            <p class="ml-defaults-notice">
+              📊 Estimated fields (not entered): {{ mlResult.used_defaults.join(', ') }}
+            </p>
+            }
+
+          </div>
+        </div>
+        }
+
+        <!-- ░░ ML ERROR ░░ -->
+        @if(mlResult?.error) {
+        <div class="col-12 mb-2">
+          <div class="ml-error-card">
+            ⚠️ ML service unavailable. You can still save your vital manually.
+          </div>
+        </div>
+        }
+      <div class="d-flex gap-2 justify-content-end mt-2">
+        <button mat-button type="button" (click)="closeForm()">Cancel</button>
+        <button mat-raised-button type="submit" [disabled]="vitalForm.invalid || saving" class="vitals-btn vitals-btn--primary">
+          @if(saving) { Saving... } @else { Save vital }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- ░░ EDIT POPUP ░░ -->
+@if(showEditForm && selectedVital) {
+<div class="vitals-popup-overlay" (click)="closeEditForm()">
+  <div class="vitals-popup-box" (click)="$event.stopPropagation()">
+    <div class="vitals-popup-header">
+      <div class="vitals-popup-icon vitals-popup-icon--edit"><span class="material-symbols-outlined">edit</span></div>
+      <div><h3 class="vitals-popup-title">Edit vital</h3><p class="vitals-popup-sub">Update your measurement</p></div>
+      <button mat-icon-button (click)="closeEditForm()" class="ms-auto"><mat-icon>close</mat-icon></button>
+    </div>
+    <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+      <div class="row gx-3">
+        <div class="col-12 col-md-6 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Systolic BP (mmHg) *</mat-label><input matInput type="number" formControlName="systolicBp" /></mat-form-field></div>
+        <div class="col-12 col-md-6 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Diastolic BP (mmHg) *</mat-label><input matInput type="number" formControlName="diastolicBp" /></mat-form-field></div>
+        <div class="col-12 col-md-6 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Weight (kg) *</mat-label><input matInput type="number" formControlName="weightKg" /></mat-form-field></div>
+        <div class="col-12 col-md-6 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Heart rate (bpm) *</mat-label><input matInput type="number" formControlName="heartRate" /></mat-form-field></div>
+        <div class="col-12 col-md-4 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Glucose (mmol/L)</mat-label><input matInput type="number" formControlName="glucoseMmol" /></mat-form-field></div>
+        <div class="col-12 col-md-4 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Temperature (°C)</mat-label><input matInput type="number" formControlName="temperatureC" /></mat-form-field></div>
+        <div class="col-12 col-md-4 mb-3"><mat-form-field appearance="outline" class="w-100"><mat-label>Oxygen (%)</mat-label><input matInput type="number" formControlName="oxygenPct" /></mat-form-field></div>
+        <div class="col-12 mb-2"><mat-form-field appearance="outline" class="w-100"><mat-label>Notes</mat-label><textarea matInput formControlName="notes" rows="2"></textarea></mat-form-field></div>
+      </div>
+      <div class="d-flex gap-2 justify-content-end mt-2">
+        <button mat-button type="button" (click)="closeEditForm()">Cancel</button>
+        <button mat-raised-button type="submit" [disabled]="editForm.invalid || saving" class="vitals-btn vitals-btn--edit">
+          @if(saving) { Saving... } @else { Save changes }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- ░░ EVOLUTION POPUP ░░ -->
+@if(showEvolutionPopup) {
+<div class="vitals-popup-overlay" (click)="closeEvolution()">
+  <div class="vitals-popup-box vitals-popup-box--evo" (click)="$event.stopPropagation()">
+
+    <div class="vitals-popup-header">
+      <div class="vitals-popup-icon vitals-popup-icon--sky">
+        <span class="material-symbols-outlined">show_chart</span>
+      </div>
+      <div>
+        <h3 class="vitals-popup-title">Vitals Evolution</h3>
+        <p class="vitals-popup-sub">Last {{ dataSource.data.length > 10 ? 10 : dataSource.data.length }} measurements · Chronological order</p>
+      </div>
+      <button mat-icon-button (click)="closeEvolution()" class="ms-auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+<div class="evo-grid">
+
+      <!-- ── Blood Pressure ── -->
+      <div class="evo-card">
+        <div class="evo-card__tag" style="background:rgba(201,77,106,0.12);color:#c94d6a">❤️ Blood Pressure</div>
+        <div class="evo-card__title">Systolic & Diastolic</div>
+        <div class="evo-card__sub">mmHg · Normal &lt; 130/80</div>
+        <div class="evo-chart-wrap"><canvas #bpChart></canvas></div>
+        <div class="evo-legend">
+          <span class="evo-leg"><span class="evo-leg__dot" style="background:#c94d6a"></span>Systolic</span>
+          <span class="evo-leg"><span class="evo-leg__dot" style="background:#a8722e"></span>Diastolic</span>
+          <span class="evo-leg"><span class="evo-leg__dot" style="background:#ff9800;opacity:0.6"></span>Limits</span>
+        </div>
+        @if(evoStats.bpSStats) {
+        <div class="evo-stats-row">
+          <span class="evo-stat">Min <strong>{{ evoStats.bpSStats.min }}/{{ evoStats.bpDStats.min }}</strong></span>
+          <span class="evo-stat">Avg <strong>{{ evoStats.bpSStats.avg }}/{{ evoStats.bpDStats.avg }}</strong></span>
+          <span class="evo-stat">Max <strong>{{ evoStats.bpSStats.max }}/{{ evoStats.bpDStats.max }}</strong></span>
+          <span class="evo-stat evo-trend" [style.color]="evoStats.bpSStats.trendColor">{{ evoStats.bpSStats.trend }}</span>
+        </div>
+        <div class="evo-message"
+             [class.evo-message--ok]="evoStats.bpMsg?.startsWith('✅')"
+             [class.evo-message--warn]="evoStats.bpMsg?.startsWith('⚠️') || evoStats.bpMsg?.startsWith('💛')"
+             [class.evo-message--danger]="evoStats.bpMsg?.startsWith('🚨')">
+          {{ evoStats.bpMsg }}
+        </div>
+        }
+      </div>
+
+      <!-- ── Weight ── -->
+      <div class="evo-card">
+        <div class="evo-card__tag" style="background:rgba(168,114,46,0.12);color:#a8722e">⚖️ Weight</div>
+        <div class="evo-card__title">Body weight</div>
+        <div class="evo-card__sub">kg · Weekly evolution</div>
+        <div class="evo-chart-wrap"><canvas #weightChart></canvas></div>
+        <div class="evo-legend">
+          <span class="evo-leg"><span class="evo-leg__dot" style="background:#a8722e"></span>Weight (kg)</span>
+        </div>
+        @if(evoStats.wStats) {
+        <div class="evo-stats-row">
+          <span class="evo-stat">Min <strong>{{ evoStats.wStats.min }} kg</strong></span>
+          <span class="evo-stat">Avg <strong>{{ evoStats.wStats.avg }} kg</strong></span>
+          <span class="evo-stat">Max <strong>{{ evoStats.wStats.max }} kg</strong></span>
+          <span class="evo-stat evo-trend" [style.color]="evoStats.wStats.trendColor">{{ evoStats.wStats.trend }}</span>
+        </div>
+        <div class="evo-message evo-message--ok">
+          💡 Weight gain is normal during pregnancy. Average gain is 0.5 kg/week in the 3rd trimester.
+        </div>
+        }
+      </div>
+
+      <!-- ── Heart Rate ── -->
+      <div class="evo-card">
+        <div class="evo-card__tag" style="background:rgba(77,140,82,0.12);color:#4d8c52">💓 Heart Rate</div>
+        <div class="evo-card__title">Heart rate</div>
+        <div class="evo-card__sub">bpm · Normal 60–100</div>
+        <div class="evo-chart-wrap"><canvas #hrChart></canvas></div>
+        <div class="evo-legend">
+          <span class="evo-leg"><span class="evo-leg__dot" style="background:#4d8c52"></span>Heart Rate</span>
+          <span class="evo-leg"><span class="evo-leg__dot" style="background:#ff9800;opacity:0.6"></span>Limits</span>
+        </div>
+        @if(evoStats.hrStats) {
+        <div class="evo-stats-row">
+          <span class="evo-stat">Min <strong>{{ evoStats.hrStats.min }} bpm</strong></span>
+          <span class="evo-stat">Avg <strong>{{ evoStats.hrStats.avg }} bpm</strong></span>
+          <span class="evo-stat">Max <strong>{{ evoStats.hrStats.max }} bpm</strong></span>
+          <span class="evo-stat evo-trend" [style.color]="evoStats.hrStats.trendColor">{{ evoStats.hrStats.trend }}</span>
+        </div>
+        <div class="evo-message"
+             [class.evo-message--ok]="evoStats.hrMsg?.startsWith('✅')"
+             [class.evo-message--warn]="evoStats.hrMsg?.startsWith('⚠️')"
+             [class.evo-message--danger]="evoStats.hrMsg?.startsWith('🚨')">
+          {{ evoStats.hrMsg }}
+        </div>
+        }
+      </div>
+
+      <!-- ── Oxygen ── -->
+      <div class="evo-card">
+        <div class="evo-card__tag" style="background:rgba(58,143,181,0.12);color:#3a8fb5">🫁 Oxygen</div>
+        <div class="evo-card__title">O₂ Saturation</div>
+        <div class="evo-card__sub">% · Normal ≥ 95%</div>
+        <div class="evo-chart-wrap"><canvas #o2Chart></canvas></div>
+        <div class="evo-legend">
+          <span class="evo-leg"><span class="evo-leg__dot" style="background:#3a8fb5"></span>O₂ (%)</span>
+          <span class="evo-leg"><span class="evo-leg__dot" style="background:#ff9800;opacity:0.6"></span>Min 95%</span>
+        </div>
+        @if(evoStats.o2Stats) {
+        <div class="evo-stats-row">
+          <span class="evo-stat">Min <strong>{{ evoStats.o2Stats.min }}%</strong></span>
+          <span class="evo-stat">Avg <strong>{{ evoStats.o2Stats.avg }}%</strong></span>
+          <span class="evo-stat">Max <strong>{{ evoStats.o2Stats.max }}%</strong></span>
+          <span class="evo-stat evo-trend" [style.color]="evoStats.o2Stats.trendColor">{{ evoStats.o2Stats.trend }}</span>
+        </div>
+        <div class="evo-message"
+             [class.evo-message--ok]="evoStats.o2Msg?.startsWith('✅') || evoStats.o2Msg?.startsWith('💡')"
+             [class.evo-message--warn]="evoStats.o2Msg?.startsWith('⚠️')"
+             [class.evo-message--danger]="evoStats.o2Msg?.startsWith('🚨')">
+          {{ evoStats.o2Msg }}
+        </div>
+        }
+      </div>
+
+    </div>
+
+    <div class="d-flex justify-content-end mt-3">
+      <button class="vitals-btn vitals-btn--primary" (click)="closeEvolution()">Close</button>
+    </div>
+
+  </div>
+</div>
+}
+
+<!-- ░░ AI ANALYSIS POPUP — OPTION 5 ░░ -->
+@if(showAiPopup) {
+<div class="vitals-popup-overlay" (click)="closeAiPopup()">
+  <div class="vitals-popup-box vitals-popup-box--ai" (click)="$event.stopPropagation()">
+    <div class="vitals-popup-header">
+      <div class="vitals-popup-icon vitals-popup-icon--ai">
+        <span class="material-symbols-outlined">psychology</span>
+      </div>
+      <div>
+        <h3 class="vitals-popup-title">AI Vitals Analysis</h3>
+        <p class="vitals-popup-sub">Based on your last {{ dataSource.data.slice(0,10).length }} measurements</p>
+      </div>
+      <button mat-icon-button (click)="closeAiPopup()" class="ms-auto"><mat-icon>close</mat-icon></button>
+    </div>
+
+    @if(aiHealthScores.length > 0) {
+    <div class="ai-scores">
+      @for(score of aiHealthScores; track score.label) {
+      <div class="ai-score-badge"
+           [style.background]="getScoreColor(score.status) + '15'"
+           [style.border]="'1.5px solid ' + getScoreColor(score.status) + '40'">
+        <span class="ai-score-label">{{ score.label }}</span>
+        <span class="ai-score-value" [style.color]="getScoreColor(score.status)">{{ score.value }}</span>
+        <span class="ai-score-status" [style.color]="getScoreColor(score.status)">{{ getScoreLabel(score.status) }}</span>
+      </div>
+      }
+    </div>
+    }
+
+    @if(aiLoading || aiFollowLoading) {
+    <div class="ai-loading">
+      <div class="ai-loading__dots"><span></span><span></span><span></span></div>
+      <p class="ai-loading__text">
+        @if(aiFollowLoading) { Claude is answering your question... }
+        @else { Claude is analyzing your vitals... }
+      </p>
+    </div>
+    }
+
+    @if(!aiLoading && !aiFollowLoading && aiAnalysis) {
+    <div class="ai-result">
+      <div class="ai-result__icon">🤖</div>
+      <p class="ai-result__text">{{ aiAnalysis }}</p>
+    </div>
+
+    @if(followUpQuestions.length > 0) {
+    <div class="ai-followup">
+      <p class="ai-followup__title">
+        <span class="material-symbols-outlined" style="font-size:0.9rem;vertical-align:middle">chat_bubble</span>
+        Ask a follow-up question
+      </p>
+      <div class="ai-followup__btns">
+        @for(q of followUpQuestions; track q) {
+        <button class="ai-followup__btn" (click)="askFollowUp(q)">
+          <span class="material-symbols-outlined">arrow_forward</span>{{ q }}
+        </button>
+        }
+      </div>
+    </div>
+    }
+
+    <div class="ai-footer">
+      <button class="vitals-btn ai-copy-btn" (click)="copyAnalysis()">
+        <span class="material-symbols-outlined">{{ aiCopied ? 'check' : 'content_copy' }}</span>
+        {{ aiCopied ? 'Copied!' : 'Copy analysis' }}
+      </button>
+      <button class="vitals-btn vitals-btn--primary" (click)="closeAiPopup()">Close</button>
+    </div>
+    }
+  </div>
+</div>
+}
+@if(showDeleteVitalConfirm) {
+<div class="vitals-popup-overlay" (click)="showDeleteVitalConfirm = false">
+  <div class="vitals-popup-box" style="max-width:420px; text-align:center" (click)="$event.stopPropagation()">
+    <div style="font-size:3rem; margin-bottom:1rem">🗑️</div>
+    <h3 class="vitals-popup-title">Delete this vital?</h3>
+    <p style="color:var(--text-mid); font-family:var(--font-body); font-size:0.9rem; margin:0.5rem 0 1.5rem">
+      Associated alerts and exams will also be deleted.
+    </p>
+    <div class="d-flex gap-2 justify-content-center">
+      <button class="vitals-btn" style="background:rgba(0,0,0,0.05);color:#666;border:1.5px solid rgba(0,0,0,0.1)"
+              (click)="showDeleteVitalConfirm = false">
+        Cancel
+      </button>
+      <button class="vitals-btn vitals-btn--primary" style="background:rgba(244,67,54,0.1);color:#c62828;border:1.5px solid rgba(244,67,54,0.3)"
+              (click)="confirmDeleteVital()">
+        <span class="material-symbols-outlined">delete</span>
+        Yes, delete
+      </button>
+    </div>
+  </div>
+</div>
+}

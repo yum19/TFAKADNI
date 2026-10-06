@@ -1,0 +1,60 @@
+<div class="container fade-in py-3 py-lg-4">
+  <h3 class="mb-1">Fetal Development</h3>
+  <p class="small opacity-50">Week-by-week tracking</p>
+</div>
+
+<div class="container fade-in">
+  @if(loading) { <mat-progress-bar mode="indeterminate" class="mb-4"></mat-progress-bar> }
+
+  <!-- Week navigation -->
+  <mat-card class="mb-4">
+    <mat-card-content>
+      <div class="d-flex align-items-center justify-content-between py-2">
+        <button mat-icon-button (click)="previousWeek()" [disabled]="week <= 1">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <div class="text-center">
+          <h2 class="mb-0 fw-bold" style="color:#2196f3">Week {{ week }}</h2>
+          <p class="small text-secondary mb-0">Current week: {{ currentWeek }}</p>
+        </div>
+        <button mat-icon-button (click)="nextWeek()" [disabled]="week >= 40">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  @if(fetalInfo && !loading) {
+  <mat-card class="mb-4">
+    <mat-card-content>
+      <h3 class="fw-bold mb-3" style="color:#2196f3">{{ fetalInfo.title }}</h3>
+      <p class="text-secondary mb-4">{{ fetalInfo.description }}</p>
+      <div class="d-flex gap-2 flex-wrap mb-4">
+        @if(fetalInfo.sizeCm) { <span class="info-chip">📏 {{ fetalInfo.sizeCm }} cm</span> }
+        @if(fetalInfo.weightG) { <span class="info-chip">⚖️ {{ fetalInfo.weightG }} g</span> }
+        @if(fetalInfo.sizeComparison) { <span class="info-chip">🍎 {{ fetalInfo.sizeComparison }}</span> }
+      </div>
+      @if(fetalInfo.motherSymptoms) {
+      <div class="info-box mb-3">
+        <h4 class="small fw-bold mb-1">Mother's Symptoms</h4>
+        <p class="small mb-0">{{ fetalInfo.motherSymptoms }}</p>
+      </div>
+      }
+      @if(fetalInfo.medicalAdvice) {
+      <div class="info-box">
+        <h4 class="small fw-bold mb-1">Medical Advice</h4>
+        <p class="small mb-0">{{ fetalInfo.medicalAdvice }}</p>
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+  }
+
+  @if(!fetalInfo && !loading) {
+  <mat-card>
+    <mat-card-content class="text-center py-4">
+      <p class="text-secondary">No information available for week {{ week }}</p>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>

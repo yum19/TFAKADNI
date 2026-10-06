@@ -1,0 +1,79 @@
+<div class="marrainage-page">
+  <div class="page-header">
+    <div class="header-icon">🤱</div>
+    <h1>Trouver votre Marraine</h1>
+    <p>Notre IA analyse votre profil et trouve les meilleures compatibilités parmi nos marraines disponibles.</p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <span>Calcul de compatibilité en cours…</span>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error && !loading" class="error-state">
+    <span>⚠️ {{ error }}</span>
+    <button (click)="loadMatches()">Réessayer</button>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && !error && marraines.length === 0" class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <p>Aucune marraine disponible pour le moment.</p>
+  </div>
+
+  <!-- Results -->
+  <div *ngIf="!loading && marraines.length > 0" class="results-section">
+    <h2>{{ marraines.length }} Marraines Compatibles</h2>
+    <div class="cards-grid">
+      <div *ngFor="let m of marraines; let i = index" class="marraine-card" [class.top-match]="i === 0">
+        <div class="card-badge" *ngIf="i === 0">⭐ Meilleure compatibilité</div>
+
+        <div class="card-header">
+          <div class="avatar" [style.background]="i === 0 ? '#ec4899' : '#a78bfa'">
+            {{ getInitials(m.fullName) }}
+          </div>
+          <div class="user-info">
+            <h3>{{ m.fullName }}</h3>
+            <span class="pregnancy-type">{{ m.pregnancyType }}</span>
+            <span *ngIf="m.hasBaby" class="baby-badge">👶 A déjà un bébé</span>
+
+          </div>
+          <div class="score-circle" [style.border-color]="getScoreColor(m.compatibilityScore)">
+            <span [style.color]="getScoreColor(m.compatibilityScore)">{{ m.compatibilityScore }}</span>
+            <small>/100</small>
+          </div>
+        </div>
+
+        <div class="card-details">
+          <div class="detail-item">
+            <span class="icon">📍</span>
+            <span>{{ m.city || 'Non précisé' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="icon">🗓️</span>
+            <span>Semaine {{ m.currentWeek }}</span>
+          </div>
+        </div>
+
+        <div class="reason-tags" *ngIf="m.reason">
+          <span *ngFor="let tag of m.reason.split('·')" class="tag" [class.empty-tag]="!tag.trim()">
+            {{ tag.trim() }}
+          </span>
+        </div>
+
+        <div class="score-bar">
+          <div class="score-fill"
+               [style.width.%]="m.compatibilityScore"
+               [style.background]="getScoreColor(m.compatibilityScore)">
+          </div>
+        </div>
+
+        <button class="contact-btn" [class.primary-btn]="i === 0">
+          💬 Contacter cette marraine
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,1120 @@
+<app-confirm-modal></app-confirm-modal>
+
+<div class="pn-wrap" (click)="closeAllPickers()">
+
+  <!-- ── TOP BAR ───────────────────────────────────────────────── -->
+  <div class="pn-topbar">
+    <div class="pn-topbar-inner">
+      <div class="pn-match-activator" (click)="$event.stopPropagation()">
+        <button class="pn-match-toggle" [class.active]="matchActivatorOn" (click)="toggleMatchActivator()" type="button">
+          <span class="pn-match-toggle-icon">{{ matchActivatorOn ? '🤱' : '🔍' }}</span>
+          <span class="pn-match-toggle-label">AI Match</span>
+          <span class="pn-match-toggle-track"><span class="pn-match-toggle-thumb"></span></span>
+        </button>
+      </div>
+      <div class="pn-search-wrap">
+        <mat-icon class="pn-search-icon">search</mat-icon>
+        <input class="pn-search-input"
+       placeholder="Search…"
+       [(ngModel)]="searchQuery"
+       (ngModelChange)="onSearch($event)" />
+      </div>
+      <button class="pn-new-post-btn" (click)="openCreatePostModal()">
+        <mat-icon>add</mat-icon><span>Add New Post</span>
+      </button>
+
+      <div class="pn-online-bar" (click)="$event.stopPropagation()">
+  <div class="pn-online-label">
+    <span class="pn-online-dot-global"></span>
+    <span>Online</span>
+  </div>
+  <div class="pn-online-avatars" *ngIf="onlineFollowingUsers.length > 0">
+    <div
+      *ngFor="let u of onlineFollowingUsers | slice:0:6"
+      class="pn-online-av-wrap"
+      [title]="u.fullName"
+      (click)="openMessage(u.id)">
+      <div class="pn-online-av">{{ getInitials(u.fullName) }}</div>
+      <span class="pn-online-av-dot"></span>
+    </div>
+    <div *ngIf="onlineFollowingUsers.length > 6" class="pn-online-av-more">
+      +{{ onlineFollowingUsers.length - 6 }}
+    </div>
+  </div>
+  <div *ngIf="onlineFollowingUsers.length === 0" class="pn-online-empty">
+    No one online
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+  <div class="pn-layout">
+
+    <!-- ============ LEFT SIDEBAR ============ -->
+    <aside class="pn-left-sidebar">
+      <div class="pn-card pn-profile-card">
+        <div class="pn-profile-cover"></div>
+        <div class="pn-profile-body">
+          <div class="pn-profile-av-wrap">
+            <div class="pn-profile-av">{{ getInitials(currentUserName) }}</div>
+            <span class="pn-online-dot"></span>
+          </div>
+          <div class="pn-profile-name">{{ currentUserName }}</div>
+          <div class="pn-profile-handle">{{ currentUserHandle }}{{ currentUserCity ? ' · ' + currentUserCity : '' }}</div>
+          <div class="pn-profile-stats">
+            <div class="pn-ps-item">
+              <span class="pn-ps-num">{{ myPostsCount }}</span>
+              <span class="pn-ps-lbl">Posts</span>
+            </div>
+            <div class="pn-ps-div"></div>
+            <div class="pn-ps-item">
+              <span class="pn-ps-num">{{ myFollowersCount }}</span>
+              <span class="pn-ps-lbl">Followers</span>
+            </div>
+            <div class="pn-ps-div"></div>
+            <div class="pn-ps-item">
+              <span class="pn-ps-num">{{ myFollowingCount }}</span>
+              <span class="pn-ps-lbl">Following</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pn-card pn-highlights-card">
+  <h3 class="pn-sidebar-title"><mat-icon>auto_stories</mat-icon><span>Story Highlights</span></h3>
+  <div class="pn-highlights-grid">
+    <div class="pn-highlight" *ngFor="let group of groupedStories | slice:0:4" (click)="viewStoryGroup(group)">
+      <div class="pn-highlight-ring">
+        <div class="pn-highlight-av" [style.background]="selectedColorForStory(group.latest)">
+          <span>{{ group.latest.contenu ? group.latest.contenu.substring(0,1).toUpperCase() : '✨' }}</span>
+        </div>
+      </div>
+      <span class="pn-highlight-lbl">{{ group.author }}</span>
+    </div>
+    <div *ngIf="activeStories.length===0" class="pn-highlights-empty">No highlights yet</div>
+  </div>
+</div>
+
+      <div class="pn-card pn-activity-card" [class.pn-activity-pulse]="saveAnimating">
+        <h3 class="pn-sidebar-title"><mat-icon>insights</mat-icon><span>Profile Activity</span></h3>
+
+        <div class="pn-activity-saved-row" (click)="goToSavedPosts()" title="View your saved posts">
+          <div class="pn-activity-saved-icon" [class.pn-saved-bounce]="saveAnimating">
+            <mat-icon>bookmark</mat-icon>
+          </div>
+          <div class="pn-activity-saved-info">
+            <div class="pn-activity-saved-count">{{ savedCount }}</div>
+            <div class="pn-activity-saved-label">Saved Posts</div>
+          </div>
+          <div class="pn-activity-saved-arrow">
+            <mat-icon>chevron_right</mat-icon>
+          </div>
+          <span class="pn-saved-spark" *ngIf="saveAnimating" aria-hidden="true"></span>
+        </div>
+
+        <div class="pn-activity-followers">
+          <div class="pn-activity-av-stack">
+            <div class="pn-act-av" style="background:linear-gradient(135deg,#ff4f75,#ff6b8a)">👩</div>
+            <div class="pn-act-av" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe)">👩</div>
+            <div class="pn-act-av" style="background:linear-gradient(135deg,#00b894,#00cec9)">👩</div>
+            <div class="pn-act-av" style="background:linear-gradient(135deg,#fd79a8,#e84393)">👩</div>
+          </div>
+          <div class="pn-activity-info">
+            <div class="pn-activity-num">{{ myFollowersCount }}</div>
+            <div class="pn-activity-sub">Total Followers</div>
+            <div class="pn-activity-badge">↑ Keep growing! 💕</div>
+          </div>
+        </div>
+        <p class="pn-activity-msg">You're gaining a wonderful community! 💕</p>
+
+        <button class="pn-see-saved-btn" (click)="goToSavedPosts()" type="button">
+          <mat-icon>collections_bookmark</mat-icon>
+          View My Saved Posts
+        </button>
+      </div>
+    </aside>
+
+    <!-- ============ CENTER FEED ============ -->
+    <main class="pn-main">
+
+      <!-- STORIES -->
+      <div class="pn-card pn-stories">
+  <div class="pn-story-add" (click)="openCreateStoryModal()">
+    <div class="pn-story-add-btn"><mat-icon>add</mat-icon></div>
+    <span class="pn-story-label">Your Story</span>
+  </div>
+  <div class="pn-story" *ngFor="let group of groupedStories" (click)="viewStoryGroup(group)">
+    <div class="pn-story-ring">
+      <div class="pn-story-av"
+           [style.background-image]="group.latest.imageUrl ? 'url('+group.latest.imageUrl+')' : null"
+           [style.background]="!group.latest.imageUrl ? selectedColorForStory(group.latest) : null">
+        <span *ngIf="!group.latest.imageUrl && group.latest.contenu" class="pn-story-av-text">{{ group.latest.contenu.substring(0,2).toUpperCase() }}</span>
+        <span *ngIf="!group.latest.imageUrl && !group.latest.contenu" class="pn-story-av-text">✨</span>
+      </div>
+      <!-- Badge showing count if more than 1 story -->
+      <span *ngIf="group.stories.length > 1" class="pn-story-count-badge">{{ group.stories.length }}</span>
+    </div>
+    <span class="pn-story-label">{{ group.author }}</span>
+  </div>
+  <div *ngIf="activeStories.length===0" class="pn-story-placeholder"><p>Be the first to share a story! 🌟</p></div>
+</div>
+
+      <!-- COMPOSE -->
+      <div class="pn-card pn-compose">
+        <div class="pn-compose-top">
+          <div class="pn-compose-av"></div>
+          <div class="pn-compose-box" (click)="openCreatePostModal()">
+            <span class="pn-compose-placeholder">What's on your mind right now? 💭</span>
+          </div>
+        </div>
+        <div class="pn-compose-divider"></div>
+        <div class="pn-compose-actions">
+          <button class="pn-compose-action" (click)="openCreatePostModal()"><mat-icon class="pn-cact-icon photo">photo_camera</mat-icon><span>Photo</span></button>
+          <button class="pn-compose-action" (click)="openCreatePostModal()"><mat-icon class="pn-cact-icon feeling">sentiment_satisfied_alt</mat-icon><span>Feeling</span></button>
+          <button class="pn-compose-action" (click)="openCreatePostModal()"><mat-icon class="pn-cact-icon location">location_on</mat-icon><span>Location</span></button>
+          <button class="pn-compose-action pn-post-submit-btn" (click)="openCreatePostModal()"><mat-icon>send</mat-icon><span>Post</span></button>
+        </div>
+      </div>
+
+      <!-- Post Notification Banner -->
+      <app-post-notification-banner></app-post-notification-banner>
+
+      <!-- Report Modal -->
+      <app-report-modal
+        *ngIf="reportingPostId !== null"
+        [postId]="reportingPostId!"
+        (close)="closeReportModal()"
+        (reported)="onPostReported()">
+      </app-report-modal>
+
+      <!-- TABS + SORT -->
+      <div class="pn-feed-controls">
+        <div class="pn-tabs">
+          <button class="pn-tab" [class.active]="activeTab==='feed'" (click)="activeTab='feed';apply()">
+            <mat-icon>home</mat-icon> For You
+          </button>
+          <button class="pn-tab" [class.active]="activeTab==='myposts'" (click)="activeTab='myposts'">
+            <mat-icon>person</mat-icon> My Posts
+          </button>
+          <button class="pn-tab pn-tab-matches" *ngIf="matchActivatorOn" [class.active]="activeTab==='matches'" (click)="activeTab='matches'">
+            <span class="pn-tab-match-dot"></span>
+            <mat-icon>favorite</mat-icon> My Matches
+            <span class="pn-tab-badge" *ngIf="pendingMatchCount>0">{{ pendingMatchCount }}</span>
+          </button>
+        </div>
+        <div class="pn-sort-wrap" (click)="$event.stopPropagation()">
+          <button class="pn-sort-btn" [matMenuTriggerFor]="sortMenu" type="button">
+            <mat-icon>sort</mat-icon><span>{{ sortLabel }}</span><mat-icon class="pn-sort-chevron">expand_more</mat-icon>
+          </button>
+          <mat-menu #sortMenu="matMenu">
+            <button mat-menu-item (click)="setSortMode('recent')" [class.pn-sort-active]="sortMode==='recent'"><mat-icon>schedule</mat-icon><span>Most Recent</span></button>
+            <button mat-menu-item (click)="setSortMode('oldest')" [class.pn-sort-active]="sortMode==='oldest'"><mat-icon>history</mat-icon><span>Oldest First</span></button>
+            <button mat-menu-item (click)="setSortMode('top')"    [class.pn-sort-active]="sortMode==='top'"><mat-icon>thumb_up</mat-icon><span>Most Liked</span></button>
+          </mat-menu>
+        </div>
+      </div>
+
+      <!-- ============ MATCHES TAB ============ -->
+      <ng-container *ngIf="activeTab==='matches' && matchActivatorOn">
+        <div *ngIf="matchesLoading" class="pn-card pn-matches-loading">
+          <div class="pn-loader"></div>
+          <p>Finding your best matches… 🤱</p>
+        </div>
+
+        <div *ngIf="!matchesLoading && noPregnancyData" class="pn-card" style="padding:48px 32px;text-align:center;">
+          <div style="font-size:3rem;margin-bottom:12px">🤰</div>
+          <h3 style="color:#1a0a10;font-size:1.15rem;font-weight:800;margin-bottom:8px">No pregnancy profile found</h3>
+          <p style="color:#b08a9a;font-size:0.9rem;margin-bottom:20px">
+            AI Match needs your pregnancy data to find compatible marraines.<br>Please complete your pregnancy profile first.
+          </p>
+          <button class="pn-post-btn" routerLink="/marrainage" type="button">
+            <mat-icon>add</mat-icon> Complete My Profile
+          </button>
+        </div>
+
+        <ng-container *ngIf="!matchesLoading && !noPregnancyData">
+          <!-- Swipe Card -->
+          <div class="sw-overlay" *ngIf="swipeCard" (click)="$event.stopPropagation()">
+            <div class="sw-modal"
+                 [class.swiping-left]="swipeDirection==='left'"
+                 [class.swiping-right]="swipeDirection==='right'">
+              <span class="sw-hint-nope" [class.visible]="swipeHint==='left'">NOPE</span>
+              <span class="sw-hint-like" [class.visible]="swipeHint==='right'">LIKE</span>
+              <div class="sw-card-inner">
+                <div class="sw-avatar" [style.background]="'linear-gradient(135deg,#ff4f75,#ff6b8a)'">
+                  {{ getInitials(swipeCard.fullName) }}
+                  <div class="sw-avatar-ring"></div>
+                </div>
+                <span class="sw-badge-ai"><span class="sw-ai-dot"></span> AI Matched</span>
+                <h3 class="sw-name">{{ swipeCard.fullName }}</h3>
+                <p class="sw-sub">
+                  <span>📍 {{ swipeCard.city || 'Unknown city' }}</span>
+                  <span>•</span>
+                  <span>Week {{ swipeCard.currentWeek }}</span>
+                  <span *ngIf="swipeCard.hasBaby">• 👶 Has baby</span>
+                </p>
+                <div class="sw-score-row">
+                  <div class="sw-score-circle" [style.border-color]="getScoreColor(swipeCard.compatibilityScore)" [style.color]="getScoreColor(swipeCard.compatibilityScore)">
+                    <span>{{ swipeCard.compatibilityScore }}%</span>
+                    <small>match</small>
+                  </div>
+                  <div class="sw-score-bar-wrap">
+                    <div class="sw-score-label">Compatibility Score</div>
+                    <div class="sw-score-bar">
+                      <div class="sw-score-fill" [style.width]="swipeCard.compatibilityScore + '%'" [style.background]="getScoreColor(swipeCard.compatibilityScore)"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="sw-actions">
+                <button class="sw-btn sw-btn-pass"   (click)="swipeLeft()"        type="button"><mat-icon>close</mat-icon></button>
+                <button class="sw-btn sw-btn-info"   (click)="dismissSwipeCard()" type="button"><mat-icon>info_outline</mat-icon></button>
+                <button class="sw-btn sw-btn-accept" (click)="swipeRight()"       type="button"><mat-icon>favorite</mat-icon></button>
+              </div>
+              <div class="sw-queue" *ngIf="swipeQueue.length > 0">
+                {{ swipeQueue.length }} more match{{ swipeQueue.length > 1 ? 'es' : '' }} waiting
+              </div>
+            </div>
+          </div>
+
+          <!-- Mutual Matches -->
+          <div class="pn-matches-section" *ngIf="mutualMatches.length > 0">
+            <div class="pn-matches-section-header pn-section-mutual">
+              <span class="pn-matches-section-icon">💕</span>
+              <div><h3>Mutual Matches ({{ mutualMatches.length }})</h3><p>You both liked each other — start chatting!</p></div>
+            </div>
+            <div class="pn-match-cards">
+              <div *ngFor="let m of mutualMatches" class="pn-match-result-card pn-mutual">
+                <div class="pn-mrc-avatar" style="background:linear-gradient(135deg,#ff4f75,#ff6b8a)">{{ getInitials(m.fullName) }}</div>
+                <div class="pn-mrc-info">
+                  <div class="pn-mrc-name">{{ m.fullName }}</div>
+                  <div class="pn-mrc-meta"><span>📍 {{ m.city }}</span><span>Week {{ m.currentWeek }}</span></div>
+                  <button class="message-btn" (click)="openMessage(m.otherUserId)"><mat-icon>message</mat-icon> Message</button>
+                </div>
+                <div class="pn-mrc-right">
+                  <div class="pn-mrc-score" [style.color]="getScoreColor(m.compatibilityScore)">{{ m.compatibilityScore }}<small>%</small></div>
+                  <span class="pn-mrc-decision accepted"><mat-icon>favorite</mat-icon> Mutual</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- My Decisions -->
+          <div class="pn-matches-section" *ngIf="myDecisionMatches.length > 0">
+            <div class="pn-matches-section-header">
+              <span class="pn-matches-section-icon">👋</span>
+              <div><h3>My Decisions ({{ myDecisionMatches.length }})</h3><p>Waiting for their response…</p></div>
+            </div>
+            <div class="pn-match-cards">
+              <div *ngFor="let m of myDecisionMatches" class="pn-match-result-card"
+                   [class.accepted]="m.myStatus==='ACCEPTED'" [class.rejected]="m.myStatus==='REJECTED'">
+                <div class="pn-mrc-avatar" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe)">{{ getInitials(m.fullName) }}</div>
+                <div class="pn-mrc-info">
+                  <div class="pn-mrc-name">{{ m.fullName }}</div>
+                  <div class="pn-mrc-meta"><span>📍 {{ m.city }}</span><span>Week {{ m.currentWeek }}</span></div>
+                </div>
+                <div class="pn-mrc-right">
+                  <div class="pn-mrc-score" [style.color]="getScoreColor(m.compatibilityScore)">{{ m.compatibilityScore }}<small>%</small></div>
+                  <span class="pn-mrc-decision" [class.accepted]="m.myStatus==='ACCEPTED'" [class.rejected]="m.myStatus==='REJECTED'">
+                    <mat-icon>{{ m.myStatus==='ACCEPTED' ? 'thumb_up' : 'thumb_down' }}</mat-icon>
+                    {{ m.myStatus==='ACCEPTED' ? 'Liked' : 'Passed' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Incoming -->
+          <div class="pn-matches-section" *ngIf="incomingMatches.length > 0">
+            <div class="pn-matches-section-header">
+              <span class="pn-matches-section-icon">💌</span>
+              <div><h3>Incoming ({{ incomingMatches.length }})</h3><p>Someone liked you — check them out!</p></div>
+            </div>
+            <div class="pn-match-cards">
+              <div *ngFor="let m of incomingMatches" class="pn-match-result-card incoming">
+                <div class="pn-mrc-avatar" style="background:linear-gradient(135deg,#00b894,#00cec9)">{{ getInitials(m.fullName) }}</div>
+                <div class="pn-mrc-info">
+                  <div class="pn-mrc-name">{{ m.fullName }}</div>
+                  <div class="pn-mrc-meta"><span>📍 {{ m.city }}</span><span>Week {{ m.currentWeek }}</span></div>
+                </div>
+                <div class="pn-mrc-right">
+                  <div class="pn-mrc-score" [style.color]="getScoreColor(m.compatibilityScore)">{{ m.compatibilityScore }}<small>%</small></div>
+                  <span class="pn-mrc-other-status pending"><mat-icon>hourglass_empty</mat-icon> Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!swipeCard && swipeQueue.length===0 && mutualMatches.length===0 && myDecisionMatches.length===0 && incomingMatches.length===0"
+               class="pn-card" style="padding:48px;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:12px">🎉</div>
+            <h3 style="color:#1a0a10;font-weight:800;margin-bottom:8px">You're all caught up!</h3>
+            <p style="color:#b08a9a;font-size:.9rem">No pending matches right now. Check back later!</p>
+          </div>
+        </ng-container>
+      </ng-container>
+
+      <!-- ============ FOR YOU FEED ============ -->
+      <div *ngIf="loading && activeTab==='feed'" class="pn-loading">
+        <div class="pn-loader"></div><p>Loading your feed…</p>
+      </div>
+
+      <div *ngIf="!loading && filteredPosts.length===0 && activeTab==='feed'" class="pn-card pn-empty">
+        <div class="pn-empty-icon">💝</div>
+        <h3>No posts yet</h3><p>Be the first to share your story!</p>
+        <button class="pn-post-btn" (click)="openCreatePostModal()"><mat-icon>add</mat-icon> Create Your First Post</button>
+      </div>
+
+      <div *ngIf="!loading && filteredPosts.length>0 && activeTab==='feed'" class="pn-feed">
+        <ng-container *ngFor="let post of filteredPosts; let i=index">
+
+          <!--
+          ══════════════════════════════════════════════════════════════
+          FEED POST CARD
+          Layout when shouldShowBlur(post) is TRUE (non-author viewer):
+            .pn-card.pn-post   ← position:relative; overflow:hidden
+              app-post-warning-banner   ← outside blur, but only shows for author so moot
+              app-post-blur-overlay     ← position:absolute; top:0; left:0; w:100%; h:100%; z-index:10
+              .pn-post-inner            ← filter:blur(6px); pointer-events:none; user-select:none
+                (header + body + stats + actions + comments — all blurred)
+
+          Layout when shouldShowBlur(post) is FALSE (author or revealed):
+            .pn-card.pn-post
+              app-post-warning-banner   ← colored inline banner for author
+              .pn-post-inner            ← no blur, fully interactive
+          ══════════════════════════════════════════════════════════════
+          -->
+          <div class="pn-card pn-post"
+               [style.animation-delay]="(i*60)+'ms'"
+               style="position:relative;overflow:hidden;">
+
+            <!-- ① AUTHOR WARNING BANNER
+                 Sits above the blur overlay in z-order so it's always readable.
+                 The component itself hides when isAuthor is false. -->
+            <app-post-warning-banner
+              [analysis]="postAnalysisMap[post.id!] ?? null"
+              [isAuthor]="isMyPost(post)"
+              (acknowledged)="onWarningAcknowledged(post.id!)">
+            </app-post-warning-banner>
+
+            <!-- ② FULL-CARD BLUR OVERLAY (non-authors only)
+                 Absolutely positioned to cover the entire .pn-post-inner below.
+                 The component renders the eye icon + warning reason + "Tap to reveal". -->
+            <app-post-blur-overlay
+              *ngIf="shouldShowBlur(post)"
+              [analysis]="postAnalysisMap[post.id!] ?? null"
+              (revealed)="onPostRevealed(post.id!)">
+            </app-post-blur-overlay>
+
+            <!-- ③ INNER WRAPPER — the blur target.
+                 When pn-post-blurred is applied, CSS blurs EVERYTHING inside:
+                 header, text, images, stats, actions, comment input, comments. -->
+            <div class="pn-post-inner" [class.pn-post-blurred]="shouldShowBlur(post)">
+
+              <!-- Post Header -->
+              <div class="pn-post-header">
+                <div class="pn-post-av"><span>{{ post.anonyme ? '👤' : '👩' }}</span></div>
+                <div class="pn-post-meta">
+                  <div class="pn-post-name">
+                    {{ getPostAuthorName(post) }}
+                    <mat-icon class="pn-verified">verified</mat-icon>
+                  </div>
+                  <div class="pn-post-sub">
+                    <span class="pn-post-time">{{ post.date | date:'MMM d, y · h:mm a' }}</span>
+                  </div>
+                </div>
+                <div class="pn-ptag" [attr.data-tag]="post.tag">
+                  <span class="pn-tag-emoji">{{ tagEmoji[post.tag] }}</span>
+                  <span class="pn-tag-text">{{ tagLabels[post.tag] }}</span>
+                </div>
+                <button class="pn-more-btn" [matMenuTriggerFor]="postMenu"><mat-icon>more_horiz</mat-icon></button>
+                <mat-menu #postMenu="matMenu">
+                  <ng-container *ngIf="isMyPost(post)">
+                    <button mat-menu-item (click)="openEditPost(post)"><mat-icon>edit</mat-icon><span>Edit Post</span></button>
+                    <button mat-menu-item (click)="deletePost(post)"><mat-icon>delete</mat-icon><span>Delete Post</span></button>
+                  </ng-container>
+                  <button mat-menu-item (click)="sharePost(post,$event)"><mat-icon>link</mat-icon><span>Copy link</span></button>
+                  <button mat-menu-item *ngIf="!isMyPost(post)" (click)="openReportModal(post,$event)"><mat-icon style="color:#ef4444">flag</mat-icon><span>Report Post</span></button>
+                </mat-menu>
+              </div>
+
+              <!-- Post Body -->
+              <!-- Post Body -->
+<p class="pn-post-text" [routerLink]="['/communaute', post.id]">
+  {{ post.contenu | slice:0:300 }}{{ post.contenu.length > 300 ? '…' : '' }}
+  
+</p>
+<!-- FAKE INFO BADGE — add after <p class="pn-post-text"> -->
+<div *ngIf="postFakeInfoMap[post.id!]?.isFakeInfo"
+     class="pn-fake-info-block"
+     [class.pn-fake-block-danger]="postFakeInfoMap[post.id!]?.severity === 'HIGH'"
+     [class.pn-fake-block-warning]="postFakeInfoMap[post.id!]?.severity === 'MEDIUM'"
+     [class.pn-fake-block-info]="postFakeInfoMap[post.id!]?.severity === 'LOW'">
+ 
+  <!-- Top pill badge row -->
+  <div class="pn-fake-badge-row">
+    <span class="pn-fake-badge-pill">
+      <mat-icon class="pn-fake-badge-icon">{{ postFakeInfoMap[post.id!]?.badgeIcon || 'gpp_bad' }}</mat-icon>
+      <span>{{ postFakeInfoMap[post.id!]?.badgeText }}</span>
+    </span>
+    <span class="pn-fake-category-chip">
+      {{ postFakeInfoMap[post.id!]?.categoryLabel }}
+    </span>
+  </div>
+ 
+  <!-- Warning message body -->
+  <p class="pn-fake-warning-msg">
+    {{ postFakeInfoMap[post.id!]?.warningMessage }}
+  </p>
+ 
+  <!-- Confidence footer -->
+  <div class="pn-fake-footer">
+    <mat-icon class="pn-fake-footer-icon">shield</mat-icon>
+    <span>AI Safety Check · {{ postFakeInfoMap[post.id!]?.confidence }}% confidence</span>
+  </div>
+ 
+</div>
+
+<!-- AI Summary -->
+<div *ngIf="postSummaryMap[post.id!]" class="pn-ai-summary">
+  <div class="pn-ai-summary-header">
+    <mat-icon>auto_awesome</mat-icon>
+    <span>AI Summary</span>
+  </div>
+  <p class="pn-ai-summary-text">{{ postSummaryMap[post.id!] }}</p>
+</div>
+
+<div class="pn-summarize-row" *ngIf="post.contenu && post.contenu.split(' ').length > 30">
+  <button class="pn-summarize-btn"
+          (click)="summarizePost(post, $event)"
+          [disabled]="summarizingPostId === post.id"
+          type="button">
+    <mat-icon>{{ summarizingPostId === post.id ? 'hourglass_empty' : 'auto_awesome' }}</mat-icon>
+    <span>{{ summarizingPostId === post.id ? 'Summarizing…' : postSummaryMap[post.id!] ? 'Re-summarize' : 'Summarize with AI' }}</span>
+  </button>
+</div>
+
+              <div class="pn-post-tags" *ngIf="extractHashtags(post.contenu).length > 0">
+                <span class="pn-hashtag" *ngFor="let ht of extractHashtags(post.contenu)">{{ ht }}</span>
+              </div>
+
+              <div *ngIf="post.images && post.images.length > 0" class="pn-post-images"
+                   [routerLink]="['/communaute', post.id]">
+                <img *ngFor="let img of post.images | slice:0:4"
+                     [src]="img" class="pn-post-img"
+                     [class.solo]="post.images.length === 1"
+                     [class.duo]="post.images.length === 2"
+                     alt="Post image"/>
+                <div *ngIf="post.images.length > 4" class="pn-img-more">
+                  <mat-icon>add</mat-icon><span>{{ post.images.length - 4 }}</span>
+                </div>
+              </div>
+
+              <!-- Stats -->
+              <div class="pn-post-stats">
+                <div class="pn-stat-item">
+                  <div class="pn-reaction-avs" *ngIf="post.reactionSummary && post.reactionSummary.total > 0">
+                    <ng-container *ngFor="let t of REACTION_TYPES">
+                      <span *ngIf="(post.reactionSummary.counts[t]||0) > 0" class="pn-reaction-av">{{ REACTION_META[t].emoji }}</span>
+                    </ng-container>
+                  </div>
+                  <span class="pn-stat-text">{{ post.reactionSummary?.total ?? 0 }} Likes</span>
+                </div>
+                <div class="pn-stat-item"><span class="pn-stat-text">{{ post.commentaires?.length ?? 0 }} Comments</span></div>
+                <div class="pn-stat-item pn-stat-share" (click)="sharePost(post,$event)" title="Copy post link"><span class="pn-stat-text">Share</span></div>
+                <div class="pn-stat-item"><span class="pn-stat-text">{{ savedCount }} Saved</span></div>
+              </div>
+
+              <!-- Actions -->
+              <div class="pn-post-actions">
+                <div class="pn-react-wrapper">
+                  <button class="pn-act-btn pn-react-btn"
+                          [class.reacted]="post.reactionSummary?.myReaction"
+                          [style.color]="postReactionColor(post)"
+                          (click)="quickLikePost(post,$event)"
+                          (mouseenter)="togglePostReactionPicker(post.id!,$event)"
+                          [disabled]="reactingPostId === post.id"
+                          type="button">
+                    <span class="pn-react-emoji">{{ post.reactionSummary?.myReaction ? REACTION_META[post.reactionSummary!.myReaction!].emoji : '👍' }}</span>
+                    <span>{{ post.reactionSummary?.myReaction ? REACTION_META[post.reactionSummary!.myReaction!].label : 'Like' }}</span>
+                  </button>
+                  <div class="pn-reaction-picker" *ngIf="openReactionPickerId === post.id" (click)="$event.stopPropagation()">
+                    <button *ngFor="let t of REACTION_TYPES"
+                            class="pn-reaction-option"
+                            [class.active]="post.reactionSummary?.myReaction === t"
+                            [title]="REACTION_META[t].label"
+                            (click)="reactToPost(post,t,$event)"
+                            type="button">
+                      <span class="pn-reaction-emoji">{{ REACTION_META[t].emoji }}</span>
+                      <span class="pn-reaction-label">{{ REACTION_META[t].label }}</span>
+                      <span class="pn-reaction-count" *ngIf="(post.reactionSummary?.counts?.[t] || 0) > 0">{{ post.reactionSummary!.counts[t] }}</span>
+                    </button>
+                  </div>
+                </div>
+                <button class="pn-act-btn" [routerLink]="['/communaute', post.id]" type="button">
+                  <mat-icon>chat_bubble_outline</mat-icon><span>Comment</span>
+                </button>
+                <button class="pn-act-btn pn-share-btn"
+                        [class.pn-share-btn--copied]="copiedPostId === post.id"
+                        (click)="sharePost(post,$event)"
+                        type="button">
+                  <mat-icon *ngIf="copiedPostId !== post.id">share</mat-icon>
+                  <mat-icon *ngIf="copiedPostId === post.id" class="pn-share-check">check_circle</mat-icon>
+                  <span>{{ copiedPostId === post.id ? 'Copied!' : 'Share' }}</span>
+                </button>
+                <button class="pn-act-btn pn-bookmark-btn"
+                        [class.pn-bookmark-saved]="isPostSaved(post.id!)"
+                        [class.pn-bookmark-saving]="savingPostId === post.id"
+                        (click)="toggleSave(post,$event)"
+                        [disabled]="savingPostId === post.id"
+                        type="button"
+                        [title]="isPostSaved(post.id!) ? 'Remove from saved' : 'Save post'">
+                  <mat-icon *ngIf="isPostSaved(post.id!)">bookmark</mat-icon>
+                  <mat-icon *ngIf="!isPostSaved(post.id!) && savingPostId === post.id" class="pn-bookmark-spin">autorenew</mat-icon>
+                  <mat-icon *ngIf="!isPostSaved(post.id!) && savingPostId !== post.id">bookmark_border</mat-icon>
+                  <span>{{ isPostSaved(post.id!) ? 'Saved' : 'Save' }}</span>
+                  <span class="pn-save-burst" *ngIf="justSavedPostId === post.id" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i><i></i><i></i>
+                  </span>
+                </button>
+              </div>
+
+              <!-- Comment Input -->
+              <div class="pn-comment-row">
+                <div class="pn-comment-av"></div>
+                <div class="pn-comment-input-wrap">
+                  <input class="pn-comment-input"
+                         placeholder="Write your comment…"
+                         [(ngModel)]="commentInputs[post.id!]"
+                         (keyup.enter)="submitComment(post)"/>
+                  <button class="pn-comment-emoji" type="button"><mat-icon>sentiment_satisfied_alt</mat-icon></button>
+                  <button class="pn-comment-attach" type="button"><mat-icon>attach_file</mat-icon></button>
+                  <button class="pn-comment-send" (click)="submitComment(post)" type="button"><mat-icon>send</mat-icon></button>
+                </div>
+              </div>
+
+              <!-- Comments List -->
+              <div *ngIf="post.commentaires && post.commentaires.length > 0" class="pn-comments">
+                <div *ngFor="let c of post.commentaires | slice:0:2" class="pn-comment">
+                  <div class="pn-comment-av-sm"></div>
+                  <div class="pn-comment-body">
+                    <div class="pn-comment-header">
+                      <div class="pn-comment-name">{{ getCommentAuthorName(c) }}</div>
+                      <div class="pn-comment-actions">
+                        <button class="pn-comment-edit-btn"   (click)="startEditComment(post,c.id!,c.contenu)" title="Edit"><mat-icon>edit</mat-icon></button>
+                        <button class="pn-comment-delete-btn" (click)="deleteComment(post,c.id!)"              title="Delete"><mat-icon>delete_outline</mat-icon></button>
+                      </div>
+                    </div>
+                    <ng-container *ngIf="!(editingCommentId === c.id && editingCommentPostId === post.id)">
+                      <div class="pn-comment-text">{{ c.contenu }}</div>
+                      <div class="pn-comment-reaction-stats" *ngIf="c.reactionSummary && c.reactionSummary.total > 0">
+                        <ng-container *ngFor="let t of REACTION_TYPES">
+                          <span *ngIf="(c.reactionSummary.counts[t] || 0) > 0" class="pn-cr-stat">{{ REACTION_META[t].emoji }} {{ c.reactionSummary.counts[t] }}</span>
+                        </ng-container>
+                      </div>
+                      <div class="pn-comment-footer">
+                        <span class="pn-comment-time"><mat-icon>schedule</mat-icon>{{ c.date | date:'MMM d · h:mm a' }}</span>
+                        <div class="pn-react-wrapper pn-comment-react-wrapper">
+                          <button class="pn-comment-react-btn"
+                                  [class.reacted]="c.reactionSummary?.myReaction"
+                                  [style.color]="commentReactionColor(c)"
+                                  (click)="quickLikeComment(c,$event)"
+                                  (mouseenter)="toggleCommentReactionPicker(c.id!,$event)"
+                                  [disabled]="reactingCommentId === c.id"
+                                  type="button">
+                            <span>{{ c.reactionSummary?.myReaction ? REACTION_META[c.reactionSummary!.myReaction!].emoji : '👍' }}</span>
+                            <span>{{ c.reactionSummary?.myReaction ? REACTION_META[c.reactionSummary!.myReaction!].label : 'Like' }}</span>
+                          </button>
+                          <div class="pn-reaction-picker pn-comment-picker" *ngIf="openCommentReactionId === c.id" (click)="$event.stopPropagation()">
+                            <button *ngFor="let t of REACTION_TYPES"
+                                    class="pn-reaction-option"
+                                    [class.active]="c.reactionSummary?.myReaction === t"
+                                    [title]="REACTION_META[t].label"
+                                    (click)="reactToComment(c,t,$event)"
+                                    type="button">
+                              <span class="pn-reaction-emoji">{{ REACTION_META[t].emoji }}</span>
+                              <span class="pn-reaction-label">{{ REACTION_META[t].label }}</span>
+                              <span class="pn-reaction-count" *ngIf="(c.reactionSummary?.counts?.[t] || 0) > 0">{{ c.reactionSummary!.counts[t] }}</span>
+                            </button>
+                          </div>
+                        </div>
+                        <button class="pn-comment-act">Reply</button>
+                      </div>
+                    </ng-container>
+                    <ng-container *ngIf="editingCommentId === c.id && editingCommentPostId === post.id">
+                      <div class="pn-comment-edit-wrap">
+                        <textarea class="pn-comment-edit-input" [(ngModel)]="editingCommentText" rows="2" (keyup.escape)="cancelEditComment()"></textarea>
+                        <div class="pn-comment-edit-actions">
+                          <button class="pn-btn-cancel" (click)="cancelEditComment()">Cancel</button>
+                          <button class="pn-btn-save"   (click)="saveEditComment(post,c.id!)"><mat-icon>check</mat-icon> Save</button>
+                        </div>
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+                <button *ngIf="post.commentaires.length > 2" class="pn-view-more" [routerLink]="['/communaute', post.id]">
+                  <mat-icon>expand_more</mat-icon> View {{ post.commentaires.length - 2 }} more comment{{ post.commentaires.length - 2 > 1 ? 's' : '' }}
+                </button>
+              </div>
+
+            </div><!-- end .pn-post-inner -->
+
+          </div><!-- end .pn-card.pn-post (feed) -->
+
+          <!-- AI Recommendations after 3rd post -->
+          <app-ai-recommendations *ngIf="i === 2"></app-ai-recommendations>
+
+        </ng-container>
+      </div>
+
+      <!-- ============ MY POSTS TAB ============ -->
+      <div *ngIf="activeTab==='myposts'" class="pn-feed">
+
+        <div *ngIf="loading" class="pn-loading">
+          <div class="pn-loader"></div><p>Loading your posts…</p>
+        </div>
+
+        <div *ngIf="!loading && myPosts.length === 0" class="pn-card pn-empty">
+          <div class="pn-empty-icon">✍️</div>
+          <h3>No posts yet</h3>
+          <p>Share your first story with the community!</p>
+          <button class="pn-post-btn" (click)="openCreatePostModal()"><mat-icon>add</mat-icon> Create Your First Post</button>
+        </div>
+
+        <ng-container *ngFor="let post of myPosts; let i=index">
+
+          <!-- MY POSTS CARD — identical structure to feed card -->
+          <div class="pn-card pn-post"
+               [style.animation-delay]="(i*60)+'ms'"
+               style="position:relative;overflow:hidden;">
+
+            <!-- ① AUTHOR WARNING BANNER -->
+            <app-post-warning-banner
+              [analysis]="postAnalysisMap[post.id!] ?? null"
+              [isAuthor]="isMyPost(post)"
+              (acknowledged)="onWarningAcknowledged(post.id!)">
+            </app-post-warning-banner>
+
+            <!-- ② FULL-CARD BLUR OVERLAY -->
+            <app-post-blur-overlay
+              *ngIf="shouldShowBlur(post)"
+              [analysis]="postAnalysisMap[post.id!] ?? null"
+              (revealed)="onPostRevealed(post.id!)">
+            </app-post-blur-overlay>
+
+            <!-- ③ INNER WRAPPER — blurred as a single unit -->
+            <div class="pn-post-inner" [class.pn-post-blurred]="shouldShowBlur(post)">
+
+              <!-- Post Header -->
+              <div class="pn-post-header">
+                <div class="pn-post-av"><span>{{ post.anonyme ? '👤' : '👩' }}</span></div>
+                <div class="pn-post-meta">
+                  <div class="pn-post-name">
+                    {{ getPostAuthorName(post) }}
+                    <mat-icon class="pn-verified">verified</mat-icon>
+                  </div>
+                  <div class="pn-post-sub">
+                    <span class="pn-post-time">{{ post.date | date:'MMM d, y · h:mm a' }}</span>
+                  </div>
+                </div>
+                <div class="pn-ptag" [attr.data-tag]="post.tag">
+                  <span class="pn-tag-emoji">{{ tagEmoji[post.tag] }}</span>
+                  <span class="pn-tag-text">{{ tagLabels[post.tag] }}</span>
+                </div>
+                <button class="pn-more-btn" [matMenuTriggerFor]="myPostMenu"><mat-icon>more_horiz</mat-icon></button>
+                <mat-menu #myPostMenu="matMenu">
+                  <button mat-menu-item (click)="openEditPost(post)"><mat-icon>edit</mat-icon><span>Edit Post</span></button>
+                  <button mat-menu-item (click)="deletePost(post)"><mat-icon>delete</mat-icon><span>Delete Post</span></button>
+                  <button mat-menu-item (click)="sharePost(post,$event)"><mat-icon>link</mat-icon><span>Copy link</span></button>
+                </mat-menu>
+              </div>
+
+              <!-- Post Body -->
+              <!-- Post Body -->
+<p class="pn-post-text" [routerLink]="['/communaute', post.id]">
+  {{ post.contenu | slice:0:300 }}{{ post.contenu.length > 300 ? '…' : '' }}
+</p>
+<!-- FAKE INFO BADGE — add after <p class="pn-post-text"> -->
+<div *ngIf="postFakeInfoMap[post.id!]?.isFakeInfo"
+     class="pn-fake-info-badge"
+     [class.pn-fake-danger]="postFakeInfoMap[post.id!]?.severity === 'HIGH'"
+     [class.pn-fake-warning]="postFakeInfoMap[post.id!]?.severity === 'MEDIUM'"
+     [class.pn-fake-info]="postFakeInfoMap[post.id!]?.severity === 'LOW'"
+     [title]="postFakeInfoMap[post.id!]?.warningMessage">
+  <mat-icon>report_problem</mat-icon>
+  <span>{{ postFakeInfoMap[post.id!]?.badgeText }}</span>
+  <small>{{ postFakeInfoMap[post.id!]?.categoryLabel }}</small>
+</div>
+
+<!-- AI Summary -->
+<div *ngIf="postSummaryMap[post.id!]" class="pn-ai-summary">
+  <div class="pn-ai-summary-header">
+    <mat-icon>auto_awesome</mat-icon>
+    <span>AI Summary</span>
+  </div>
+  <p class="pn-ai-summary-text">{{ postSummaryMap[post.id!] }}</p>
+</div>
+
+<div class="pn-summarize-row" *ngIf="post.contenu && post.contenu.split(' ').length > 30">
+  <button class="pn-summarize-btn"
+          (click)="summarizePost(post, $event)"
+          [disabled]="summarizingPostId === post.id"
+          type="button">
+    <mat-icon>{{ summarizingPostId === post.id ? 'hourglass_empty' : 'auto_awesome' }}</mat-icon>
+    <span>{{ summarizingPostId === post.id ? 'Summarizing…' : postSummaryMap[post.id!] ? 'Re-summarize' : 'Summarize with AI' }}</span>
+  </button>
+</div>
+
+              <div class="pn-post-tags" *ngIf="extractHashtags(post.contenu).length > 0">
+                <span class="pn-hashtag" *ngFor="let ht of extractHashtags(post.contenu)">{{ ht }}</span>
+              </div>
+
+              <div *ngIf="post.images && post.images.length > 0" class="pn-post-images"
+                   [routerLink]="['/communaute', post.id]">
+                <img *ngFor="let img of post.images | slice:0:4"
+                     [src]="img" class="pn-post-img"
+                     [class.solo]="post.images.length === 1"
+                     [class.duo]="post.images.length === 2"
+                     alt="Post image"/>
+                <div *ngIf="post.images.length > 4" class="pn-img-more">
+                  <mat-icon>add</mat-icon><span>{{ post.images.length - 4 }}</span>
+                </div>
+              </div>
+
+              <!-- Stats -->
+              <div class="pn-post-stats">
+                <div class="pn-stat-item">
+                  <div class="pn-reaction-avs" *ngIf="post.reactionSummary && post.reactionSummary.total > 0">
+                    <ng-container *ngFor="let t of REACTION_TYPES">
+                      <span *ngIf="(post.reactionSummary.counts[t] || 0) > 0" class="pn-reaction-av">{{ REACTION_META[t].emoji }}</span>
+                    </ng-container>
+                  </div>
+                  <span class="pn-stat-text">{{ post.reactionSummary?.total ?? 0 }} Likes</span>
+                </div>
+                <div class="pn-stat-item"><span class="pn-stat-text">{{ post.commentaires?.length ?? 0 }} Comments</span></div>
+                <div class="pn-stat-item pn-stat-share" (click)="sharePost(post,$event)"><span class="pn-stat-text">Share</span></div>
+                <div class="pn-stat-item"><span class="pn-stat-text">{{ isPostSaved(post.id!) ? 'Saved ✓' : 'Save' }}</span></div>
+              </div>
+
+              <!-- Actions -->
+              <div class="pn-post-actions">
+                <div class="pn-react-wrapper">
+                  <button class="pn-act-btn pn-react-btn"
+                          [class.reacted]="post.reactionSummary?.myReaction"
+                          [style.color]="postReactionColor(post)"
+                          (click)="quickLikePost(post,$event)"
+                          (mouseenter)="togglePostReactionPicker(post.id!,$event)"
+                          [disabled]="reactingPostId === post.id"
+                          type="button">
+                    <span class="pn-react-emoji">{{ post.reactionSummary?.myReaction ? REACTION_META[post.reactionSummary!.myReaction!].emoji : '👍' }}</span>
+                    <span>{{ post.reactionSummary?.myReaction ? REACTION_META[post.reactionSummary!.myReaction!].label : 'Like' }}</span>
+                  </button>
+                  <div class="pn-reaction-picker" *ngIf="openReactionPickerId === post.id" (click)="$event.stopPropagation()">
+                    <button *ngFor="let t of REACTION_TYPES"
+                            class="pn-reaction-option"
+                            [class.active]="post.reactionSummary?.myReaction === t"
+                            [title]="REACTION_META[t].label"
+                            (click)="reactToPost(post,t,$event)"
+                            type="button">
+                      <span class="pn-reaction-emoji">{{ REACTION_META[t].emoji }}</span>
+                      <span class="pn-reaction-label">{{ REACTION_META[t].label }}</span>
+                      <span class="pn-reaction-count" *ngIf="(post.reactionSummary?.counts?.[t] || 0) > 0">{{ post.reactionSummary!.counts[t] }}</span>
+                    </button>
+                  </div>
+                </div>
+                <button class="pn-act-btn" [routerLink]="['/communaute', post.id]" type="button">
+                  <mat-icon>chat_bubble_outline</mat-icon><span>Comment</span>
+                </button>
+                <button class="pn-act-btn pn-share-btn"
+                        [class.pn-share-btn--copied]="copiedPostId === post.id"
+                        (click)="sharePost(post,$event)"
+                        type="button">
+                  <mat-icon *ngIf="copiedPostId !== post.id">share</mat-icon>
+                  <mat-icon *ngIf="copiedPostId === post.id" class="pn-share-check">check_circle</mat-icon>
+                  <span>{{ copiedPostId === post.id ? 'Copied!' : 'Share' }}</span>
+                </button>
+                <button class="pn-act-btn pn-bookmark-btn"
+                        [class.pn-bookmark-saved]="isPostSaved(post.id!)"
+                        [class.pn-bookmark-saving]="savingPostId === post.id"
+                        (click)="toggleSave(post,$event)"
+                        [disabled]="savingPostId === post.id"
+                        type="button">
+                  <mat-icon *ngIf="isPostSaved(post.id!)">bookmark</mat-icon>
+                  <mat-icon *ngIf="!isPostSaved(post.id!) && savingPostId === post.id" class="pn-bookmark-spin">autorenew</mat-icon>
+                  <mat-icon *ngIf="!isPostSaved(post.id!) && savingPostId !== post.id">bookmark_border</mat-icon>
+                  <span>{{ isPostSaved(post.id!) ? 'Saved' : 'Save' }}</span>
+                </button>
+              </div>
+
+              <!-- Comment Input -->
+              <div class="pn-comment-row">
+                <div class="pn-comment-av"></div>
+                <div class="pn-comment-input-wrap">
+                  <input class="pn-comment-input"
+                         placeholder="Write your comment…"
+                         [(ngModel)]="commentInputs[post.id!]"
+                         (keyup.enter)="submitComment(post)"/>
+                  <button class="pn-comment-emoji" type="button"><mat-icon>sentiment_satisfied_alt</mat-icon></button>
+                  <button class="pn-comment-attach" type="button"><mat-icon>attach_file</mat-icon></button>
+                  <button class="pn-comment-send" (click)="submitComment(post)" type="button"><mat-icon>send</mat-icon></button>
+                </div>
+              </div>
+
+              <!-- Comments List -->
+              <div *ngIf="post.commentaires && post.commentaires.length > 0" class="pn-comments">
+                <div *ngFor="let c of post.commentaires | slice:0:2" class="pn-comment">
+                  <div class="pn-comment-av-sm"></div>
+                  <div class="pn-comment-body">
+                    <div class="pn-comment-header">
+                      <div class="pn-comment-name">{{ getCommentAuthorName(c) }}</div>
+                      <div class="pn-comment-actions">
+                        <button class="pn-comment-edit-btn"   (click)="startEditComment(post,c.id!,c.contenu)" title="Edit"><mat-icon>edit</mat-icon></button>
+                        <button class="pn-comment-delete-btn" (click)="deleteComment(post,c.id!)"              title="Delete"><mat-icon>delete_outline</mat-icon></button>
+                      </div>
+                    </div>
+                    <ng-container *ngIf="!(editingCommentId === c.id && editingCommentPostId === post.id)">
+                      <div class="pn-comment-text">{{ c.contenu }}</div>
+                      <div class="pn-comment-footer">
+                        <span class="pn-comment-time"><mat-icon>schedule</mat-icon>{{ c.date | date:'MMM d · h:mm a' }}</span>
+                        <div class="pn-react-wrapper pn-comment-react-wrapper">
+                          <button class="pn-comment-react-btn"
+                                  [class.reacted]="c.reactionSummary?.myReaction"
+                                  [style.color]="commentReactionColor(c)"
+                                  (click)="quickLikeComment(c,$event)"
+                                  (mouseenter)="toggleCommentReactionPicker(c.id!,$event)"
+                                  [disabled]="reactingCommentId === c.id"
+                                  type="button">
+                            <span>{{ c.reactionSummary?.myReaction ? REACTION_META[c.reactionSummary!.myReaction!].emoji : '👍' }}</span>
+                            <span>{{ c.reactionSummary?.myReaction ? REACTION_META[c.reactionSummary!.myReaction!].label : 'Like' }}</span>
+                          </button>
+                          <div class="pn-reaction-picker pn-comment-picker" *ngIf="openCommentReactionId === c.id" (click)="$event.stopPropagation()">
+                            <button *ngFor="let t of REACTION_TYPES"
+                                    class="pn-reaction-option"
+                                    [class.active]="c.reactionSummary?.myReaction === t"
+                                    [title]="REACTION_META[t].label"
+                                    (click)="reactToComment(c,t,$event)"
+                                    type="button">
+                              <span class="pn-reaction-emoji">{{ REACTION_META[t].emoji }}</span>
+                              <span class="pn-reaction-label">{{ REACTION_META[t].label }}</span>
+                            </button>
+                          </div>
+                        </div>
+                        <button class="pn-comment-act">Reply</button>
+                      </div>
+                    </ng-container>
+                    <ng-container *ngIf="editingCommentId === c.id && editingCommentPostId === post.id">
+                      <div class="pn-comment-edit-wrap">
+                        <textarea class="pn-comment-edit-input" [(ngModel)]="editingCommentText" rows="2" (keyup.escape)="cancelEditComment()"></textarea>
+                        <div class="pn-comment-edit-actions">
+                          <button class="pn-btn-cancel" (click)="cancelEditComment()">Cancel</button>
+                          <button class="pn-btn-save"   (click)="saveEditComment(post,c.id!)"><mat-icon>check</mat-icon> Save</button>
+                        </div>
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+                <button *ngIf="post.commentaires.length > 2" class="pn-view-more" [routerLink]="['/communaute', post.id]">
+                  <mat-icon>expand_more</mat-icon> View {{ post.commentaires.length - 2 }} more comment{{ post.commentaires.length - 2 > 1 ? 's' : '' }}
+                </button>
+              </div>
+
+            </div><!-- end .pn-post-inner -->
+
+          </div><!-- end .pn-card.pn-post (my posts) -->
+
+        </ng-container>
+      </div>
+
+    </main>
+
+    <!-- ============ RIGHT SIDEBAR ============ -->
+    <aside class="pn-sidebar">
+      <div class="pn-card pn-sidebar-card">
+        <div class="pn-sidebar-title-row">
+          <h3 class="pn-sidebar-title"><mat-icon>people</mat-icon><span>Friend Suggestions</span></h3>
+          <a class="pn-see-all" (click)="goToSeeAll()" style="cursor:pointer">See All →</a>
+        </div>
+
+        <div *ngIf="suggestedUsers.length === 0" style="padding:12px 0;text-align:center;color:#b08a9a;font-size:.82rem;">
+          Loading suggestions…
+        </div>
+
+        <div class="pn-follow-item" *ngFor="let u of suggestedUsers">
+          <div class="pn-follow-av" [style.background]="'linear-gradient(135deg,#ff4f75,#ff6b8a)'">
+            <span style="color:white;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%">
+              {{ getInitials(u.fullName) }}
+            </span>
+          </div>
+          <div class="pn-follow-info">
+            <div class="pn-follow-name">{{ u.fullName }}</div>
+            <div class="pn-follow-handle">{{ u.followersCount }} followers</div>
+          </div>
+          <button class="pn-follow-sidebar-btn"
+                  (click)="toggleFollow(u,$event)"
+                  [class.is-following]="u.isFollowedByMe"
+                  [disabled]="followingInProgress.has(u.id)"
+                  type="button">
+            <span class="pn-fsb-default">
+              <mat-icon>{{ u.isFollowedByMe ? 'check' : 'person_add' }}</mat-icon>
+              {{ u.isFollowedByMe ? 'Following' : 'Follow' }}
+            </span>
+            <span class="pn-fsb-hover">
+              <mat-icon>person_remove</mat-icon>
+              Unfollow
+            </span>
+          </button>
+        </div>
+      </div>
+
+      
+
+      <div class="pn-card pn-sidebar-card pn-events-card">
+        <div class="pn-sidebar-title-row" style="margin-bottom:16px;padding-bottom:14px;border-bottom:1.5px solid var(--border-color)">
+          <h3 class="pn-sidebar-title" style="margin-bottom:0;padding-bottom:0;border-bottom:none">
+            <mat-icon>event</mat-icon><span>Upcoming Spaces</span>
+          </h3>
+          <button class="pn-see-all" (click)="router.navigate(['/spaces'])" style="cursor:pointer;background:none;border:none;font-family:inherit">See All →</button>
+        </div>
+
+        
+
+        <div *ngIf="spaces.length === 0" style="padding:16px 0;text-align:center;color:#b08a9a;font-size:.8rem;">
+          <mat-icon style="font-size:24px;width:24px;height:24px;display:block;margin:0 auto 6px">mic_none</mat-icon>
+          No upcoming spaces
+        </div>
+
+        <div *ngFor="let space of spaces.slice(0,3)" class="pn-event-item"
+             style="cursor:pointer;position:relative" (click)="joinSpaceRoom(space)">
+          <div class="pn-event-date" [style.background]="getSpaceCatColor(space.category)">
+            <ng-container *ngIf="space.status === 'LIVE'">
+              <span class="pn-space-live-dot"></span>
+              <span class="pn-event-mon">LIVE</span>
+            </ng-container>
+            <ng-container *ngIf="space.status === 'SCHEDULED'">
+              <span class="pn-event-day">{{ space.scheduledAt | date:'d' }}</span>
+              <span class="pn-event-mon">{{ space.scheduledAt | date:'MMM' }}</span>
+            </ng-container>
+          </div>
+          <div class="pn-event-info" style="flex:1;min-width:0">
+            <div class="pn-event-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              {{ getSpaceCatEmoji(space.category) }} {{ space.title }}
+            </div>
+            <div class="pn-event-loc">
+              <mat-icon>person</mat-icon>
+              {{ space.hostName }}
+              <span *ngIf="space.status === 'LIVE'" style="margin-left:6px;color:#22c55e;font-weight:700">· {{ space.listenerCount + space.speakerCount }} in room</span>
+              <span *ngIf="space.status === 'SCHEDULED'">· {{ space.scheduledAt | date:'h:mm a' }}</span>
+            </div>
+          </div>
+          <button *ngIf="space.status === 'LIVE'"
+                  class="pn-event-bell"
+                  style="background:linear-gradient(135deg,#ff4f75,#ff6b8a);border-color:#ff4f75;color:white"
+                  (click)="joinSpaceRoom(space); $event.stopPropagation()"
+                  type="button" title="Join Space">
+            <mat-icon>headphones</mat-icon>
+          </button>
+          <button *ngIf="space.status === 'SCHEDULED' && space.hostId === myUserId"
+                  class="pn-event-bell"
+                  style="background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#16a34a"
+                  (click)="startSpaceNow(space); $event.stopPropagation()"
+                  type="button" title="Start now">
+            <mat-icon>play_arrow</mat-icon>
+          </button>
+          <button *ngIf="space.status === 'SCHEDULED' && space.hostId !== myUserId"
+                  class="pn-event-bell"
+                  (click)="$event.stopPropagation()"
+                  type="button" title="Notify me">
+            <mat-icon>notifications_none</mat-icon>
+          </button>
+        </div>
+
+        <button class="pn-create-space-btn" (click)="showCreateSpace = true; $event.stopPropagation()" type="button">
+          <mat-icon>add</mat-icon> Create a Space
+        </button>
+      </div>
+      <div class="pn-card pn-sidebar-card">
+        <h3 class="pn-sidebar-title"><mat-icon>trending_up</mat-icon><span>Trending Topics</span></h3>
+        <div class="pn-trend" *ngFor="let t of trendingTopics">
+          <div class="pn-trend-icon" [style.background]="t.gradient"><mat-icon>tag</mat-icon></div>
+          <div class="pn-trend-info">
+            <div class="pn-trend-tag">{{ t.tag }}</div>
+            <div class="pn-trend-count">{{ t.count }} posts</div>
+          </div>
+          <mat-icon class="pn-trend-arrow">chevron_right</mat-icon>
+        </div>
+      </div>
+    </aside>
+
+  </div><!-- end pn-layout -->
+
+  <button class="pn-fab" (click)="openCreatePostModal()" type="button"><mat-icon>add</mat-icon></button>
+
+  <!-- CREATE SPACE MODAL -->
+  <app-create-space-modal
+    *ngIf="showCreateSpace"
+    (close)="showCreateSpace = false"
+    (created)="onSpaceCreated()">
+  </app-create-space-modal>
+
+  <!-- SPACE ROOM MODAL -->
+  <app-space-room
+    *ngIf="activeSpaceRoom"
+    [space]="activeSpaceRoom"
+    [myUserId]="+myUserId"
+    [myEmail]="myEmail"
+    [token]="spacesToken"
+    (left)="closeSpaceRoom()">
+  </app-space-room>
+
+</div><!-- end pn-wrap -->
+
+<app-messenger-bubble></app-messenger-bubble>
+
+<!-- ===================== STORY VIEWER ===================== -->
+<div class="sv-overlay" *ngIf="viewingStory" (click)="closeStoryViewer()">
+  <div class="sv-modal" (click)="$event.stopPropagation()">
+
+    <div class="sv-progress-container">
+      <div *ngFor="let s of (currentStoryGroup.length > 0 ? currentStoryGroup : activeStories); let idx=index" class="sv-progress-bar"
+     [class.filled]="idx < currentStoryIndex">
+  <div class="sv-progress-fill"
+       [style.width]="idx === currentStoryIndex ? storyProgress + '%' : idx < currentStoryIndex ? '100%' : '0%'">
+  </div>
+</div>
+    </div>
+
+    <div class="sv-header">
+      <div class="sv-author">
+        <div class="sv-author-av" [style.background]="selectedColorForStory(viewingStory)">
+          <span *ngIf="!viewingStory.imageUrl">{{ viewingStory.contenu ? viewingStory.contenu.substring(0,1).toUpperCase() : '✨' }}</span>
+        </div>
+        <div class="sv-author-info">
+  <span class="sv-author-name">{{ getStoryAuthorName(viewingStory) }}</span>
+  <span class="sv-author-time">
+    {{ viewingStory.type === 'TEXT' ? 'Text Story' : 'Photo Story' }} · {{ viewingStory.createdAt | date:'MMM d · h:mm a' }}
+  </span>
+</div>
+      </div>
+      <button class="sv-close" (click)="closeStoryViewer()" type="button"><mat-icon>close</mat-icon></button>
+    </div>
+
+    <div class="sv-content" style="position:relative;flex:1;overflow:hidden;">
+      <ng-container *ngIf="viewingStory.type === 'TEXT' || (!viewingStory.imageUrl && !viewingStory.type)">
+        <div class="sv-text-content" [style.background]="selectedColorForStory(viewingStory)"
+     style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:0;">
+  <p class="sv-text">{{ viewingStory.contenu }}</p>
+</div>
+      </ng-container>
+      <ng-container *ngIf="viewingStory.imageUrl">
+        <div class="sv-photo-content">
+          <img [src]="viewingStory.imageUrl" class="sv-photo" alt="Story image"/>
+        </div>
+      </ng-container>
+    </div>
+
+    <button class="sv-nav sv-nav-prev" (click)="prevStory()" *ngIf="currentStoryIndex > 0" type="button"><mat-icon>chevron_left</mat-icon></button>
+    <button class="sv-nav sv-nav-next" (click)="nextStory()" type="button"><mat-icon>chevron_right</mat-icon></button>
+<div class="sv-counter">{{ currentStoryIndex + 1 }} / {{ (currentStoryGroup.length > 0 ? currentStoryGroup : activeStories).length }}</div>
+  </div>
+</div>

@@ -1,0 +1,712 @@
+<!-- src/app/pages/shop/_front/communaute/chat/chat.html -->
+<app-call-overlay></app-call-overlay>
+<br>
+
+
+<!-- Hidden file input -->
+<input #fileInput type="file" style="display:none" (change)="onFileSelected($event)" />
+<!-- Hidden file input for shared files upload -->
+<input #sharedFileInput type="file" style="display:none" (change)="onSharedFileSelected($event)" multiple />
+
+<!-- ERROR -->
+<div class="ch-error-overlay" *ngIf="!loading && error">
+  <div class="ch-error-card">
+    <div class="ch-error-icon">⚠️</div>
+    <h2>Cannot open chat</h2>
+    <p>{{ error }}</p>
+    <button class="ch-back-btn" (click)="goBack()">← Back to Community</button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="ch-init-loading" *ngIf="loading">
+  <div class="ch-spinner-lg"></div>
+  <p>Connecting…</p>
+</div>
+
+<!-- MESSENGER LAYOUT -->
+<div class="ch-wrap" *ngIf="!loading && !error" (click)="closeThemePanel()">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="ch-sidebar">
+
+    <!-- Top bar -->
+    <div class="ch-sidebar-topbar">
+      <button class="ch-back-icon-btn" (click)="goBack()" title="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <span class="ch-sidebar-title">Chat</span>
+      <button class="ch-icon-btn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Profile -->
+    <div class="ch-profile-card">
+      <div class="ch-profile-av-wrap">
+        <div class="ch-profile-av">{{ initial(me) }}</div>
+        <span class="ch-profile-status-dot"></span>
+      </div>
+      <div class="ch-profile-name">{{ me?.displayName }}</div>
+      <button class="ch-status-badge" type="button">
+        <span class="ch-status-dot"></span>
+        available
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div class="ch-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" placeholder="Search…" [(ngModel)]="searchQuery" />
+    </div>
+
+    <!-- Section header -->
+    <div class="ch-section-row">
+      <span class="ch-section-label">Last chats</span>
+      <div class="ch-section-actions">
+        <button class="ch-icon-btn" title="New chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+        <button class="ch-icon-btn" title="More">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Archive toggle -->
+    <div class="ch-archive-toggle">
+      <button [class.active]="!showArchive" (click)="showArchive=false" type="button">Active</button>
+      <button [class.active]="showArchive"  (click)="showArchive=true"  type="button">
+        Archived <span>📦</span>
+      </button>
+    </div>
+
+    <!-- People list -->
+    <div class="ch-people">
+      <div *ngIf="filteredUsers.length === 0" class="ch-no-results">
+        {{ showArchive ? 'No archived conversations' : 'No users found' }}
+      </div>
+
+      <button *ngFor="let u of filteredUsers"
+              class="ch-person"
+              [class.ch-person--active]="activeUser?.id === u.id"
+              [class.ch-person--archived]="u.isArchived"
+              (click)="openConversation(u)" type="button">
+        <div class="ch-person-av">
+          <span>{{ initial(u) }}</span>
+          <span class="ch-online-dot" *ngIf="!u.isArchived"></span>
+        </div>
+        <div class="ch-person-info">
+          <div class="ch-person-name-row">
+            <span class="ch-person-name">{{ u.displayName }}</span>
+            <span class="ch-person-time" *ngIf="u.lastTime">{{ formatTime(u.lastTime) }}</span>
+          </div>
+          <span class="ch-person-preview"
+                [class.ch-person-preview--typing]="isTypingUser(u.id)">
+            <ng-container *ngIf="isTypingUser(u.id)">typing…</ng-container>
+            <ng-container *ngIf="!isTypingUser(u.id)">
+              {{ u.isArchived ? '📦 Archived' : (u.lastMessage || u.email) }}
+            </ng-container>
+          </span>
+        </div>
+        <span class="ch-unread" *ngIf="(u.unread || unreadMap[u.id] || 0) > 0">
+          {{ (u.unread || unreadMap[u.id]) > 9 ? '9+' : (u.unread || unreadMap[u.id]) }}
+        </span>
+      </button>
+    </div>
+
+    <!-- WS status dot -->
+    <div style="padding:10px 16px;border-top:1px solid rgba(0,0,0,.06);flex-shrink:0;display:flex;align-items:center;gap:6px;">
+      <div class="ch-ws-dot"
+           [class.ch-ws-dot--on]="chatSvc.connected$ | async"
+           style="width:8px;height:8px;border-radius:50%;background:#d1d5db;transition:background .3s;"
+           [style.background]="(chatSvc.connected$ | async) ? '#ff4f75' : '#d1d5db'">
+      </div>
+      <span style="font-size:.68rem;color:var(--text-muted);">
+        {{ (chatSvc.connected$ | async) ? 'Connected' : 'Disconnected' }}
+      </span>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN CHAT ══ -->
+  <main class="ch-main">
+
+    <!-- Welcome screen -->
+    <div class="ch-welcome" *ngIf="!activeUser">
+      <div class="ch-welcome-art">
+        <svg viewBox="0 0 120 120" fill="none">
+          <circle cx="60" cy="60" r="60" fill="url(#wg)"/>
+          <path d="M28 44a6 6 0 0 1 6-6h52a6 6 0 0 1 6 6v30a6 6 0 0 1-6 6H70l-14 12V80H34a6 6 0 0 1-6-6V44z" fill="white" opacity=".95"/>
+          <circle cx="47" cy="59" r="3.5" fill="#ff4f75" opacity=".4"/>
+          <circle cx="60" cy="59" r="3.5" fill="#ff4f75" opacity=".7"/>
+          <circle cx="73" cy="59" r="3.5" fill="#ff4f75"/>
+          <defs>
+            <linearGradient id="wg" x1="0" y1="0" x2="120" y2="120">
+              <stop stop-color="#ff4f75"/><stop offset="1" stop-color="#e63d63"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h2>Welcome, {{ me?.displayName }}!</h2>
+      <p>Select a conversation from the left to start chatting in real time.</p>
+    </div>
+
+    <ng-container *ngIf="activeUser">
+
+      <!-- Chat header -->
+      <div class="ch-chat-head" (click)="$event.stopPropagation()">
+        <div class="ch-chat-head-left">
+          <div class="ch-chat-av">
+            <span>{{ initial(activeUser) }}</span>
+            <span class="ch-online-dot"></span>
+          </div>
+          <div class="ch-chat-info">
+            <span class="ch-chat-name">
+              {{ activeUser.displayName }}
+              <span class="ch-archived-tag" *ngIf="activeUser.isArchived">📦 Archived</span>
+            </span>
+            <span class="ch-chat-sub">
+              <ng-container *ngIf="isPartnerTyping">
+                <span class="ch-typing-label">typing…</span>
+              </ng-container>
+              <ng-container *ngIf="!isPartnerTyping">{{ activeUser.email }}</ng-container>
+            </span>
+          </div>
+        </div>
+
+        <!-- Tab group -->
+        <div class="ch-head-tabs">
+          <button class="ch-head-tab ch-head-tab--active" type="button">Messages</button>
+          <button class="ch-head-tab" type="button" (click)="scrollToSharedFiles()">Participants</button>
+        </div>
+
+        <div class="ch-chat-actions" style="position:relative;">
+          <!-- Voice call -->
+          <button class="ch-icon-btn ch-call-btn"
+                  [class.ch-call-btn--active]="callActive"
+                  [class.ch-call-btn--audio]="!callActive"
+                  [disabled]="callActive"
+                  (click)="startVoiceCall()" title="Voice call">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.29 6.29l1.45-1.45a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </button>
+          <!-- Video call -->
+          <button class="ch-icon-btn ch-call-btn"
+                  [class.ch-call-btn--active]="callActive"
+                  [class.ch-call-btn--video]="!callActive"
+                  [disabled]="callActive"
+                  (click)="startVideoCall()" title="Video call">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="23 7 16 12 23 17 23 7"/>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+            </svg>
+          </button>
+          <!-- Theme picker -->
+          <button class="ch-theme-btn" title="Chat theme" (click)="toggleThemePanel($event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+            <!-- Theme panel -->
+            <div class="ch-theme-panel" *ngIf="showThemePanel" (click)="$event.stopPropagation()">
+              <div class="ch-theme-panel-title">Chat background</div>
+              <div class="ch-theme-grid">
+                <button *ngFor="let t of chatThemes"
+                        class="ch-theme-swatch"
+                        [class.ch-theme-swatch--active]="activeTheme === t.key"
+                        (click)="setTheme(t.key)" [title]="t.label">
+                  <div class="ch-theme-swatch-bg" [ngStyle]="{'background': t.preview}">
+                    <span class="ch-theme-swatch-label">{{ t.label }}</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- BAN banner -->
+      <div class="ch-ban-banner" *ngIf="isBanned">
+        🚫 You are temporarily banned. <strong>{{ banSeconds }}s</strong> remaining.
+      </div>
+      <!-- Moderation toast -->
+      <div class="ch-mod-toast" *ngIf="moderationMsg && !isBanned">⚠️ {{ moderationMsg }}</div>
+
+      <!-- Messages -->
+      <div class="ch-messages" [ngClass]="'ch-theme-' + activeTheme">
+        <div class="ch-loading-hist" *ngIf="loadingHist"><div class="ch-spinner"></div></div>
+
+        <div class="ch-convo-empty" *ngIf="!loadingHist && messages.length === 0">
+          <div class="ch-convo-av">{{ initial(activeUser) }}</div>
+          <p class="ch-convo-name">{{ activeUser.displayName }}</p>
+          <p class="ch-convo-hint">No messages yet. Say hello! 👋</p>
+        </div>
+
+        <ng-container *ngFor="let group of groupedMessages">
+          <div class="ch-date-sep"><span>{{ group.date }}</span></div>
+
+          <ng-container *ngFor="let msg of group.msgs; let i = index">
+
+            <!-- CALL BUBBLE -->
+            <div class="ch-msg-row ch-msg-row--call" *ngIf="isCallMsg(msg)">
+              <div class="ch-call-bubble"
+                   [class.ch-call-bubble--me]="isMe(msg)"
+                   [class.ch-call-bubble--answered]="msg.content?.includes('·')"
+                   [class.ch-call-bubble--missed]="!msg.content?.includes('·')">
+                <span class="ch-call-bubble-icon">{{ callIcon(msg) }}</span>
+                <div class="ch-call-bubble-info">
+                  <span class="ch-call-bubble-label">{{ callLabel(msg) }}</span>
+                  <span class="ch-call-bubble-time">{{ formatTime(msg.timestamp) }}</span>
+                </div>
+                <button class="ch-call-back-btn" (click)="startVoiceCall()" title="Call back">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.29 6.29l1.45-1.45a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- NORMAL MESSAGE -->
+            <div class="ch-msg-row"
+                 [class.ch-msg-row--me]="isMe(msg)"
+                 *ngIf="!isCallMsg(msg)">
+
+              <div class="ch-bubble-av"
+                   *ngIf="!isMe(msg) && (i === 0 || group.msgs[i-1].senderId !== msg.senderId || isCallMsg(group.msgs[i-1]))">
+                {{ initial(activeUser) }}
+              </div>
+              <div class="ch-bubble-av ch-bubble-av--gap"
+                   *ngIf="!isMe(msg) && i > 0 && group.msgs[i-1].senderId === msg.senderId && !isCallMsg(group.msgs[i-1])">
+              </div>
+
+              <div class="ch-bubble-wrap" [class.ch-bubble-wrap--me]="isMe(msg)">
+
+                <!-- Sender name (non-me, first in group) -->
+                <span class="ch-bubble-sender-name"
+                      *ngIf="!isMe(msg) && (i === 0 || group.msgs[i-1].senderId !== msg.senderId)">
+                  {{ activeUser.displayName }}
+                </span>
+
+                <!-- Reply preview -->
+                <div class="ch-reply-preview" *ngIf="msg.replyTo">
+                  <div class="ch-reply-bar"></div>
+                  <div class="ch-reply-body">
+                    <span class="ch-reply-name">{{ msg.replyTo.senderName }}</span>
+                    <span class="ch-reply-text">{{ msg.replyTo.content }}</span>
+                  </div>
+                </div>
+
+                <!-- IMAGE -->
+                <div class="ch-bubble ch-bubble--image" [class.ch-bubble--me]="isMe(msg)"
+                     *ngIf="msg.messageType === 'IMAGE'">
+                  <img [src]="msg.fileUrl" class="ch-msg-image" [alt]="msg.fileName"/>
+                </div>
+
+                <!-- VOICE -->
+                <!-- VOICE -->
+<div class="ch-bubble ch-bubble--voice" [class.ch-bubble--me]="isMe(msg)"
+     *ngIf="msg.messageType === 'VOICE'">
+  <audio controls style="pointer-events:auto;width:160px;height:32px;display:block;"
+         [attr.src]="msg.fileUrl">
+  </audio>
+</div>
+
+                <!-- FILE -->
+                <div class="ch-bubble ch-bubble--file" [class.ch-bubble--me]="isMe(msg)"
+                     *ngIf="msg.messageType === 'FILE'">
+                  <div class="ch-file-icon">{{ fileIcon(msg) }}</div>
+                  <div class="ch-file-info">
+                    <span class="ch-file-name">{{ msg.fileName }}</span>
+                    <span class="ch-file-size">{{ formatSize(msg.fileSize) }}</span>
+                  </div>
+                  <a [href]="msg.fileUrl" download class="ch-file-dl" target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </a>
+                </div>
+
+                <!-- LINK -->
+                <div class="ch-bubble ch-bubble--text" [class.ch-bubble--me]="isMe(msg)"
+                     *ngIf="msg.messageType === 'LINK' || (msg.messageType === 'TEXT' && isUrl(msg.content))">
+                  <a [href]="msg.content" target="_blank" class="ch-link-plain">{{ msg.content }}</a>
+                </div>
+
+                <!-- TEXT -->
+                <div class="ch-bubble" [class.ch-bubble--me]="isMe(msg)"
+                     *ngIf="msg.messageType === 'TEXT' && !isUrl(msg.content)">
+                  {{ msg.content }}
+                </div>
+
+                <!-- Time + tick -->
+                <span class="ch-time">
+                  {{ isMe(msg) ? 'You, ' : '' }}{{ formatTime(msg.timestamp) }}
+                  <span class="ch-tick" *ngIf="isMe(msg)" [class.ch-tick--seen]="msg.status === 'SEEN'">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         [attr.stroke]="msg.status === 'SEEN' ? '#ff4f75' : '#aaa'"
+                         stroke-width="2.5" width="11" height="11">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <svg *ngIf="msg.status === 'SEEN' || msg.status === 'DELIVERED'"
+                         viewBox="0 0 24 24" fill="none"
+                         [attr.stroke]="msg.status === 'SEEN' ? '#ff4f75' : '#aaa'"
+                         stroke-width="2.5" width="11" height="11" style="margin-left:-6px">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </span>
+
+                <!-- Reactions -->
+                <div class="ch-reactions" [class.ch-reactions--me]="isMe(msg)"
+                     *ngIf="msg.reactions && msg.reactions.length > 0">
+                  <button *ngFor="let g of reactionGroups(msg)"
+                          class="ch-reaction-chip"
+                          [class.ch-reaction-chip--mine]="g.hasMe"
+                          (click)="pickEmoji(msg.messageId, g.emoji)">
+                    {{ g.emoji }} <span>{{ g.count }}</span>
+                  </button>
+                </div>
+
+                <!-- Hover actions -->
+                <div class="ch-msg-actions" [class.ch-msg-actions--me]="isMe(msg)" (click)="$event.stopPropagation()">
+                  <button class="ch-msg-act-btn" (click)="setReply(msg)" title="Reply">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+                    </svg>
+                  </button>
+                  <button class="ch-msg-act-btn" (click)="toggleEmojiPicker(msg.messageId, $event)" title="React">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M8 13s1.5 2 4 2 4-2 4-2"/>
+                      <line x1="9" y1="9" x2="9.01" y2="9"/>
+                      <line x1="15" y1="9" x2="15.01" y2="9"/>
+                    </svg>
+                  </button>
+                  <div class="ch-emoji-picker" [class.ch-emoji-picker--me]="isMe(msg)"
+                       *ngIf="emojiPickerMsgId === msg.messageId">
+                    <button *ngFor="let e of EMOJIS" class="ch-emoji-opt"
+                            (click)="pickEmoji(msg.messageId, e)">{{ e }}</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+
+        <!-- Typing indicator -->
+        <div class="ch-typing-row" *ngIf="isPartnerTyping">
+          <div class="ch-bubble-av">{{ initial(activeUser) }}</div>
+          <div>
+            <div class="ch-typing-bubble"><span></span><span></span><span></span></div>
+            <div class="ch-typing-row-info">{{ activeUser.displayName }} is typing…</div>
+          </div>
+        </div>
+
+        <div #msgEnd></div>
+      </div>
+
+      <!-- Reply banner -->
+      <div class="ch-reply-banner" *ngIf="replyingTo">
+        <div class="ch-reply-banner-bar"></div>
+        <div class="ch-reply-banner-content">
+          <span class="ch-reply-banner-label">Replying to {{ replyingTo.senderName }}</span>
+          <span class="ch-reply-banner-text">{{ replyingTo.content }}</span>
+        </div>
+        <button class="ch-reply-banner-close" (click)="cancelReply()">✕</button>
+      </div>
+
+      <!-- Recording bar -->
+      <div class="ch-recording-bar" *ngIf="isRecording">
+        <div class="ch-rec-dot"></div>
+        <span class="ch-rec-time">{{ formatRecordingTime(recordingTime) }}</span>
+        <svg class="ch-waveform" viewBox="0 0 130 26" width="130" height="26">
+          <g fill="#ff4f75">
+            <rect *ngFor="let h of [12,18,8,24,14,20,7,16,22,10,19,26,9,17,14]; let i = index"
+                  [attr.x]="i * 9" [attr.y]="(26 - h) / 2"
+                  width="4" [attr.height]="h" rx="2"
+                  style="animation: waveBar 0.8s ease-in-out infinite alternate"
+                  [style.animation-delay]="(i * 40) + 'ms'" />
+          </g>
+        </svg>
+        <button class="ch-rec-cancel" (click)="stopRecording(false)">Cancel</button>
+        <button class="ch-rec-send" (click)="stopRecording(true)">Send 🎙️</button>
+      </div>
+
+      <!-- Input bar -->
+      <div class="ch-input-bar" *ngIf="!isRecording">
+        <button class="ch-side-btn" type="button" title="Emoji">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M8 13s1.5 2 4 2 4-2 4-2"/>
+            <line x1="9" y1="9" x2="9.01" y2="9"/>
+            <line x1="15" y1="9" x2="15.01" y2="9"/>
+          </svg>
+        </button>
+        <button class="ch-side-btn" type="button" title="Attach file"
+                (click)="triggerFileInput('file')" [disabled]="isBanned || isUploading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 17.2a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+        </button>
+
+        <div class="ch-input-wrap" [class.ch-input-wrap--active]="msgText.length > 0">
+          <textarea #msgTextarea
+            [(ngModel)]="msgText"
+            placeholder="{{ isBanned ? '🚫 Banned for ' + banSeconds + 's…' : 'Write your message…' }}"
+            rows="1"
+            [disabled]="isBanned"
+            (keydown)="onEnter($event)"
+            (input)="$any($event.target).style.height='auto';
+                     $any($event.target).style.height=$any($event.target).scrollHeight+'px';
+                     onInput()">
+          </textarea>
+        </div>
+
+        <button class="ch-side-btn"
+                [class.ch-side-btn--recording]="isRecording"
+                type="button" title="Voice message"
+                (click)="startRecording()"
+                [disabled]="isBanned || isUploading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+
+        <button class="ch-send-btn"
+                [class.ch-send-btn--active]="msgText.trim().length > 0 && !isBanned"
+                (click)="send()"
+                [disabled]="!msgText.trim() || isBanned"
+                type="button">
+          <div class="ch-send-loader" *ngIf="isUploading"></div>
+          <svg *ngIf="!isUploading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+
+    </ng-container>
+  </main>
+
+  <!-- ══ SHARED FILES PANEL ══ -->
+  <aside class="ch-files-panel" #filesPanel>
+
+    <div class="ch-files-head">
+      <span class="ch-files-title">Shared files</span>
+      <button class="ch-files-toggle-btn" title="Collapse">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Group info -->
+    <div class="ch-group-card" *ngIf="activeUser">
+      <div class="ch-group-inner">
+        <div class="ch-group-av">{{ initial(activeUser) }}</div>
+        <div class="ch-group-name">{{ activeUser?.displayName }}</div>
+        <div class="ch-group-members">{{ activeUser?.email }}</div>
+
+        <div class="ch-stats-row">
+          <div class="ch-stat-card">
+            <span class="ch-stat-label">
+              <span class="ch-stat-dot"></span> All files
+            </span>
+            <span class="ch-stat-count">{{ sharedFiles.length }}</span>
+          </div>
+          <div class="ch-stat-card ch-stat-card--links">
+            <span class="ch-stat-label">
+              <span class="ch-stat-dot ch-stat-dot--link"></span> All links
+            </span>
+            <span class="ch-stat-count">{{ sharedLinks.length }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No active user placeholder -->
+    <div class="ch-group-card" *ngIf="!activeUser">
+      <div class="ch-group-inner">
+        <div class="ch-group-av">💬</div>
+        <div class="ch-group-name">No conversation</div>
+        <div class="ch-group-members">Select a chat to see shared files</div>
+        <div class="ch-stats-row">
+          <div class="ch-stat-card"><span class="ch-stat-label"><span class="ch-stat-dot"></span> All files</span><span class="ch-stat-count">0</span></div>
+          <div class="ch-stat-card ch-stat-card--links"><span class="ch-stat-label"><span class="ch-stat-dot ch-stat-dot--link"></span> All links</span><span class="ch-stat-count">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload zone -->
+    <div class="ch-upload-zone" (click)="triggerSharedFileInput()" *ngIf="activeUser">
+      <div class="ch-upload-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <div>
+        <div class="ch-upload-text-title">Upload a file</div>
+        <div class="ch-upload-text-sub">Share with this conversation</div>
+      </div>
+    </div>
+
+    <!-- File type section -->
+    <div class="ch-filetype-head">
+      <span class="ch-filetype-label">File type</span>
+      <button class="ch-icon-btn" style="width:24px;height:24px;" title="More">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12">
+          <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Files list -->
+    <div class="ch-files-list">
+
+      <div class="ch-files-empty" *ngIf="!activeUser || sharedFiles.length === 0">
+        <div class="ch-files-empty-icon">📂</div>
+        <span>{{ activeUser ? 'No shared files yet' : 'Select a conversation' }}</span>
+      </div>
+
+      <ng-container *ngIf="activeUser && sharedFiles.length > 0">
+
+        <!-- Documents -->
+        <div class="ch-file-category" *ngIf="filesByCategory('doc').length > 0">
+          <div class="ch-file-cat-header" (click)="toggleCategory('doc')">
+            <div class="ch-file-cat-left">
+              <div class="ch-file-cat-icon ch-file-cat-icon--doc">📄</div>
+              <div class="ch-file-cat-info">
+                <div class="ch-file-cat-name">Documents</div>
+                <div class="ch-file-cat-count">{{ filesByCategory('doc').length }} files · {{ categorySize('doc') }}</div>
+              </div>
+            </div>
+            <span class="ch-file-cat-chevron" [class.open]="openCategory['doc']">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+          </div>
+          <div class="ch-file-items" *ngIf="openCategory['doc']">
+            <div class="ch-file-item" *ngFor="let f of filesByCategory('doc')">
+              <div class="ch-file-item-icon" [ngClass]="fileItemIconClass(f)">{{ fileItemLabel(f) }}</div>
+              <div class="ch-file-item-info">
+                <div class="ch-file-item-name">{{ f.name }}</div>
+                <div class="ch-file-item-meta">{{ formatSize(f.size) }} · {{ formatDate(f.sharedAt) }}</div>
+              </div>
+              <a [href]="f.url" download class="ch-file-item-dl" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Images -->
+        <div class="ch-file-category" *ngIf="filesByCategory('img').length > 0">
+          <div class="ch-file-cat-header" (click)="toggleCategory('img')">
+            <div class="ch-file-cat-left">
+              <div class="ch-file-cat-icon ch-file-cat-icon--img">🖼️</div>
+              <div class="ch-file-cat-info">
+                <div class="ch-file-cat-name">Photos</div>
+                <div class="ch-file-cat-count">{{ filesByCategory('img').length }} files · {{ categorySize('img') }}</div>
+              </div>
+            </div>
+            <span class="ch-file-cat-chevron" [class.open]="openCategory['img']">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+          </div>
+          <div class="ch-file-items" *ngIf="openCategory['img']">
+            <div class="ch-file-item" *ngFor="let f of filesByCategory('img')">
+              <div class="ch-file-item-icon ch-file-item-icon--img">IMG</div>
+              <div class="ch-file-item-info">
+                <div class="ch-file-item-name">{{ f.name }}</div>
+                <div class="ch-file-item-meta">{{ formatSize(f.size) }} · {{ formatDate(f.sharedAt) }}</div>
+              </div>
+              <a [href]="f.url" download class="ch-file-item-dl" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Videos -->
+        <div class="ch-file-category" *ngIf="filesByCategory('vid').length > 0">
+          <div class="ch-file-cat-header" (click)="toggleCategory('vid')">
+            <div class="ch-file-cat-left">
+              <div class="ch-file-cat-icon ch-file-cat-icon--vid">🎬</div>
+              <div class="ch-file-cat-info">
+                <div class="ch-file-cat-name">Movies</div>
+                <div class="ch-file-cat-count">{{ filesByCategory('vid').length }} files · {{ categorySize('vid') }}</div>
+              </div>
+            </div>
+            <span class="ch-file-cat-chevron" [class.open]="openCategory['vid']">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+          </div>
+          <div class="ch-file-items" *ngIf="openCategory['vid']">
+            <div class="ch-file-item" *ngFor="let f of filesByCategory('vid')">
+              <div class="ch-file-item-icon ch-file-item-icon--vid">VID</div>
+              <div class="ch-file-item-info">
+                <div class="ch-file-item-name">{{ f.name }}</div>
+                <div class="ch-file-item-meta">{{ formatSize(f.size) }} · {{ formatDate(f.sharedAt) }}</div>
+              </div>
+              <a [href]="f.url" download class="ch-file-item-dl" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other -->
+        <div class="ch-file-category" *ngIf="filesByCategory('oth').length > 0">
+          <div class="ch-file-cat-header" (click)="toggleCategory('oth')">
+            <div class="ch-file-cat-left">
+              <div class="ch-file-cat-icon ch-file-cat-icon--oth">📦</div>
+              <div class="ch-file-cat-info">
+                <div class="ch-file-cat-name">Other</div>
+                <div class="ch-file-cat-count">{{ filesByCategory('oth').length }} files · {{ categorySize('oth') }}</div>
+              </div>
+            </div>
+            <span class="ch-file-cat-chevron" [class.open]="openCategory['oth']">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
+          </div>
+          <div class="ch-file-items" *ngIf="openCategory['oth']">
+            <div class="ch-file-item" *ngFor="let f of filesByCategory('oth')">
+              <div class="ch-file-item-icon" [ngClass]="fileItemIconClass(f)">{{ fileItemLabel(f) }}</div>
+              <div class="ch-file-item-info">
+                <div class="ch-file-item-name">{{ f.name }}</div>
+                <div class="ch-file-item-meta">{{ formatSize(f.size) }} · {{ formatDate(f.sharedAt) }}</div>
+              </div>
+              <a [href]="f.url" download class="ch-file-item-dl" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+    </div>
+  </aside>
+
+</div>

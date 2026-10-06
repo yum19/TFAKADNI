@@ -1,0 +1,128 @@
+<!-- ai-lab-sanctuary.component.html -->
+<section class="ai-lab-sanctuary">
+  <div class="studio-wrap">
+    <header class="studio-header">
+      <div class="header-row">
+        <span class="studio-chip">
+          Partner AI v2.0
+          <span class="ai-dot"></span>
+        </span>
+      </div>
+      <h1 class="studio-title">
+        Intelligence <span class="title-accent">Studio.</span>
+      </h1>
+      <p class="studio-lead">
+        Convert complex guidance into actionable support strategies in seconds.
+      </p>
+    </header>
+
+    <div class="studio-grid">
+      <!-- Left: Controls -->
+      <div class="glass-card">
+        <div class="studio-section">
+          <span class="section-label">Guide Synthesis</span>
+          <h4 class="section-title">Summarize Insights</h4>
+          <p class="section-sub">
+            Choose a clinical or support guide to generate a high-level summary.
+          </p>
+          <select
+            title="select-title-guide"
+            class="glass-select"
+            [(ngModel)]="guideId"
+          >
+            <option [ngValue]="undefined">Select a target guide...</option>
+            <option *ngFor="let guide of guides" [ngValue]="guide.id">
+              {{ guide.title }}
+            </option>
+          </select>
+          <button class="studio-btn" (click)="summarizeGuide()">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            Synthesize Guide
+          </button>
+        </div>
+
+        <div class="studio-sep"></div>
+
+        <div class="studio-section">
+          <span class="section-label">Contextual Intelligence</span>
+          <h4 class="section-title">Generate Support Tips</h4>
+          <p class="section-sub">
+            Generate tips based on the current pregnancy week and clinical
+            context.
+          </p>
+          <select
+            title="select-pregnancy-context"
+            class="glass-select"
+            [(ngModel)]="pregnancyId"
+          >
+            <option [ngValue]="undefined">Select a pregnancy context...</option>
+            <option *ngFor="let link of links" [ngValue]="link.pregnancyId">
+              Partner Link #{{ link.id }} (ID: {{ link.pregnancyId }})
+            </option>
+          </select>
+          <button class="studio-btn" (click)="tips()">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              />
+            </svg>
+            Generate Tips
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Output -->
+      <div class="glass-card result-card">
+        <div class="result-header">
+          <h4 class="section-title m-0">AI Output</h4>
+          <span class="gen-badge" *ngIf="result">Generation Complete</span>
+        </div>
+        <div class="output-body" *ngIf="result; else emptyState">
+          {{ result }}
+        </div>
+        <ng-template #emptyState>
+          <div class="empty-state">
+            <div class="bot-ring">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <rect x="3" y="8" width="18" height="13" rx="3" />
+                <path d="M12 3v5M9 3h6" />
+                <circle cx="9" cy="14" r="1.5" fill="currentColor" />
+                <circle cx="15" cy="14" r="1.5" fill="currentColor" />
+                <path d="M9 18h6" />
+              </svg>
+            </div>
+            <h5>Ready for Analysis</h5>
+            <p>
+              Select a guide or context on the left<br />to generate your
+              support brief.
+            </p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</section>

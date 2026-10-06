@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+faster-whisper
+librosa
+numpy
+soundfile
+ffmpeg-python
+python-multipart
+rapidfuzz

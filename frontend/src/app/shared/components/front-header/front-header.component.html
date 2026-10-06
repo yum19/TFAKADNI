@@ -1,0 +1,351 @@
+<header class="front-header">
+  <!-- Top accent line -->
+  <div class="header-top-line"></div>
+
+  <div class="header-inner">
+    <!-- Left: Brand -->
+    <div class="header-brand">
+      <button
+        mat-icon-button
+        class="mobile-menu-btn d-lg-none"
+        (click)="drawer?.toggle()"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+      <a [routerLink]="homePath()" class="brand-link">
+        @if (session.role === "PARTNER") {
+          <img
+            src="assets/img/logo-partner-v2.png"
+            alt="MAMA-AI"
+            class="brand-logo"
+          />
+        } @else {
+          <img
+            src="assets/img/logo-mother.png"
+            alt="MAMA-AI"
+            class="brand-logo"
+          />
+        }
+        <span class="brand-text">MAMA<span class="text-accent">AI</span></span>
+      </a>
+    </div>
+
+    <!-- Center: Category Nav (desktop) -->
+    <nav class="header-nav d-none d-lg-flex" role="navigation">
+      <!-- Home -->
+      <a
+        mat-button
+        class="nav-pill"
+        [routerLink]="homePath()"
+        routerLinkActive="active-pill"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <mat-icon class="nav-icon">home</mat-icon>
+        Home
+      </a>
+      
+
+      @if (role === 'USER') {
+        <div
+          class="nav-group"
+          (mouseenter)="openGroup('community')"
+          (mouseleave)="closeGroup()"
+        >
+          <button
+            class="nav-pill nav-group-trigger"
+            [class.group-active]="isGroupActive('community')"
+            [class.active-pill]="isGroupRouteActive(CommunityLinks)"
+          >
+            <mat-icon class="nav-icon">groups</mat-icon>
+            Community
+            <mat-icon
+              class="nav-chevron"
+              [class.rotated]="openGroupKey === 'community'"
+              >expand_more</mat-icon
+            >
+          </button>
+ 
+          <div class="mega-panel" [class.open]="openGroupKey === 'community'">
+            <div class="mega-inner">
+              @for (link of CommunityLinks; track $index) {
+                <a
+                  class="mega-item"
+                  [routerLink]="link.path"
+                  routerLinkActive="mega-item-active"
+                  (click)="closeGroup()"
+                >
+                  <mat-icon class="mega-icon">{{ link.icon }}</mat-icon>
+                  <span class="mega-label">{{ link.label }}</span>
+                </a>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ── Learning category ── -->
+      <div
+        class="nav-group"
+        (mouseenter)="openGroup('learning')"
+        (mouseleave)="closeGroup()"
+      >
+        <button
+          class="nav-pill nav-group-trigger"
+          [class.group-active]="isGroupActive('learning')"
+          [class.active-pill]="isGroupRouteActive(learningLinks)"
+        >
+          <mat-icon class="nav-icon">school</mat-icon>
+          Learning
+          <mat-icon
+            class="nav-chevron"
+            [class.rotated]="openGroupKey === 'learning'"
+            >expand_more</mat-icon
+          >
+        </button>
+
+        <div class="mega-panel" [class.open]="openGroupKey === 'learning'">
+          <div class="mega-inner">
+            @for (link of learningLinks; track $index) {
+              <a
+                class="mega-item"
+                [routerLink]="link.path"
+                routerLinkActive="mega-item-active"
+                (click)="closeGroup()"
+              >
+                <mat-icon class="mega-icon">{{ link.icon }}</mat-icon>
+                <span class="mega-label">{{ link.label }}</span>
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Health category ── -->
+      <div
+        class="nav-group"
+        (mouseenter)="openGroup('health')"
+        (mouseleave)="closeGroup()"
+      >
+        <button
+          class="nav-pill nav-group-trigger"
+          [class.group-active]="isGroupActive('health')"
+          [class.active-pill]="isGroupRouteActive(healthLinks)"
+        >
+          <mat-icon class="nav-icon">favorite</mat-icon>
+          Health
+          <mat-icon
+            class="nav-chevron"
+            [class.rotated]="openGroupKey === 'health'"
+            >expand_more</mat-icon
+          >
+        </button>
+
+        <div class="mega-panel" [class.open]="openGroupKey === 'health'">
+          <div class="mega-inner">
+            @for (link of healthLinks; track $index) {
+              <a
+                class="mega-item"
+                [routerLink]="link.path"
+                routerLinkActive="mega-item-active"
+                (click)="closeGroup()"
+              >
+                <mat-icon class="mega-icon">{{ link.icon }}</mat-icon>
+                <span class="mega-label">{{ link.label }}</span>
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Care category ── -->
+      <div
+        class="nav-group"
+        (mouseenter)="openGroup('care')"
+        (mouseleave)="closeGroup()"
+      >
+        <button
+          class="nav-pill nav-group-trigger"
+          [class.group-active]="isGroupActive('care')"
+          [class.active-pill]="isGroupRouteActive(careLinks)"
+        >
+          <mat-icon class="nav-icon">local_hospital</mat-icon>
+          Care
+          <mat-icon
+            class="nav-chevron"
+            [class.rotated]="openGroupKey === 'care'"
+            >expand_more</mat-icon
+          >
+        </button>
+
+        <div class="mega-panel" [class.open]="openGroupKey === 'care'">
+          <div class="mega-inner">
+            @for (link of careLinks; track $index) {
+              <a
+                class="mega-item"
+                [routerLink]="link.path"
+                routerLinkActive="mega-item-active"
+                (click)="closeGroup()"
+              >
+                <mat-icon class="mega-icon">{{ link.icon }}</mat-icon>
+                <span class="mega-label">{{ link.label }}</span>
+                @if (link.label === "Alerts" && (alertCount$ | async) > 0) {
+                  <span class="mega-badge">{{ alertCount$ | async }}</span>
+                }
+                @if (link.label === "Exams" && (examCount$ | async) > 0) {
+                  <span class="mega-badge">{{ examCount$ | async }}</span>
+                }
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tools category ── -->
+      <div
+        class="nav-group"
+        (mouseenter)="openGroup('tools')"
+        (mouseleave)="closeGroup()"
+      >
+        <button
+          class="nav-pill nav-group-trigger"
+          [class.group-active]="isGroupActive('tools')"
+          [class.active-pill]="isGroupRouteActive(toolLinks)"
+        >
+          <mat-icon class="nav-icon">auto_awesome</mat-icon>
+          AI & Tools
+          <mat-icon
+            class="nav-chevron"
+            [class.rotated]="openGroupKey === 'tools'"
+            >expand_more</mat-icon
+          >
+        </button>
+
+        <div class="mega-panel" [class.open]="openGroupKey === 'tools'">
+          <div class="mega-inner">
+            @for (link of toolLinks; track $index) {
+              <a
+                class="mega-item"
+                [routerLink]="link.path"
+                routerLinkActive="mega-item-active"
+                (click)="closeGroup()"
+              >
+                <mat-icon class="mega-icon">{{ link.icon }}</mat-icon>
+                <span class="mega-label">{{ link.label }}</span>
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Community (partner only) ── -->
+      @if (role === "PARTNER") {
+        <div
+          class="nav-group"
+          (mouseenter)="openGroup('partner')"
+          (mouseleave)="closeGroup()"
+        >
+          <button
+            class="nav-pill nav-group-trigger"
+            [class.group-active]="isGroupActive('partner')"
+            [class.active-pill]="isGroupRouteActive(partnerLinks)"
+          >
+            <mat-icon class="nav-icon">handshake</mat-icon>
+            Partner
+            <mat-icon
+              class="nav-chevron"
+              [class.rotated]="openGroupKey === 'partner'"
+              >expand_more</mat-icon
+            >
+          </button>
+
+          <div class="mega-panel" [class.open]="openGroupKey === 'partner'">
+            <div class="mega-inner">
+              @for (link of partnerLinks; track $index) {
+                <a
+                  class="mega-item"
+                  [routerLink]="link.path"
+                  routerLinkActive="mega-item-active"
+                  (click)="closeGroup()"
+                >
+                  <mat-icon class="mega-icon">{{ link.icon }}</mat-icon>
+                  <span class="mega-label">{{ link.label }}</span>
+                </a>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </nav>
+
+    <!-- Right: Actions -->
+    <div class="header-actions">
+      <button
+        mat-icon-button
+        class="icon-action-btn"
+        (click)="toggleDark()"
+        title="Toggle theme"
+      >
+        <mat-icon>wb_sunny</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        class="icon-action-btn d-none d-md-flex"
+        (click)="openTheme.emit()"
+        title="Color palette"
+      >
+        <mat-icon>palette</mat-icon>
+      </button>
+
+      @if (role === 'USER') {
+  <button
+    mat-icon-button
+    class="icon-action-btn"
+    (click)="cartSvc.toggle()"
+    title="Cart"
+    style="position:relative"
+  >
+    <mat-icon>shopping_cart</mat-icon>
+    @if ((cartSvc.count()) > 0) {
+      <span style="
+        position:absolute;top:4px;right:4px;
+        background:#ff4f75;color:#fff;
+        font-size:10px;font-weight:800;
+        border-radius:50%;width:16px;height:16px;
+        display:flex;align-items:center;justify-content:center;
+        line-height:1;
+      ">{{ cartSvc.count() }}</span>
+    }
+  </button>
+}
+
+
+
+
+      <button mat-button [matMenuTriggerFor]="accountMenu" class="account-pill">
+        <div class="account-pill-inner">
+          <div class="avatar-ring">
+            <mat-icon>person</mat-icon>
+          </div>
+          <span class="account-name d-none d-md-inline">{{
+            session.fullName || "Account"
+          }}</span>
+          <mat-icon class="account-chevron">expand_more</mat-icon>
+        </div>
+      </button>
+
+      <mat-menu #accountMenu="matMenu" class="studio-menu">
+        <button mat-menu-item [routerLink]="profilePath()">
+          <mat-icon>person_outline</mat-icon> Personal Profile
+        </button>
+        <button mat-menu-item routerLink="/mother/subscription">
+          <mat-icon>payments</mat-icon> Subscription
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()" class="logout-item">
+          <mat-icon>logout</mat-icon> Force Logout
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+</header>
+<app-cart-sidebar></app-cart-sidebar>

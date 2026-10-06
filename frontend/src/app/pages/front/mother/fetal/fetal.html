@@ -1,0 +1,730 @@
+<!-- ░░ BACKGROUND ░░ -->
+<div class="fetal-page-bg">
+  <div class="fetal-bg-img" style="background-image: url('assets/img/bg-pregnancy.jpg')"></div>
+  <div class="fetal-bg-overlay"></div>
+</div>
+
+<!-- ░░ HERO ░░ -->
+<section class="fetal-hero fade-in">
+  <div class="fetal-hero__left">
+    <span class="fetal-hero__eyebrow">👶 Your baby's development</span>
+    <h1 class="fetal-hero__title">
+      Fetal <span style="font-style:italic; background:linear-gradient(135deg,#e91e63,#ff9800,#9c27b0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; background-size:200% auto; display:inline-block;">Development</span>
+    </h1>
+    <p class="fetal-hero__sub">Discover every milestone of your baby's extraordinary journey, week by week.</p>
+    @if(currentWeek > 0) {
+    <div class="fetal-hero__pills">
+      <span class="fetal-pill fetal-pill--rose">
+        <span class="material-symbols-outlined">child_care</span>
+        Week {{ currentWeek }} · {{ getTrimesterLabel(currentWeek) }}
+      </span>
+      <span class="fetal-pill fetal-pill--gold">
+        <span class="material-symbols-outlined">percent</span>
+        {{ Math.round((currentWeek / 40) * 100) }}% complete
+      </span>
+      <button class="fetal-pill fetal-pill--name" (click)="openNamePopup()">
+        <span class="material-symbols-outlined">auto_awesome</span>
+        Find a baby name
+      </button>
+      <!-- ✅ NOUVEAU BOUTON PORTRAIT -->
+      <button class="fetal-pill fetal-pill--portrait" (click)="openPortraitPopup()">
+        <span class="material-symbols-outlined">face</span>
+        Baby portrait
+      </button>
+    </div>
+    }
+  </div>
+  <div class="fetal-hero__right">
+    <div class="fetal-hero__ring" [style.border-color]="getTrimesterColor(selectedWeek) + '40'">
+      <span class="material-symbols-outlined fetal-ring-icon"
+            [style.color]="getTrimesterColor(selectedWeek)">child_friendly</span>
+      <span class="fetal-ring-value">W{{ selectedWeek }}</span>
+      <span class="fetal-ring-unit" [style.color]="getTrimesterColor(selectedWeek)">
+        {{ getTrimester(selectedWeek) }}
+      </span>
+    </div>
+  </div>
+</section>
+
+@if(isSharedPartner) {
+<div class="sharing-banner fade-in-delay-1">
+  <div style="max-width:1200px; margin:0 auto; padding:0 2.5rem;">
+    <div style="display:flex; align-items:center; gap:14px; padding:14px 20px; border-radius:16px; background:rgba(76,175,80,0.08); border:1.5px solid rgba(76,175,80,0.3);">
+      <span class="material-symbols-outlined" style="font-size:1.6rem; color:#4caf50; flex-shrink:0">people</span>
+      <div>
+        <p style="font-weight:700; font-size:0.9rem; color:#2e7d32; margin:0">Shared with your partner</p>
+        <p style="font-size:0.78rem; color:#4caf50; margin:0">Your partner can view fetal development week by week</p>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ░░ LOADING ░░ -->
+@if(loading) {
+<div class="fetal-loading">
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
+}
+
+<!-- ░░ WEEK NAVIGATION ░░ -->
+@if(!loading) {
+<section class="fetal-nav fade-in-delay-1">
+  <div class="fetal-nav__card">
+    <button class="fetal-nav-btn" [disabled]="selectedWeek <= 1" (click)="previousWeek()">
+      <span class="material-symbols-outlined">chevron_left</span>
+    </button>
+    <div class="fetal-nav__center">
+      <div class="fetal-nav__title">
+        <h3>Week {{ selectedWeek }}</h3>
+        <span class="fetal-trimester-badge"
+              [style.background]="getTrimesterColor(selectedWeek) + '18'"
+              [style.color]="getTrimesterColor(selectedWeek)"
+              [style.border]="'1px solid ' + getTrimesterColor(selectedWeek) + '40'">
+          {{ getTrimesterLabel(selectedWeek) }}
+        </span>
+        @if(isCurrentWeek()) {
+        <span class="fetal-current-badge">● Current</span>
+        }
+      </div>
+      <div class="fetal-nav__progress">
+        <div class="fetal-progress-track">
+          <div class="fetal-progress-fill"
+               [style.width]="(selectedWeek / 40 * 100) + '%'"
+               [style.background]="getTrimesterColor(selectedWeek)">
+          </div>
+          <div class="fetal-progress-marker"
+               [style.left]="(currentWeek / 40 * 100) + '%'"
+               title="Current week">
+          </div>
+        </div>
+        <div class="fetal-progress-labels">
+          <span>T1 · W1–12</span>
+          <span>{{ Math.round((selectedWeek / 40) * 100) }}%</span>
+          <span>T3 · W27–40</span>
+        </div>
+      </div>
+    </div>
+    <button class="fetal-nav-btn" [disabled]="selectedWeek >= 40" (click)="nextWeek()">
+      <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+    <div class="fetal-week-select-wrap">
+      <mat-form-field appearance="outline" class="fetal-week-select">
+        <mat-label>Go to week</mat-label>
+        <mat-select [(ngModel)]="selectedWeek" (ngModelChange)="onWeekChange()">
+          @for(w of weeks; track w) {
+          <mat-option [value]="w">
+            W{{ w }} — {{ getTrimesterLabel(w) }}{{ w === currentWeek ? ' (Now)' : '' }}
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ MILESTONE LOADING ░░ -->
+@if(loadingMilestone) {
+<div class="fetal-loading" style="padding: 0 2.5rem">
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
+}
+
+<!-- ░░ BENTO GRID ░░ -->
+@if(!loadingMilestone && currentMilestone) {
+<section class="fetal-bento fade-in-delay-2">
+
+  <!-- BABY CARD -->
+  <div class="fetal-bento__card fetal-bento__card--baby">
+    <div class="fetal-card-tag">🌱 Baby this week</div>
+    <h2 class="fetal-card-title">{{ currentMilestone.title }}</h2>
+    <div class="fetal-baby-header">
+      <div class="fetal-baby-avatar"
+           [style.background]="getTrimesterColor(selectedWeek) + '15'"
+           [style.border-color]="getTrimesterColor(selectedWeek) + '40'">
+        <span class="material-symbols-outlined"
+              [style.color]="getTrimesterColor(selectedWeek)">child_friendly</span>
+      </div>
+      <div class="fetal-measures">
+        <div class="fetal-measure fetal-measure--rose">
+          <span class="fetal-measure__num">{{ currentMilestone.sizeCm }}</span>
+          <span class="fetal-measure__unit">cm</span>
+          <span class="fetal-measure__lbl">Size</span>
+        </div>
+        <div class="fetal-measure-divider"></div>
+        <div class="fetal-measure fetal-measure--gold">
+          <span class="fetal-measure__num">{{ currentMilestone.weightG }}</span>
+          <span class="fetal-measure__unit">g</span>
+          <span class="fetal-measure__lbl">Weight</span>
+        </div>
+        @if(currentMilestone.sizeComparison) {
+        <div class="fetal-measure-divider"></div>
+        <div class="fetal-comparison">
+          <span class="fetal-comparison__emoji">{{ getComparisonEmoji(currentMilestone.sizeComparison) }}</span>
+          <span class="fetal-comparison__text">{{ currentMilestone.sizeComparison }}</span>
+          <span class="fetal-comparison__lbl">Like a</span>
+        </div>
+        }
+      </div>
+    </div>
+    <div class="fetal-desc-box" [style.border-color]="getTrimesterColor(selectedWeek) + '40'">
+      <p>{{ currentMilestone.description }}</p>
+    </div>
+  </div>
+
+  <!-- MOTHER CARD -->
+  @if(currentMilestone.motherSymptoms) {
+  <div class="fetal-bento__card fetal-bento__card--mother">
+    <div class="fetal-card-tag fetal-card-tag--rose">🤰 How you may feel</div>
+    <h2 class="fetal-card-title">Your body</h2>
+    <div class="fetal-symptoms-box">
+      <span class="material-symbols-outlined">pregnant_woman</span>
+      <p>{{ currentMilestone.motherSymptoms }}</p>
+    </div>
+  </div>
+  }
+
+  <!-- ADVICE CARD -->
+  @if(currentMilestone.medicalAdvice) {
+  <div class="fetal-bento__card fetal-bento__card--advice">
+    <div class="fetal-card-tag fetal-card-tag--gold">💡 Medical advice</div>
+    <h2 class="fetal-card-title">This week</h2>
+    <div class="fetal-advice-box">
+      <span class="material-symbols-outlined">lightbulb</span>
+      <p>{{ currentMilestone.medicalAdvice }}</p>
+    </div>
+  </div>
+  }
+
+</section>
+}
+
+<!-- ░░ NO DATA ░░ -->
+@if(!loadingMilestone && !currentMilestone) {
+<section class="fetal-empty fade-in-delay-2">
+  <div class="fetal-empty__card">
+    <span class="material-symbols-outlined fetal-empty__icon">child_friendly</span>
+    <h2 class="fetal-empty__title">No data for week {{ selectedWeek }}</h2>
+    <p class="fetal-empty__sub">Fetal information for this week is not yet available.</p>
+  </div>
+</section>
+}
+
+<!-- ░░ ALL WEEKS TIMELINE ░░ -->
+@if(allMilestones.length > 0) {
+<section class="fetal-timeline-section fade-in-delay-2">
+  <div class="fetal-timeline-card">
+    <div class="fetal-card-tag">📅 All weeks</div>
+    <h2 class="fetal-card-title">Journey timeline <small>{{ allMilestones.length }} weeks</small></h2>
+    <div class="fetal-milestones-grid">
+      @for(m of allMilestones; track m.id) {
+      <div class="fetal-milestone-chip"
+           [class.fetal-milestone--active]="m.weekNumber === selectedWeek"
+           [class.fetal-milestone--past]="isPast(m.weekNumber)"
+           [class.fetal-milestone--current]="m.weekNumber === currentWeek"
+           [style.border-color]="m.weekNumber === selectedWeek ? getTrimesterColor(m.weekNumber) + '80' : ''"
+           [style.background]="m.weekNumber === selectedWeek ? getTrimesterColor(m.weekNumber) + '15' : ''"
+           (click)="selectedWeek = m.weekNumber; onWeekChange()">
+        <span class="fetal-milestone-week"
+              [style.color]="getTrimesterColor(m.weekNumber)">W{{ m.weekNumber }}</span>
+        <span class="fetal-milestone-title">{{ m.title }}</span>
+        @if(m.weekNumber === currentWeek) {
+        <span class="fetal-milestone-dot"
+              [style.background]="getTrimesterColor(m.weekNumber)"></span>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</section>
+}
+}
+
+<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+<!-- ░░  BABY NAME AI POPUP      ░░ -->
+<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+@if(showNamePopup) {
+<div class="name-popup-overlay" (click)="closeNamePopup()">
+  <div class="name-popup-box" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="name-popup-header">
+      <div class="name-popup-icon">
+        <span class="material-symbols-outlined">auto_awesome</span>
+      </div>
+      <div>
+        <h3 class="name-popup-title">AI Baby Name Generator</h3>
+        <p class="name-popup-sub">Powered by Claude · 10 unique names with meanings</p>
+      </div>
+      <button mat-icon-button (click)="closeNamePopup()" class="ms-auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- ── Preferences ── -->
+    @if(nameResults.length === 0 && !nameLoading) {
+    <div class="name-prefs">
+
+      <div class="name-pref-group">
+        <p class="name-pref-label">Gender</p>
+        <div class="name-pref-pills">
+          <button class="name-pref-pill" [class.name-pref-pill--active]="namePrefs.gender === 'girl'" (click)="namePrefs.gender = 'girl'">
+            <span>👧</span> Girl
+          </button>
+          <button class="name-pref-pill" [class.name-pref-pill--active]="namePrefs.gender === 'boy'" (click)="namePrefs.gender = 'boy'">
+            <span>👦</span> Boy
+          </button>
+          <button class="name-pref-pill" [class.name-pref-pill--active]="namePrefs.gender === 'both'" (click)="namePrefs.gender = 'both'">
+            <span>✨</span> Both
+          </button>
+        </div>
+      </div>
+
+      <div class="name-pref-group">
+        <p class="name-pref-label">Origin</p>
+        <div class="name-pref-pills name-pref-pills--wrap">
+          @for(o of ORIGINS; track o) {
+          <button class="name-pref-pill name-pref-pill--sm"
+                  [class.name-pref-pill--active]="namePrefs.origin === o"
+                  (click)="namePrefs.origin = o">{{ o }}</button>
+          }
+        </div>
+      </div>
+
+      <div class="name-pref-group">
+        <p class="name-pref-label">Style</p>
+        <div class="name-pref-pills name-pref-pills--wrap">
+          @for(s of STYLES; track s) {
+          <button class="name-pref-pill name-pref-pill--sm"
+                  [class.name-pref-pill--active]="namePrefs.style === s"
+                  (click)="namePrefs.style = s">{{ s }}</button>
+          }
+        </div>
+      </div>
+
+      <div class="name-pref-group">
+        <p class="name-pref-label">Starts with (optional)</p>
+        <div class="name-pref-pills name-pref-pills--wrap">
+          @for(l of LETTERS; track l) {
+          <button class="name-pref-pill name-pref-pill--xs"
+                  [class.name-pref-pill--active]="namePrefs.letter === l || (l === 'No preference' && !namePrefs.letter)"
+                  (click)="namePrefs.letter = l === 'No preference' ? '' : l">{{ l }}</button>
+          }
+        </div>
+      </div>
+
+      <div class="name-pref-group">
+        <p class="name-pref-label">Preferred meaning (optional)</p>
+        <input class="name-meaning-input"
+               [(ngModel)]="namePrefs.meaning"
+               placeholder="e.g. light, strength, love, peace..." />
+      </div>
+
+      <button class="name-generate-btn" (click)="generateNames()">
+        <span class="material-symbols-outlined">auto_awesome</span>
+        Generate 10 names
+      </button>
+    </div>
+    }
+
+    <!-- ── Loading ── -->
+    @if(nameLoading) {
+    <div class="name-loading">
+      <div class="name-loading__dots">
+        <span></span><span></span><span></span>
+      </div>
+      <p class="name-loading__text">Claude is finding the perfect names for your baby...</p>
+    </div>
+    }
+
+    <!-- ── Error ── -->
+    @if(nameError) {
+    <div class="name-error">
+      <span class="material-symbols-outlined">error_outline</span>
+      {{ nameError }}
+    </div>
+    }
+
+    <!-- ── Results ── -->
+    @if(nameResults.length > 0) {
+    <div class="name-results">
+
+      <div class="name-results-bar">
+        <div class="name-results-info">
+          <span class="material-symbols-outlined">auto_awesome</span>
+          {{ nameResults.length }} names ·
+          {{ namePrefs.gender === 'girl' ? 'Girl' : namePrefs.gender === 'boy' ? 'Boy' : 'Both' }}
+          · {{ namePrefs.origin }} · {{ namePrefs.style }}
+        </div>
+        <div class="name-results-actions">
+          @if(favoriteNames.length > 0) {
+          <span class="name-fav-count">
+            <span class="material-symbols-outlined">favorite</span>
+            {{ favoriteNames.length }} saved
+          </span>
+          }
+          <button class="name-action-btn name-action-btn--copy" (click)="copyNames()">
+            <span class="material-symbols-outlined">{{ nameCopied ? 'check' : 'content_copy' }}</span>
+            {{ nameCopied ? 'Copied!' : 'Copy all' }}
+          </button>
+          <button class="name-action-btn name-action-btn--regen" (click)="generateNames()">
+            <span class="material-symbols-outlined">refresh</span>
+            Regenerate
+          </button>
+        </div>
+      </div>
+
+      <div class="name-cards-grid">
+        @for(n of nameResults; track n.name; let i = $index) {
+        <div class="name-card" [class.name-card--fav]="isFavorite(n.name)">
+          <div class="name-card__top">
+            <div class="name-card__num">{{ i + 1 }}</div>
+            <h4 class="name-card__name">{{ n.name }}</h4>
+            <button class="name-card__fav-btn" (click)="toggleFavorite(n.name)">
+              <span class="material-symbols-outlined">
+                {{ isFavorite(n.name) ? 'favorite' : 'favorite_border' }}
+              </span>
+            </button>
+          </div>
+          <div class="name-card__origin">
+            <span class="material-symbols-outlined">public</span>
+            {{ n.origin }}
+          </div>
+          <p class="name-card__meaning">
+            <span class="material-symbols-outlined">lightbulb</span>
+            {{ n.meaning }}
+          </p>
+          <p class="name-card__poem">{{ n.poem }}</p>
+        </div>
+        }
+      </div>
+
+      @if(favoriteNames.length > 0) {
+      <div class="name-favorites">
+        <p class="name-favorites__title">
+          <span class="material-symbols-outlined">favorite</span>
+          Your favorites
+        </p>
+        <div class="name-favorites__chips">
+          @for(fav of favoriteNames; track fav) {
+          <span class="name-fav-chip">
+            {{ fav }}
+            <button (click)="toggleFavorite(fav)">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </span>
+          }
+        </div>
+      </div>
+      }
+
+      <div class="d-flex gap-2 justify-content-end mt-3">
+        <button class="name-action-btn name-action-btn--back" (click)="nameResults = []">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Change preferences
+        </button>
+        <button class="name-action-btn name-action-btn--close" (click)="closeNamePopup()">
+          Close
+        </button>
+      </div>
+    </div>
+    }
+
+  </div>
+</div>
+}
+
+<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+<!-- ░░  BABY PORTRAIT AI POPUP  ░░ -->
+<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+<!-- ░░  BABY PORTRAIT AI POPUP  ░░ -->
+<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+<!-- ░░  BABY PORTRAIT AI POPUP  ░░ -->
+<!-- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ -->
+@if(showPortraitPopup) {
+<div class="portrait-overlay" (click)="closePortraitPopup()">
+  <div class="portrait-box" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="portrait-header">
+      <div class="portrait-header-icon">
+        <span class="material-symbols-outlined">face</span>
+      </div>
+      <div>
+        <h3 class="portrait-title">AI Baby Portrait</h3>
+        <p class="portrait-sub">A poetic vision of your baby · Week {{ currentWeek || selectedWeek }}</p>
+      </div>
+      <button mat-icon-button (click)="closePortraitPopup()" class="ms-auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- ── Form ── -->
+    @if(!portrait && !portraitLoading) {
+    <div class="portrait-form">
+
+      <div class="portrait-form-intro">
+        <span class="material-symbols-outlined">auto_awesome</span>
+        Enter each parent's traits — Claude will imagine your baby's unique blend
+      </div>
+
+      <div class="portrait-parents-grid">
+
+        <!-- MAMAN -->
+        <div class="portrait-parent-col portrait-parent-col--mom">
+          <div class="portrait-parent-header">
+            <span class="portrait-parent-avatar">🤱</span>
+            <span class="portrait-parent-label">Mother</span>
+          </div>
+          <div class="portrait-field">
+            <p class="portrait-field-label">👁️ Eye color</p>
+            <div class="portrait-pills">
+              @for(c of EYE_COLORS; track c) {
+              <button class="portrait-pill portrait-pill--mom"
+                      [class.portrait-pill--active]="portraitForm.momEyeColor === c"
+                      (click)="portraitForm.momEyeColor = c">{{ c }}</button>
+              }
+            </div>
+          </div>
+          <div class="portrait-field">
+            <p class="portrait-field-label">💇 Hair color</p>
+            <div class="portrait-pills">
+              @for(h of HAIR_COLORS; track h) {
+              <button class="portrait-pill portrait-pill--mom"
+                      [class.portrait-pill--active]="portraitForm.momHairColor === h"
+                      (click)="portraitForm.momHairColor = h">{{ h }}</button>
+              }
+            </div>
+          </div>
+          <div class="portrait-field">
+            <p class="portrait-field-label">🌸 Skin tone</p>
+            <div class="portrait-pills">
+              @for(s of SKIN_TONES; track s) {
+              <button class="portrait-pill portrait-pill--mom"
+                      [class.portrait-pill--active]="portraitForm.momSkinTone === s"
+                      (click)="portraitForm.momSkinTone = s">{{ s }}</button>
+              }
+            </div>
+          </div>
+          <div class="portrait-field">
+            <p class="portrait-field-label">✨ Distinctive features (optional)</p>
+            <input class="portrait-input portrait-input--mom" [(ngModel)]="portraitForm.momFeatures"
+                   placeholder="e.g. dimples, almond eyes..." />
+          </div>
+        </div>
+
+        <!-- DIVIDER -->
+        <div class="portrait-parents-divider"><span>+</span></div>
+
+        <!-- PAPA -->
+        <div class="portrait-parent-col portrait-parent-col--dad">
+          <div class="portrait-parent-header">
+            <span class="portrait-parent-avatar">👨</span>
+            <span class="portrait-parent-label">Father</span>
+          </div>
+          <div class="portrait-field">
+            <p class="portrait-field-label">👁️ Eye color</p>
+            <div class="portrait-pills">
+              @for(c of EYE_COLORS; track c) {
+              <button class="portrait-pill portrait-pill--dad"
+                      [class.portrait-pill--active]="portraitForm.dadEyeColor === c"
+                      (click)="portraitForm.dadEyeColor = c">{{ c }}</button>
+              }
+            </div>
+          </div>
+          <div class="portrait-field">
+            <p class="portrait-field-label">💇 Hair color</p>
+            <div class="portrait-pills">
+              @for(h of HAIR_COLORS; track h) {
+              <button class="portrait-pill portrait-pill--dad"
+                      [class.portrait-pill--active]="portraitForm.dadHairColor === h"
+                      (click)="portraitForm.dadHairColor = h">{{ h }}</button>
+              }
+            </div>
+          </div>
+          <div class="portrait-field">
+            <p class="portrait-field-label">🌸 Skin tone</p>
+            <div class="portrait-pills">
+              @for(s of SKIN_TONES; track s) {
+              <button class="portrait-pill portrait-pill--dad"
+                      [class.portrait-pill--active]="portraitForm.dadSkinTone === s"
+                      (click)="portraitForm.dadSkinTone = s">{{ s }}</button>
+              }
+            </div>
+          </div>
+          <div class="portrait-field">
+            <p class="portrait-field-label">✨ Distinctive features (optional)</p>
+            <input class="portrait-input portrait-input--dad" [(ngModel)]="portraitForm.dadFeatures"
+                   placeholder="e.g. strong jaw, broad smile..." />
+          </div>
+        </div>
+
+      </div>
+
+      @if(portraitError) {
+      <div class="portrait-error">
+        <span class="material-symbols-outlined">error_outline</span>{{ portraitError }}
+      </div>
+      }
+
+      <button class="portrait-generate-btn" (click)="generatePortrait()">
+        <span class="material-symbols-outlined">face</span>
+        Generate my baby's portrait
+      </button>
+
+    </div>
+    }
+
+    <!-- ── Loading ── -->
+    @if(portraitLoading) {
+    <div class="portrait-loading">
+      <div class="portrait-loading__heart">💗</div>
+      <div class="portrait-loading__dots"><span></span><span></span><span></span></div>
+      <p class="portrait-loading__text">Claude is imagining your little one...</p>
+      <p class="portrait-loading__sub">
+        Blending {{ portraitForm.momEyeColor }} & {{ portraitForm.dadEyeColor }} eyes,
+        {{ portraitForm.momHairColor }} & {{ portraitForm.dadHairColor }} hair...
+      </p>
+    </div>
+    }
+
+    <!-- ── Result ── -->
+    @if(portrait && !portraitLoading) {
+    <div class="portrait-result">
+
+      <!-- Avatar SVG dynamique -->
+      <div class="portrait-avatar-wrap">
+        <div class="portrait-avatar-glow" [style.background]="'radial-gradient(circle, ' + babySkinColor + '40, transparent 70%)'"></div>
+        <svg class="portrait-avatar-svg" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Tête -->
+          <ellipse cx="100" cy="105" rx="62" ry="70" [attr.fill]="babySkinColor"/>
+          <!-- Oreilles -->
+          <ellipse cx="38" cy="108" rx="12" ry="16" [attr.fill]="babySkinColor"/>
+          <ellipse cx="162" cy="108" rx="12" ry="16" [attr.fill]="babySkinColor"/>
+          <!-- Cheveux -->
+          <ellipse cx="100" cy="50" rx="62" ry="32" [attr.fill]="babyHairColor"/>
+          <ellipse cx="60"  cy="62" rx="20" ry="22" [attr.fill]="babyHairColor"/>
+          <ellipse cx="140" cy="62" rx="20" ry="22" [attr.fill]="babyHairColor"/>
+          <!-- Sourcils -->
+          <path d="M72 88 Q82 83 92 88" stroke="#4a3028" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M108 88 Q118 83 128 88" stroke="#4a3028" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- Yeux blancs -->
+          <ellipse cx="82"  cy="100" rx="13" ry="10" fill="white"/>
+          <ellipse cx="118" cy="100" rx="13" ry="10" fill="white"/>
+          <!-- Iris colorés -->
+          <circle cx="82"  cy="100" r="7" [attr.fill]="babyEyeColor"/>
+          <circle cx="118" cy="100" r="7" [attr.fill]="babyEyeColor"/>
+          <!-- Pupilles -->
+          <circle cx="82"  cy="100" r="3.5" fill="#1a1008"/>
+          <circle cx="118" cy="100" r="3.5" fill="#1a1008"/>
+          <!-- Reflet yeux -->
+          <circle cx="85"  cy="97" r="1.8" fill="white" opacity="0.9"/>
+          <circle cx="121" cy="97" r="1.8" fill="white" opacity="0.9"/>
+          <!-- Nez -->
+          <ellipse cx="100" cy="118" rx="7" ry="5" [attr.fill]="babySkinColor" stroke="#d4956a" stroke-width="1"/>
+          <circle cx="96"  cy="120" r="2.5" fill="#c4856a" opacity="0.5"/>
+          <circle cx="104" cy="120" r="2.5" fill="#c4856a" opacity="0.5"/>
+          <!-- Bouche souriante -->
+          <path d="M86 135 Q100 148 114 135" stroke="#d4607a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M89 135 Q100 143 111 135" fill="#f4a0b0" opacity="0.4"/>
+          <!-- Joues roses -->
+          <ellipse cx="68"  cy="125" rx="14" ry="9" fill="#f4a0b0" opacity="0.35"/>
+          <ellipse cx="132" cy="125" rx="14" ry="9" fill="#f4a0b0" opacity="0.35"/>
+          <!-- Corps -->
+          <ellipse cx="100" cy="195" rx="38" ry="22" [attr.fill]="babySkinColor" opacity="0.4"/>
+          <!-- Sparkles -->
+          <text x="20"  y="40"  font-size="14" opacity="0.7">✨</text>
+          <text x="165" y="35"  font-size="12" opacity="0.6">⭐</text>
+          <text x="10"  y="160" font-size="10" opacity="0.5">💫</text>
+          <text x="172" y="155" font-size="11" opacity="0.6">🌟</text>
+        </svg>
+        <div class="portrait-week-badge">Week {{ currentWeek || selectedWeek }}</div>
+      </div>
+
+      <!-- Sections descriptives -->
+      <div class="portrait-sections">
+
+        <div class="portrait-section">
+          <span class="portrait-section-icon">👁️</span>
+          <div>
+            <span class="portrait-section-label">Eyes</span>
+            <p class="portrait-section-text">{{ portrait.eyes }}</p>
+          </div>
+        </div>
+
+        <div class="portrait-section">
+          <span class="portrait-section-icon">💇</span>
+          <div>
+            <span class="portrait-section-label">Hair</span>
+            <p class="portrait-section-text">{{ portrait.hair }}</p>
+          </div>
+        </div>
+
+        <div class="portrait-section">
+          <span class="portrait-section-icon">🌸</span>
+          <div>
+            <span class="portrait-section-label">Skin</span>
+            <p class="portrait-section-text">{{ portrait.skin }}</p>
+          </div>
+        </div>
+
+        <div class="portrait-section">
+          <span class="portrait-section-icon">😊</span>
+          <div>
+            <span class="portrait-section-label">Face</span>
+            <p class="portrait-section-text">{{ portrait.face }}</p>
+          </div>
+        </div>
+
+        <div class="portrait-section">
+          <span class="portrait-section-icon">🤲</span>
+          <div>
+            <span class="portrait-section-label">Hands</span>
+            <p class="portrait-section-text">{{ portrait.hands }}</p>
+          </div>
+        </div>
+
+        <div class="portrait-section portrait-section--dream">
+          <span class="portrait-section-icon">💭</span>
+          <div>
+            <span class="portrait-section-label">Right now...</span>
+            <p class="portrait-section-text">{{ portrait.dream }}</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Poème -->
+      <div class="portrait-poem-card">
+        <div class="portrait-poem-icon">🎨</div>
+        <p class="portrait-poem-text">{{ portrait.poem }}</p>
+      </div>
+
+      <!-- Message maman -->
+      <div class="portrait-message-card">
+        <span class="material-symbols-outlined">favorite</span>
+        <p class="portrait-message-text">{{ portrait.message }}</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="portrait-actions">
+        <button class="portrait-action-btn portrait-action-btn--copy" (click)="copyPortrait()">
+          <span class="material-symbols-outlined">{{ portraitCopied ? 'check' : 'content_copy' }}</span>
+          {{ portraitCopied ? 'Copied!' : 'Copy portrait' }}
+        </button>
+        <button class="portrait-action-btn portrait-action-btn--regen" (click)="portrait = null">
+          <span class="material-symbols-outlined">refresh</span> Change traits
+        </button>
+        <button class="portrait-action-btn portrait-action-btn--close" (click)="closePortraitPopup()">
+          Close
+        </button>
+      </div>
+
+    </div>
+    }
+
+  </div>
+</div>
+}

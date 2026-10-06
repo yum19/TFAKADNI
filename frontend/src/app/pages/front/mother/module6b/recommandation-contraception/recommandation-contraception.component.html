@@ -1,0 +1,381 @@
+<div class="recommendation-page">
+  <div class="recommendation-shell">
+
+    <!-- HERO -->
+    <section class="recommendation-hero">
+      <div class="hero-content">
+        <div class="hero-kicker">
+          <mat-icon>favorite</mat-icon>
+          <span>Contraception care</span>
+        </div>
+        <h1 class="hero-title">Recommendation <span>insight</span> hub</h1>
+        <p class="hero-lead">
+          Use this space to build a personalized contraception recommendation and review the full history in a calm, elegant layout.
+        </p>
+        <div class="hero-actions">
+          <a routerLink="/mother/postpartum/contraception" class="hero-secondary-btn">Back to contraception home</a>
+          <a routerLink="/mother/postpartum/contraception/methode" class="hero-primary-btn">Open contraception method</a>
+        </div>
+      </div>
+      <div class="hero-decoration" aria-hidden="true">
+        <span class="flower flower-1"><mat-icon>local_florist</mat-icon></span>
+        <span class="flower flower-2"><mat-icon>spa</mat-icon></span>
+        <span class="flower flower-3"><mat-icon>local_florist</mat-icon></span>
+        <span class="flower flower-4"><mat-icon>spa</mat-icon></span>
+        <span class="flower flower-5"><mat-icon>eco</mat-icon></span>
+        <span class="flower flower-6"><mat-icon>local_florist</mat-icon></span>
+        <span class="flower flower-7"><mat-icon>spa</mat-icon></span>
+        <span class="pulse-orb orb-1"></span>
+        <span class="pulse-orb orb-2"></span>
+        <span class="pulse-orb orb-3"></span>
+      </div>
+    </section>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-chip">
+        <div class="stat-icon-wrap sic-pink">🤖</div>
+        <div class="stat-body">
+          <div class="stat-number">{{ recommendationHistory.length }}</div>
+          <div class="stat-label">Recommandations IA</div>
+        </div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-icon-wrap sic-purple">🌸</div>
+        <div class="stat-body">
+          <div class="stat-number">{{ recommendationHistory.length > 0 ? '✓' : '—' }}</div>
+          <div class="stat-label">Profil analysé</div>
+        </div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-icon-wrap sic-teal">💊</div>
+        <div class="stat-body">
+          <div class="stat-number">{{ recommendationHistory.length > 0 ? recommendationHistory[0].age : '—' }}</div>
+          <div class="stat-label">Âge du dernier profil</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN STACK -->
+    <section class="recommendation-stack">
+
+      <!-- COLONNE 1 : Formulaire -->
+      <div class="glass-card">
+        <span class="card-petal card-petal-1" aria-hidden="true">🌸</span>
+        <span class="card-petal card-petal-2" aria-hidden="true">🌺</span>
+        <span class="card-petal card-petal-3" aria-hidden="true">✿</span>
+
+        <div class="card-title">
+          <div class="title-left">
+            <div class="title-icon-wrap"><mat-icon>auto_awesome</mat-icon></div>
+            <h3>Personalized recommendation</h3>
+          </div>
+          <span class="badge pink">✨ AI</span>
+        </div>
+
+        <div class="form-grid-compact">
+          <div class="form-row-inline">
+            <div class="form-group-sm">
+              <label>🎂 Age</label>
+              <input type="text" [(ngModel)]="profileForm.age" placeholder="Ex: 29" />
+            </div>
+            <div class="form-group-sm">
+              <label>🍼 Breastfeeding</label>
+              <select [(ngModel)]="profileForm.isBreastfeeding">
+                <option [ngValue]="true">Yes</option>
+                <option [ngValue]="false">No</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group-sm">
+            <label>🏥 Medical history</label>
+            <input type="text" [(ngModel)]="profileForm.medicalHistory" placeholder="Ex: hypertension, migraine..." />
+          </div>
+          <div class="form-group-sm">
+            <label>💡 Preference</label>
+            <input type="text" [(ngModel)]="profileForm.preference" placeholder="Ex: long-acting, hormone-free..." />
+          </div>
+        </div>
+
+        <button class="primary-btn" (click)="submitRecommendation()" [disabled]="loadingRecommendation">
+          <mat-icon>psychology</mat-icon>
+          {{ loadingRecommendation ? 'Analyzing...' : 'Get my recommendation' }}
+        </button>
+
+        <div class="result-box" *ngIf="recommendationResult">
+          <div class="result-head">
+            <mat-icon>favorite</mat-icon>
+            <h4>Assistant response</h4>
+          </div>
+          <p>{{ recommendationResult.aiRecommendation }}</p>
+          <div class="meta-line">📅 {{ formatDateTime(recommendationResult.createdAt) }}</div>
+        </div>
+      </div>
+
+      <!-- COLONNE 2 : Historique -->
+      <div class="glass-card">
+        <span class="card-petal card-petal-1" aria-hidden="true">🌷</span>
+        <span class="card-petal card-petal-2" aria-hidden="true">🌸</span>
+
+        <div class="card-title">
+          <div class="title-left">
+            <div class="title-icon-wrap"><mat-icon>history</mat-icon></div>
+            <h3>Recommendation history</h3>
+          </div>
+          <span class="badge teal">{{ filteredHistory.length }} result{{ filteredHistory.length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="filter-bar">
+          <span class="filter-label"><mat-icon>filter_list</mat-icon> Filter</span>
+          <div class="filter-pills">
+            <button class="filter-pill" [class.active]="breastfeedingFilter === null" (click)="setFilter(null)">
+              All
+            </button>
+            <button class="filter-pill pill-bf" [class.active]="breastfeedingFilter === true" (click)="setFilter(true)">
+              🍼 Breastfeeding
+            </button>
+            <button class="filter-pill pill-no-bf" [class.active]="breastfeedingFilter === false" (click)="setFilter(false)">
+              🚫 Not breastfeeding
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="filteredHistory.length === 0" class="empty-state">
+          <div class="empty-state-icon">🌸</div>
+          <mat-icon>inbox</mat-icon>
+          <p>{{ breastfeedingFilter !== null ? 'No results for this filter.' : 'No recommendations saved yet.' }}</p>
+        </div>
+
+        <div class="history-list" *ngIf="filteredHistory.length > 0">
+          <div class="history-item" *ngFor="let item of pagedHistory; let i = index">
+            <div class="history-top">
+              <div class="history-top-left">
+                <div class="history-avatar">{{ currentPage === 0 && i === 0 ? '🌟' : '💊' }}</div>
+                <div>
+                  <h4>{{ item.preference || 'No preference specified' }}</h4>
+                  <small>📅 {{ formatDateTime(item.createdAt) }}</small>
+                </div>
+              </div>
+              <button class="delete-btn" (click)="confirmDelete(item.id)" title="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+
+            <div class="history-tags">
+              <span class="htag htag-pink">🎂 Age: {{ item.age }}</span>
+              <span class="htag htag-purple" *ngIf="item.isBreastfeeding">🍼 Breastfeeding</span>
+              <span class="htag htag-teal" *ngIf="!item.isBreastfeeding">🚫 Not breastfeeding</span>
+              <span class="htag htag-pink" *ngIf="item.medicalHistory">🏥 History</span>
+            </div>
+
+            <p class="history-ai-text" *ngIf="item.aiRecommendation">
+              {{ item.aiRecommendation }}
+            </p>
+          </div>
+        </div>
+
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="page-btn nav-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button
+            class="page-btn"
+            *ngFor="let p of pageNumbers"
+            [class.active]="p === currentPage"
+            (click)="goToPage(p)">
+            {{ p + 1 }}
+          </button>
+          <button class="page-btn nav-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- POPUP CONFIRMATION SUPPRESSION -->
+<div class="modal-backdrop" *ngIf="deleteConfirmOpen" (click)="cancelDelete()">
+  <div class="confirm-card" (click)="$event.stopPropagation()">
+    <div class="confirm-icon">🗑️</div>
+    <h3>Delete recommendation?</h3>
+    <p>This action is permanent and cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="modal-cancel-btn" (click)="cancelDelete()">Cancel</button>
+      <button class="confirm-delete-btn" (click)="executeDelete()">
+        <mat-icon>delete_forever</mat-icon>
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CHATBOT FLOATING -->
+<div class="ai-helper-wrapper">
+  <div class="helper-label">Do you need help in contraception?</div>
+
+  <button class="ai-avatar-btn" (click)="openChatWidget()">
+    <div class="ai-avatar-core">
+      <mat-icon>support_agent</mat-icon>
+    </div>
+  </button>
+</div>
+
+<!-- CHAT WIDGET -->
+<div class="chat-widget" *ngIf="showChatWidget">
+  <div class="chat-widget-header">
+    <div class="chat-header-left">
+      <div class="mini-avatar">
+        <mat-icon>support_agent</mat-icon>
+      </div>
+      <div>
+        <h3>AI Contraception Help</h3>
+        <p>Soft guidance, session by session</p>
+      </div>
+    </div>
+
+    <button class="close-btn" (click)="closeChatWidget()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="session-choice" *ngIf="showSessionChoice">
+    <div class="choice-intro">
+      <h4>How would you like to continue?</h4>
+      <p>Select a previous session or begin a new conversation.</p>
+    </div>
+
+    <button class="new-session-btn" (click)="chooseNewSession()">
+      <mat-icon>add_comment</mat-icon>
+      Start a new session
+    </button>
+
+    <div class="previous-sessions" *ngIf="groupedSessions.length > 0">
+      <h5>Previous sessions</h5>
+
+      <div class="session-card" *ngFor="let session of groupedSessions">
+        <button class="session-main" (click)="chooseExistingSession(session)">
+          <div class="session-icon">
+            <mat-icon>forum</mat-icon>
+          </div>
+
+          <div class="session-text">
+            <strong>Session {{ session | slice:0:8 }}</strong>
+            <p>{{ getSessionPreview(session) }}</p>
+          </div>
+        </button>
+
+        <button class="session-delete-btn" (click)="deleteSession(session)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="no-session" *ngIf="groupedSessions.length === 0">
+      <mat-icon>chat</mat-icon>
+      <p>No previous sessions yet.</p>
+    </div>
+  </div>
+
+  <div class="chat-content" *ngIf="!showSessionChoice">
+    <div class="chat-toolbar">
+      <button class="back-choice-btn" (click)="backToSessionChoice()">
+        <mat-icon>arrow_back</mat-icon>
+        Sessions
+      </button>
+
+      <div class="current-session">
+        {{ currentSessionId ? ('Session ' + (currentSessionId | slice:0:8)) : 'New session' }}
+      </div>
+    </div>
+
+    <div class="chat-box">
+      <div *ngIf="chatMessages.length === 0" class="empty-chat">
+        <mat-icon>support_agent</mat-icon>
+        <p>Ask your first question about contraception.</p>
+      </div>
+
+      <div
+        *ngFor="let msg of chatMessages; trackBy: trackByMessageId"
+        class="message-wrapper"
+        [ngClass]="{
+          'user-wrapper': msg.role.toUpperCase() === 'USER',
+          'assistant-wrapper': msg.role.toUpperCase() === 'ASSISTANT'
+        }"
+      >
+        <div
+          class="message"
+          [ngClass]="{
+            'user-message': msg.role.toUpperCase() === 'USER',
+            'assistant-message': msg.role.toUpperCase() === 'ASSISTANT'
+          }"
+        >
+          <div class="message-head">
+            <span>{{ msg.role.toUpperCase() === 'USER' ? 'You' : 'Assistant' }}</span>
+            <small>{{ formatDateTime(msg.createdAt) }}</small>
+          </div>
+
+          <div *ngIf="editingMessageId !== msg.id; else editTemplate">
+            <p>{{ msg.content }}</p>
+          </div>
+
+          <ng-template #editTemplate>
+            <div class="edit-box" *ngIf="msg.role.toUpperCase() === 'USER'">
+              <textarea
+                rows="3"
+                [(ngModel)]="editingText"
+                placeholder="Edit your message..."
+              ></textarea>
+
+              <div class="edit-actions">
+                <button class="save-edit-btn" (click)="saveEdit(msg)" [disabled]="loadingChat">
+                  <mat-icon>check</mat-icon>
+                  Save
+                </button>
+
+                <button class="cancel-edit-btn" (click)="cancelEdit()">
+                  <mat-icon>close</mat-icon>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+
+        <div class="message-actions" *ngIf="editingMessageId !== msg.id">
+          <button
+            class="message-action-btn"
+            *ngIf="msg.role.toUpperCase() === 'USER'"
+            (click)="startEdit(msg)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+
+          <button
+            class="message-action-btn delete"
+            (click)="deleteMessage(msg.id)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="loadingChat" class="typing-indicator">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div class="chat-input-row">
+      <input
+        type="text"
+        [(ngModel)]="chatInput"
+        placeholder="Write your question here..."
+        (keyup.enter)="sendMessage()"
+      />
+      <button class="send-btn" (click)="sendMessage()" [disabled]="loadingChat">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

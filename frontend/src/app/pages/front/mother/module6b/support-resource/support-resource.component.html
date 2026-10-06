@@ -1,0 +1,605 @@
+<div class="postpartum-page support-resource-page">
+  <div class="page-shell">
+
+    <div class="toast-stack">
+      <div
+        class="toast"
+        *ngFor="let toast of toasts"
+        [ngClass]="'toast-' + toast.type"
+      >
+        <div class="toast-content">
+          <mat-icon>
+            {{
+              toast.type === 'success'
+                ? 'check_circle'
+                : toast.type === 'error'
+                ? 'error'
+                : 'info'
+            }}
+          </mat-icon>
+          <span>{{ toast.text }}</span>
+        </div>
+
+        <button type="button" class="toast-close" (click)="removeToast(toast.id)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <section class="hero-panel">
+      <div class="hero-gradient"></div>
+
+      <div class="hero-layout">
+        <div class="hero-content">
+          <p class="hero-kicker">Postpartum support</p>
+          <h1 class="hero-title">Support resources for you</h1>
+          <p class="hero-lead">
+            Explore personalized articles, calming audio, helpful videos, and urgent hotlines tailored to your current needs.
+          </p>
+
+          <div class="current-situation-badge" [ngClass]="getRiskBadgeClass(detectedRiskLevel)">
+            <mat-icon>favorite</mat-icon>
+            <span>Current support level: {{ situationLabel }}</span>
+          </div>
+
+          <div class="hero-actions">
+            <a routerLink="/mother/postpartum" class="secondary-btn">Back to postpartum hub</a>
+            <a routerLink="/mother/postpartum/mood-log" class="glass-btn">Mood tracking</a>
+            <button type="button" class="primary-btn" (click)="resetFilters()">
+              <mat-icon>auto_awesome</mat-icon>
+              <span>Refresh your support</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <article class="hero-stat-card">
+            <div class="stat-icon"><mat-icon>favorite</mat-icon></div>
+            <div>
+              <p>Saved</p>
+              <h3>{{ savedCount }}</h3>
+            </div>
+          </article>
+
+          <article class="hero-stat-card">
+            <div class="stat-icon"><mat-icon>library_books</mat-icon></div>
+            <div>
+              <p>Articles</p>
+              <h3>{{ articleCount }}</h3>
+            </div>
+          </article>
+
+          <article class="hero-stat-card">
+            <div class="stat-icon"><mat-icon>perm_media</mat-icon></div>
+            <div>
+              <p>Media</p>
+              <h3>{{ mediaCount }}</h3>
+            </div>
+          </article>
+
+          <article class="hero-stat-card">
+            <div class="stat-icon"><mat-icon>support_agent</mat-icon></div>
+            <div>
+              <p>Hotlines</p>
+              <h3>{{ hotlineCount }}</h3>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="filters-card">
+      <div class="filter-head">
+        <h2>Find the right support</h2>
+        <p>Search and filter the library in a smarter way.</p>
+      </div>
+
+      <div class="toolbar-grid">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            name="searchTerm"
+            (ngModelChange)="onSearchChanged()"
+            placeholder="Search by title, description, category..."
+          />
+        </div>
+
+        <div class="toolbar-select">
+          <label>Risk level</label>
+          <select [(ngModel)]="selectedRiskLevel" name="selectedRiskLevel" (ngModelChange)="onFiltersChanged()">
+            <option value="ALL">All</option>
+            <option value="LOW">Low</option>
+            <option value="MODERATE">Moderate</option>
+            <option value="HIGH">High</option>
+          </select>
+        </div>
+
+        <div class="toolbar-select">
+          <label>Type</label>
+          <select [(ngModel)]="selectedType" name="selectedType" (ngModelChange)="onFiltersChanged()">
+            <option value="ALL">All</option>
+            <option value="ARTICLE">Article</option>
+            <option value="AUDIO">Audio</option>
+            <option value="VIDEO">Video</option>
+            <option value="HOTLINE">Hotline</option>
+          </select>
+        </div>
+
+        <div class="toolbar-select">
+          <label>Language</label>
+          <select [(ngModel)]="selectedLanguage" name="selectedLanguage" (ngModelChange)="onFiltersChanged()">
+            <option value="ALL">All</option>
+            <option value="FR">French</option>
+            <option value="AR">Arabic</option>
+            <option value="EN">English</option>
+          </select>
+        </div>
+
+        <div class="toolbar-select">
+          <label>Category</label>
+          <select [(ngModel)]="selectedCategory" name="selectedCategory" (ngModelChange)="onFiltersChanged()">
+            <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+   <section class="recommended-section">
+  <div class="section-head">
+    <div>
+      <p class="section-kicker">Personalized</p>
+      <h2>Recommended for you</h2>
+      <p>
+        Only resources matching your latest screening result are shown here.
+      </p>
+    </div>
+  </div>
+
+  <div class="loading-box" *ngIf="loadingRecommended">
+    <div class="spinner"></div>
+    <span>Loading recommended resources...</span>
+  </div>
+
+  <div class="recommended-grid" *ngIf="!loadingRecommended && recommendedResources.length > 0">
+    <article
+      class="recommended-card"
+      *ngFor="let item of recommendedResources; trackBy: trackByResourceId"
+      (click)="openViewer(item, $event)"
+    >
+      <div class="recommended-top">
+        <span class="recommendation-badge">{{ getRecommendationReason(item) }}</span>
+
+        <button
+          type="button"
+          class="favorite-icon-btn"
+          (click)="toggleFavorite(item, $event)"
+        >
+          <mat-icon>{{ isFavorite(item.id) ? 'favorite' : 'favorite_border' }}</mat-icon>
+        </button>
+      </div>
+
+      <h3>{{ getDisplayTitle(item) }}</h3>
+      <p>{{ getPreviewText(item) }}</p>
+
+      <div class="recommended-meta">
+        <span class="soft-badge" [ngClass]="getTypeClass(item.type)">
+          {{ item.type }}
+        </span>
+        <span class="soft-badge" [ngClass]="getRiskBadgeClass(item.riskLevelTarget)">
+          {{ item.riskLevelTarget }}
+        </span>
+      </div>
+    </article>
+  </div>
+
+  <div class="empty-box" *ngIf="!loadingRecommended && recommendedResources.length === 0">
+    No recommended resources found for your latest risk level.
+  </div>
+</section>
+
+    <section class="care-path-section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Guided experience</p>
+          <h2>Your care path</h2>
+          <p>Move step by step through the most relevant kinds of support.</p>
+        </div>
+      </div>
+
+      <div class="care-path-grid">
+        <article class="care-step-card" *ngFor="let step of carePath">
+          <div class="care-step-head">
+            <div class="care-step-icon">
+              <mat-icon>{{ step.icon }}</mat-icon>
+            </div>
+            <div>
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.subtitle }}</p>
+            </div>
+          </div>
+
+          <div class="care-step-list" *ngIf="step.resources.length > 0; else emptyStep">
+            <button
+              type="button"
+              class="care-resource-item"
+              *ngFor="let item of step.resources; trackBy: trackByResourceId"
+              (click)="openViewer(item)"
+            >
+              <mat-icon>{{ getTypeIcon(item.type) }}</mat-icon>
+              <span>{{ item.title }}</span>
+            </button>
+          </div>
+
+          <ng-template #emptyStep>
+            <div class="empty-mini">No matching resource in this step.</div>
+          </ng-template>
+        </article>
+      </div>
+    </section>
+
+    <section class="favorites-section" *ngIf="favoriteResources.length > 0">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Saved by you</p>
+          <h2>Your favorites</h2>
+          <p>Quick access to the resources you want to keep close.</p>
+        </div>
+      </div>
+
+      <div class="favorite-strip">
+        <button
+          type="button"
+          class="favorite-pill"
+          *ngFor="let item of favoriteResources; trackBy: trackByResourceId"
+          (click)="openViewer(item)"
+        >
+          <mat-icon>favorite</mat-icon>
+          <span>{{ item.title }}</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="resource-library-section">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Complete library</p>
+          <h2>All support resources</h2>
+          <p>{{ totalCount }} resource(s) found.</p>
+        </div>
+      </div>
+
+      <div class="loading-box" *ngIf="loading">
+        <div class="spinner"></div>
+        <span>Loading support resources...</span>
+      </div>
+
+      <div class="resource-grid" *ngIf="!loading && filteredResources.length > 0">
+        <article
+          class="resource-card"
+          *ngFor="let item of paginatedResources; trackBy: trackByResourceId"
+        >
+          <div class="resource-preview" [ngClass]="getTypeClass(item.type)">
+            <ng-container [ngSwitch]="item.type.toUpperCase()">
+
+              <ng-container *ngSwitchCase="'VIDEO'">
+                <ng-container *ngIf="isYoutubeOrVimeo(item.url); else directVideoBlock">
+                  <iframe
+                    class="embedded-frame"
+                    [src]="getSanitizedVideoUrl(item.url)"
+                    title="Video resource"
+                    allowfullscreen
+                  ></iframe>
+                </ng-container>
+
+                <ng-template #directVideoBlock>
+                  <video
+                    *ngIf="isDirectVideo(item.url)"
+                    class="media-player"
+                    [src]="item.url"
+                    controls
+                    preload="metadata"
+                  ></video>
+
+                  <div class="media-fallback" *ngIf="!isDirectVideo(item.url)">
+                    <mat-icon>play_circle</mat-icon>
+                    <p>Video preview unavailable</p>
+                  </div>
+                </ng-template>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="'AUDIO'">
+                <div class="audio-preview">
+                  <div class="audio-visual">
+                    <span></span><span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span><span></span>
+                  </div>
+
+                  <audio
+                    *ngIf="isDirectAudio(item.url)"
+                    class="audio-player"
+                    [src]="item.url"
+                    controls
+                    preload="metadata"
+                  ></audio>
+
+                  <iframe
+                    *ngIf="!isDirectAudio(item.url) && isSpotify(item.url)"
+                    class="spotify-frame"
+                    [src]="getSpotifyEmbedUrl(item.url)"
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                  ></iframe>
+
+                  <div class="media-fallback" *ngIf="!isDirectAudio(item.url) && !isSpotify(item.url)">
+                    <mat-icon>music_note</mat-icon>
+                    <p>Audio preview unavailable</p>
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="'HOTLINE'">
+                <div class="hotline-preview">
+                  <mat-icon>call</mat-icon>
+                  <h4>{{ item.phoneNumber || 'No number available' }}</h4>
+                  <p>{{ item.description }}</p>
+                </div>
+              </ng-container>
+
+              <ng-container *ngSwitchDefault>
+                <div class="article-preview">
+                  <img
+                    *ngIf="item.thumbnailUrl"
+                    [src]="item.thumbnailUrl"
+                    alt="Resource thumbnail"
+                    class="article-thumbnail"
+                  />
+                  <div class="article-placeholder" *ngIf="!item.thumbnailUrl">
+                    <mat-icon>article</mat-icon>
+                  </div>
+                  <p>{{ getPreviewText(item) }}</p>
+                </div>
+              </ng-container>
+
+            </ng-container>
+          </div>
+
+          <div class="resource-body">
+            <div class="resource-top-row">
+              <span class="resource-type-badge" [ngClass]="getTypeClass(item.type)">
+                {{ item.type }}
+              </span>
+
+              <button
+                type="button"
+                class="favorite-icon-btn"
+                (click)="toggleFavorite(item, $event)"
+              >
+                <mat-icon>{{ isFavorite(item.id) ? 'favorite' : 'favorite_border' }}</mat-icon>
+              </button>
+            </div>
+
+            <h3>{{ item.title }}</h3>
+            <p class="resource-description">{{ item.description }}</p>
+
+            <div class="resource-meta">
+              <span class="soft-badge">{{ item.category }}</span>
+              <span class="soft-badge">{{ item.language }}</span>
+              <span class="soft-badge" [ngClass]="getRiskBadgeClass(item.riskLevelTarget)">
+                {{ item.riskLevelTarget }}
+              </span>
+              <span class="soft-badge" *ngIf="item.estimatedMinutes">
+                {{ item.estimatedMinutes }} min
+              </span>
+            </div>
+
+            <div class="resource-actions">
+              <button
+                *ngIf="item.type.toUpperCase() === 'ARTICLE'"
+                type="button"
+                class="primary-btn small-btn"
+                (click)="openArticle(item, $event)"
+              >
+                <mat-icon>article</mat-icon>
+                <span>Read article</span>
+              </button>
+
+              <button
+                *ngIf="item.type.toUpperCase() === 'AUDIO'"
+                type="button"
+                class="primary-btn small-btn"
+                (click)="listenAudio(item, $event)"
+              >
+                <mat-icon>headphones</mat-icon>
+                <span>Listen now</span>
+              </button>
+
+              <button
+                *ngIf="item.type.toUpperCase() === 'VIDEO'"
+                type="button"
+                class="primary-btn small-btn"
+                (click)="openViewer(item)"
+              >
+                <mat-icon>play_circle</mat-icon>
+                <span>Watch now</span>
+              </button>
+
+              <button
+                *ngIf="item.type.toUpperCase() !== 'HOTLINE' && item.type.toUpperCase() !== 'ARTICLE' && item.type.toUpperCase() !== 'AUDIO' && item.type.toUpperCase() !== 'VIDEO'"
+                type="button"
+                class="primary-btn small-btn"
+                (click)="openViewer(item)"
+              >
+                <mat-icon>visibility</mat-icon>
+                <span>Open now</span>
+              </button>
+
+              <button type="button" class="secondary-btn small-btn" (click)="shareResource(item, $event)">
+                <mat-icon>share</mat-icon>
+                <span>Share</span>
+              </button>
+
+              <button
+                *ngIf="item.type.toUpperCase() === 'HOTLINE'"
+                type="button"
+                class="danger-btn small-btn"
+                (click)="openPhone(item, $event)"
+              >
+                <mat-icon>call</mat-icon>
+                <span>Call now</span>
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="empty-box" *ngIf="!loading && filteredResources.length === 0">
+        No support resources match the current filters.
+      </div>
+
+      <mat-paginator
+        *ngIf="!loading && filteredResources.length > pageSize"
+        class="library-paginator"
+        [length]="filteredResources.length"
+        [pageIndex]="currentPageIndex"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[4]"
+        [hidePageSize]="true"
+        aria-label="Support resources pagination"
+        (page)="onPageChange($event)"
+      ></mat-paginator>
+    </section>
+
+    <div class="viewer-backdrop" *ngIf="isViewerOpen" (click)="closeViewer()"></div>
+
+    <section class="viewer-modal" *ngIf="isViewerOpen && activeViewerResource">
+      <div class="viewer-card" (click)="$event.stopPropagation()">
+        <div class="viewer-head">
+          <div>
+            <p class="viewer-kicker">{{ activeViewerResource.category }} · {{ activeViewerResource.type }}</p>
+            <h2>{{ activeViewerResource.title }}</h2>
+            <p class="viewer-subtitle">{{ activeViewerResource.description }}</p>
+          </div>
+
+          <button type="button" class="icon-btn" (click)="closeViewer()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+       <div class="viewer-content" [ngSwitch]="activeViewerResource.type.toUpperCase()">
+
+  <ng-container *ngSwitchCase="'VIDEO'">
+    <iframe
+      *ngIf="isYoutubeOrVimeo(activeViewerResource.url)"
+      class="viewer-frame"
+      [src]="getSanitizedVideoUrl(activeViewerResource.url)"
+      title="Video resource"
+      allowfullscreen
+    ></iframe>
+
+    <video
+      *ngIf="!isYoutubeOrVimeo(activeViewerResource.url) && isDirectVideo(activeViewerResource.url)"
+      class="viewer-video"
+      [src]="activeViewerResource.url"
+      controls
+      preload="metadata"
+    ></video>
+
+    <div
+      class="media-fallback"
+      *ngIf="!isYoutubeOrVimeo(activeViewerResource.url) && !isDirectVideo(activeViewerResource.url)"
+    >
+      <mat-icon>play_circle</mat-icon>
+      <p>Video preview unavailable</p>
+    </div>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'AUDIO'">
+    <div class="viewer-audio-box">
+      <div class="audio-visual large">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <audio
+        *ngIf="isDirectAudio(activeViewerResource.url)"
+        class="viewer-audio"
+        [src]="activeViewerResource.url"
+        controls
+        preload="metadata"
+      ></audio>
+
+      <iframe
+        *ngIf="!isDirectAudio(activeViewerResource.url) && canEmbedSpotify(activeViewerResource.url)"
+        class="spotify-frame large"
+        [src]="getSpotifyEmbedUrl(activeViewerResource.url)"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+      ></iframe>
+
+      <div
+        class="media-fallback"
+        *ngIf="!isDirectAudio(activeViewerResource.url) && !canEmbedSpotify(activeViewerResource.url)"
+      >
+        <mat-icon>music_note</mat-icon>
+        <p>
+          Audio preview unavailable. Save in database a direct .mp3 link
+          or an open.spotify.com episode/show/track link.
+        </p>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'HOTLINE'">
+    <div class="viewer-phone-box">
+      <mat-icon>call</mat-icon>
+      <h3>{{ activeViewerResource.phoneNumber || 'No number available' }}</h3>
+      <p>{{ activeViewerResource.description }}</p>
+
+      <div class="viewer-actions">
+        <button type="button" class="primary-btn" (click)="openPhone(activeViewerResource)">
+          <mat-icon>call</mat-icon>
+          <span>Call now</span>
+        </button>
+
+        <button type="button" class="secondary-btn" (click)="copyPhoneNumber(activeViewerResource)">
+          <mat-icon>content_copy</mat-icon>
+          <span>Copy number</span>
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngSwitchDefault>
+    <div class="viewer-article-box">
+      <div class="article-full-text" *ngIf="activeViewerResource.contentText && activeViewerResource.contentText.trim(); else articleFallback">
+        {{ activeViewerResource.contentText }}
+      </div>
+
+      <ng-template #articleFallback>
+        <div class="article-full-text">
+          {{ activeViewerResource.description || 'No article text available.' }}
+        </div>
+      </ng-template>
+
+      <div class="viewer-actions" *ngIf="activeViewerResource.url">
+        <a
+          class="primary-btn"
+          [href]="activeViewerResource.url"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <mat-icon>open_in_new</mat-icon>
+          <span>Open source</span>
+        </a>
+      </div>
+    </div>
+  </ng-container>
+
+</div>
+      </div>
+    </section>
+
+  </div>
+</div>

@@ -1,0 +1,194 @@
+<section class="document-page">
+  <div class="document-shell">
+    <header class="topbar"></header>
+
+    <section class="hero-card">
+      <div class="hero-copy">
+        <p class="eyebrow">Feeding logs · daily routine</p>
+        <h1>
+          Nourish with love,
+          <span>beautifully logged</span>
+        </h1>
+        <p class="hero-text">Log sessions with mode, quantity, duration and side used.</p>
+      </div>
+
+      <div class="hero-side">
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-number">{{ itemsCount }}</span>
+            <span class="stat-label">Entries</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">{{ babyId }}</span>
+            <span class="stat-label">Baby ID</span>
+          </div>
+        </div>
+
+        <button type="button" class="add-document-btn" (click)="openAddEntryModal()">
+          <span class="plus">+</span>
+          Add entry
+        </button>
+      </div>
+    </section>
+
+    <div class="messages">
+      <div class="status" *ngIf="loading">Loading data...</div>
+      <div class="status error" *ngIf="!loading && error">{{ error }}</div>
+      <div class="status error" *ngIf="!loading && submitError">{{ submitError }}</div>
+      <div class="status success" *ngIf="!loading && submitSuccess">{{ submitSuccess }}</div>
+    </div>
+
+    <section class="gallery-section">
+      <div class="list-toolbar" *ngIf="!loading && !error && records.length > 0">
+        <label class="search-box">
+          <span>Search</span>
+          <input
+            type="text"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchChange($event)"
+            placeholder="Search feeding records..."
+          />
+        </label>
+      </div>
+
+      <div *ngIf="!loading && !error && records.length === 0" class="empty-state">
+        <h3>No feeding records yet</h3>
+        <p>Add the first entry to start tracking feeding gently.</p>
+        <button type="button" class="empty-add-btn" (click)="openAddEntryModal()">
+          Add first entry
+        </button>
+      </div>
+
+      <div *ngIf="!loading && !error && records.length > 0 && filteredRecords.length === 0" class="empty-state">
+        <h3>No matching feeding records</h3>
+        <p>Try a different search term.</p>
+      </div>
+
+      <div class="documents-grid feeding-grid" *ngIf="!loading && !error && paginatedRecords.length > 0">
+        <article
+          class="document-card"
+          *ngFor="let item of paginatedRecords; let i = index"
+          [style.--delay]="(i * 60) + 'ms'"
+        >
+          <div class="document-body">
+            <div class="record-fields">
+              <div class="detail-row" *ngFor="let field of displayEntries(item)">
+                <span>{{ field.key }}</span>
+                <strong>{{ field.value }}</strong>
+              </div>
+            </div>
+
+            <div class="document-footer">
+              <div class="card-actions">
+                <button type="button" class="update-btn" (click)="openUpdateEntryModal(item)">
+                  Update
+                </button>
+                <button type="button" class="delete-btn" (click)="deleteRecord(item.id)">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="pagination-bar" *ngIf="!loading && !error && filteredRecords.length > pageSize">
+        <button type="button" class="pagination-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+          Prev
+        </button>
+
+        <div class="pagination-pages">
+          <button
+            type="button"
+            class="pagination-page"
+            *ngFor="let page of pageNumbers"
+            [class.active]="currentPage === page"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        </div>
+
+        <button type="button" class="pagination-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          Next
+        </button>
+      </div>
+    </section>
+  </div>
+</section>
+
+<div
+  class="feeding-modal-backdrop"
+  *ngIf="isAddEntryModalOpen"
+  (click)="closeAddEntryModal()"
+>
+  <section
+    class="feeding-modal"
+    *ngIf="form"
+    [formGroup]="form"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="modal-head">
+      <span class="filters-title">{{ isEditMode ? 'Update feeding entry' : 'Add feeding entry' }}</span>
+      <button type="button" class="modal-close-btn" (click)="closeAddEntryModal()">×</button>
+    </div>
+
+    <div class="feeding-form-grid">
+      <label class="feeding-field">
+        <span>Feeding date</span>
+        <input type="date" formControlName="feedingDate" />
+        <small *ngIf="hasError('feedingDate')">Date is required.</small>
+      </label>
+
+      <label class="feeding-field">
+        <span>Feeding time</span>
+        <input type="time" formControlName="feedingTime" />
+        <small *ngIf="hasError('feedingTime')">Time is required.</small>
+      </label>
+
+      <label class="feeding-field">
+        <span>Feeding mode</span>
+        <select formControlName="feedingMode">
+          <option value="breastfeeding">Breastfeeding</option>
+          <option value="bottle">Bottle</option>
+          <option value="pumped">Pumped</option>
+          <option value="mixed">Mixed</option>
+        </select>
+      </label>
+
+      <label class="feeding-field">
+        <span>Quantity (ml)</span>
+        <input type="number" formControlName="quantity" />
+      </label>
+
+      <label class="feeding-field">
+        <span>Duration (minutes)</span>
+        <input type="number" formControlName="duration" />
+      </label>
+
+      <label class="feeding-field">
+        <span>Side used</span>
+        <select formControlName="sideUsed">
+          <option value="LEFT">LEFT</option>
+          <option value="RIGHT">RIGHT</option>
+          <option value="BOTH">BOTH</option>
+          <option value="NONE">NONE</option>
+        </select>
+      </label>
+
+      <label class="feeding-field full">
+        <span>Notes</span>
+        <textarea rows="3" formControlName="notes"></textarea>
+      </label>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="secondary-btn" (click)="closeAddEntryModal()">
+        Cancel
+      </button>
+      <button type="button" class="primary-btn" [disabled]="submitting" (click)="submit()">
+        {{ submitting ? 'Saving...' : (isEditMode ? 'Update entry' : 'Create entry') }}
+      </button>
+    </div>
+  </section>
+</div>

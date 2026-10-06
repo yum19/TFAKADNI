@@ -1,0 +1,590 @@
+<!-- Header -->
+<div class="admin-hero">
+  <div class="container">
+    <div class="row gx-3 align-items-center py-4">
+      <div class="col">
+        <h1 class="hero-title mb-1">Fetal Admin</h1>
+        <p class="hero-sub">Manage fetal content week by week</p>
+      </div>
+      <div class="col-auto d-flex gap-2 align-items-center">
+        <button mat-raised-button (click)="loadAll()" class="btn-refresh">
+          <mat-icon class="me-1">refresh</mat-icon> Refresh
+        </button>
+        <!-- ← AI BUTTON -->
+        <button mat-raised-button (click)="openAiPopup()" class="btn-ai"
+                [disabled]="getUnconfiguredWeeks().length === 0">
+          <span class="ai-btn-icon">🤖</span>
+          Generate with AI
+          @if(getUnconfiguredWeeks().length > 0) {
+            <span class="ai-btn-badge">{{ getUnconfiguredWeeks().length }}</span>
+          }
+        </button>
+        <button mat-raised-button (click)="openForm()" class="btn-create" [disabled]="milestones.length >= 40">
+          <mat-icon class="me-1">add_circle</mat-icon>
+          @if(milestones.length >= 40) { 40/40 Complete } @else { Add week }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  @if(loading) { <mat-progress-bar mode="indeterminate" class="mb-4"></mat-progress-bar> }
+
+  <!-- STATS -->
+  <div class="row gx-3 mb-4">
+    <div class="col-12 col-sm-4">
+      <mat-card class="stat-card mb-3">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" style="background:rgba(233,30,99,0.12);color:#e91e63">
+              <span class="material-symbols-outlined">child_care</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ milestones.length }}/40</h1>
+              <p class="stat-label mb-0">Weeks configured</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="col-12 col-sm-4">
+      <mat-card class="stat-card mb-3">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" style="background:rgba(255,152,0,0.12);color:#ff9800">
+              <span class="material-symbols-outlined">pending</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ getUnconfiguredWeeks().length }}</h1>
+              <p class="stat-label mb-0">Missing weeks</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="col-12 col-sm-4">
+      <mat-card class="stat-card mb-3">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" style="background:rgba(76,175,80,0.12);color:#4caf50">
+              <span class="material-symbols-outlined">bar_chart</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ (milestones.length / 40 * 100).toFixed(0) }}%</h1>
+              <p class="stat-label mb-0">Completion</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- WEEKS DOTS -->
+  <mat-card class="mb-5">
+    <mat-card-header>
+      <div class="w-100 mb-3">
+        <h3 class="mb-1">Overview — 40 weeks</h3>
+        <p class="small text-secondary mb-0">🟢 configured &nbsp;⚫ missing</p>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="weeks-grid">
+        @for(week of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40]; track week) {
+        <div class="week-dot" [class.configured]="isConfigured(week)" [title]="'Week ' + week">{{ week }}</div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- TRIMESTER 1 -->
+  @if(milestonesT1.length > 0) {
+  <div class="trim-section mb-5">
+    <div class="trim-header" style="--trim-color:#e91e63">
+      <div class="d-flex align-items-center gap-3">
+        <div class="trim-badge" style="background:rgba(233,30,99,0.12);color:#e91e63">T1</div>
+        <div>
+          <h3 class="mb-0" style="color:#e91e63">Trimester 1</h3>
+          <p class="small text-secondary mb-0">Weeks 1–12 · {{ milestonesT1.length }} configured</p>
+        </div>
+      </div>
+      <div class="carousel-nav">
+        <button class="nav-btn" (click)="prev('T1')" [disabled]="pageT1 === 0"><mat-icon>chevron_left</mat-icon></button>
+        <span class="nav-count">{{ pageT1 * 3 + 1 }}–{{ min(pageT1 * 3 + 3, milestonesT1.length) }} / {{ milestonesT1.length }}</span>
+        <button class="nav-btn" (click)="next('T1')" [disabled]="(pageT1 + 1) * 3 >= milestonesT1.length"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+    </div>
+    <div class="cards-carousel">
+      @for(m of getPage(milestonesT1, pageT1); track m.id) {
+      <div class="milestone-card" (click)="openDetail(m)" style="--card-accent:#e91e63">
+        <div class="card-inner">
+          <div class="card-top">
+            <div class="week-badge" style="background:rgba(233,30,99,0.12);color:#e91e63;border-color:rgba(233,30,99,0.3)">W{{ m.weekNumber }}</div>
+            <div class="card-actions">
+              <button mat-icon-button (click)="openEditForm(m,$event)"><mat-icon style="color:#ff9800;font-size:1.1rem">edit</mat-icon></button>
+              <button mat-icon-button (click)="delete(m,$event)"><mat-icon style="color:#f44336;font-size:1.1rem">delete</mat-icon></button>
+            </div>
+          </div>
+          <h4 class="card-title">{{ m.title }}</h4>
+          <p class="card-desc">{{ m.description }}</p>
+        </div>
+        <div class="card-footer">
+          <div class="card-chips">
+            @if(m.sizeCm) { <span class="chip">📏 {{ m.sizeCm }} cm</span> }
+            @if(m.weightG) { <span class="chip">⚖️ {{ m.weightG }} g</span> }
+            @if(m.sizeComparison) { <span class="chip">{{ getComparisonEmoji(m.sizeComparison) }} {{ m.sizeComparison }}</span> }
+          </div>
+          <p class="card-hint mb-0">Voir →</p>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- TRIMESTER 2 -->
+  @if(milestonesT2.length > 0) {
+  <div class="trim-section mb-5">
+    <div class="trim-header" style="--trim-color:#ff9800">
+      <div class="d-flex align-items-center gap-3">
+        <div class="trim-badge" style="background:rgba(255,152,0,0.12);color:#ff9800">T2</div>
+        <div>
+          <h3 class="mb-0" style="color:#ff9800">Trimester 2</h3>
+          <p class="small text-secondary mb-0">Weeks 13–26 · {{ milestonesT2.length }} configured</p>
+        </div>
+      </div>
+      <div class="carousel-nav">
+        <button class="nav-btn" (click)="prev('T2')" [disabled]="pageT2 === 0"><mat-icon>chevron_left</mat-icon></button>
+        <span class="nav-count">{{ pageT2 * 3 + 1 }}–{{ min(pageT2 * 3 + 3, milestonesT2.length) }} / {{ milestonesT2.length }}</span>
+        <button class="nav-btn" (click)="next('T2')" [disabled]="(pageT2 + 1) * 3 >= milestonesT2.length"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+    </div>
+    <div class="cards-carousel">
+      @for(m of getPage(milestonesT2, pageT2); track m.id) {
+      <div class="milestone-card" (click)="openDetail(m)" style="--card-accent:#ff9800">
+        <div class="card-inner">
+          <div class="card-top">
+            <div class="week-badge" style="background:rgba(255,152,0,0.12);color:#ff9800;border-color:rgba(255,152,0,0.3)">W{{ m.weekNumber }}</div>
+            <div class="card-actions">
+              <button mat-icon-button (click)="openEditForm(m,$event)"><mat-icon style="color:#ff9800;font-size:1.1rem">edit</mat-icon></button>
+              <button mat-icon-button (click)="delete(m,$event)"><mat-icon style="color:#f44336;font-size:1.1rem">delete</mat-icon></button>
+            </div>
+          </div>
+          <h4 class="card-title">{{ m.title }}</h4>
+          <p class="card-desc">{{ m.description }}</p>
+        </div>
+        <div class="card-footer">
+          <div class="card-chips">
+            @if(m.sizeCm) { <span class="chip">📏 {{ m.sizeCm }} cm</span> }
+            @if(m.weightG) { <span class="chip">⚖️ {{ m.weightG }} g</span> }
+            @if(m.sizeComparison) { <span class="chip">{{ getComparisonEmoji(m.sizeComparison) }} {{ m.sizeComparison }}</span> }
+          </div>
+          <p class="card-hint mb-0">Voir →</p>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- TRIMESTER 3 -->
+  @if(milestonesT3.length > 0) {
+  <div class="trim-section mb-5">
+    <div class="trim-header" style="--trim-color:#9c27b0">
+      <div class="d-flex align-items-center gap-3">
+        <div class="trim-badge" style="background:rgba(156,39,176,0.12);color:#9c27b0">T3</div>
+        <div>
+          <h3 class="mb-0" style="color:#9c27b0">Trimester 3</h3>
+          <p class="small text-secondary mb-0">Weeks 27–40 · {{ milestonesT3.length }} configured</p>
+        </div>
+      </div>
+      <div class="carousel-nav">
+        <button class="nav-btn" (click)="prev('T3')" [disabled]="pageT3 === 0"><mat-icon>chevron_left</mat-icon></button>
+        <span class="nav-count">{{ pageT3 * 3 + 1 }}–{{ min(pageT3 * 3 + 3, milestonesT3.length) }} / {{ milestonesT3.length }}</span>
+        <button class="nav-btn" (click)="next('T3')" [disabled]="(pageT3 + 1) * 3 >= milestonesT3.length"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+    </div>
+    <div class="cards-carousel">
+      @for(m of getPage(milestonesT3, pageT3); track m.id) {
+      <div class="milestone-card" (click)="openDetail(m)" style="--card-accent:#9c27b0">
+        <div class="card-inner">
+          <div class="card-top">
+            <div class="week-badge" style="background:rgba(156,39,176,0.12);color:#9c27b0;border-color:rgba(156,39,176,0.3)">W{{ m.weekNumber }}</div>
+            <div class="card-actions">
+              <button mat-icon-button (click)="openEditForm(m,$event)"><mat-icon style="color:#ff9800;font-size:1.1rem">edit</mat-icon></button>
+              <button mat-icon-button (click)="delete(m,$event)"><mat-icon style="color:#f44336;font-size:1.1rem">delete</mat-icon></button>
+            </div>
+          </div>
+          <h4 class="card-title">{{ m.title }}</h4>
+          <p class="card-desc">{{ m.description }}</p>
+        </div>
+        <div class="card-footer">
+          <div class="card-chips">
+            @if(m.sizeCm) { <span class="chip">📏 {{ m.sizeCm }} cm</span> }
+            @if(m.weightG) { <span class="chip">⚖️ {{ m.weightG }} g</span> }
+            @if(m.sizeComparison) { <span class="chip">{{ getComparisonEmoji(m.sizeComparison) }} {{ m.sizeComparison }}</span> }
+          </div>
+          <p class="card-hint mb-0">Voir →</p>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  @if(!loading && milestones.length === 0) {
+  <mat-card>
+    <mat-card-content class="text-center py-5">
+      <span class="material-symbols-outlined d-block mb-3" style="font-size:4rem;color:rgba(233,30,99,0.3)">child_care</span>
+      <h3 class="mb-2">No weeks configured</h3>
+      <p class="text-secondary mb-4">Use AI to generate content or add manually.</p>
+      <div class="d-flex gap-2 justify-content-center">
+        <button mat-raised-button (click)="openAiPopup()" class="btn-ai">
+          <span class="ai-btn-icon">🤖</span> Generate with AI
+        </button>
+        <button mat-raised-button (click)="openForm()" class="btn-create">
+          <mat-icon class="me-1">add_circle</mat-icon> Add manually
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>
+
+<!-- ===== AI GENERATION POPUP ===== -->
+@if(showAiPopup) {
+<div class="popup-overlay" (click)="closeAiPopup()">
+  <div class="popup-box ai-popup-box" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="ai-popup-header">
+      <div class="ai-popup-icon">🤖</div>
+      <div>
+        <h3 class="ai-popup-title">AI Fetal Content Generator</h3>
+        <p class="ai-popup-sub">Powered by Claude · Medical prenatal content</p>
+      </div>
+      <button mat-icon-button (click)="closeAiPopup()" class="ms-auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Week selector -->
+    <div class="ai-week-selector">
+      <p class="ai-label">Select a week to generate :</p>
+      <div class="ai-weeks-grid">
+        @for(week of getUnconfiguredWeeks(); track week) {
+        <button class="ai-week-btn"
+                [class.ai-week-btn--selected]="aiSelectedWeek === week"
+                [class.ai-week-btn--t1]="week <= 12"
+                [class.ai-week-btn--t2]="week > 12 && week <= 26"
+                [class.ai-week-btn--t3]="week > 26"
+                (click)="aiSelectedWeek = week; aiGenerated = null; aiError = ''">
+          W{{ week }}
+        </button>
+        }
+      </div>
+    </div>
+
+    <!-- Generate button -->
+    <div class="d-flex justify-content-center my-3">
+      <button class="ai-generate-btn"
+              [disabled]="!aiSelectedWeek || aiGenerating"
+              (click)="generateWithAI()">
+        @if(aiGenerating) {
+          <span class="ai-spinner"></span> Generating week {{ aiSelectedWeek }}...
+        } @else {
+          <span>✨</span> Generate week {{ aiSelectedWeek || '?' }}
+        }
+      </button>
+    </div>
+
+    <!-- Status message -->
+    @if(aiStreamText && !aiGenerated) {
+    <div class="ai-status">{{ aiStreamText }}</div>
+    }
+
+    <!-- Error -->
+    @if(aiError) {
+    <div class="ai-error">⚠️ {{ aiError }}</div>
+    }
+
+    <!-- Generated preview -->
+    @if(aiGenerated) {
+    <div class="ai-preview">
+      <div class="ai-preview-header">
+        <span class="ai-preview-week">W{{ aiGenerated.weekNumber }}</span>
+        <span class="ai-preview-trim"
+              [style.background]="getTrimColor(aiGenerated.trimester || '') + '18'"
+              [style.color]="getTrimColor(aiGenerated.trimester || '')">
+          {{ getTrimLabel(aiGenerated.trimester || '') }}
+        </span>
+        <h4 class="ai-preview-title">{{ aiGenerated.title }}</h4>
+      </div>
+
+      <div class="ai-preview-chips">
+        @if(aiGenerated.sizeCm) { <span class="ai-chip">📏 {{ aiGenerated.sizeCm }} cm</span> }
+        @if(aiGenerated.weightG) { <span class="ai-chip">⚖️ {{ aiGenerated.weightG }} g</span> }
+        @if(aiGenerated.sizeComparison) { <span class="ai-chip">{{ getComparisonEmoji(aiGenerated.sizeComparison || '') }} {{ aiGenerated.sizeComparison }}</span> }
+      </div>
+
+      <div class="ai-preview-section">
+        <span class="ai-section-label">👶 Development</span>
+        <p>{{ aiGenerated.description }}</p>
+      </div>
+
+      @if(aiGenerated.motherSymptoms) {
+      <div class="ai-preview-section">
+        <span class="ai-section-label">🤰 Mother's symptoms</span>
+        <p>{{ aiGenerated.motherSymptoms }}</p>
+      </div>
+      }
+
+      @if(aiGenerated.medicalAdvice) {
+      <div class="ai-preview-section">
+        <span class="ai-section-label">🏥 Medical advice</span>
+        <p>{{ aiGenerated.medicalAdvice }}</p>
+      </div>
+      }
+
+      <!-- Actions -->
+      <div class="ai-preview-actions">
+        <button class="ai-action-btn ai-action-btn--secondary" (click)="generateWithAI()" [disabled]="aiGenerating">
+          🔄 Regenerate
+        </button>
+        <button class="ai-action-btn ai-action-btn--outline" (click)="useAiInForm()">
+          ✏️ Edit before saving
+        </button>
+        <button class="ai-action-btn ai-action-btn--primary" (click)="saveAiGenerated()" [disabled]="saving">
+          @if(saving) { Saving... } @else { ✅ Save directly }
+        </button>
+      </div>
+    </div>
+    }
+
+  </div>
+</div>
+}
+
+<!-- ===== POPUP DETAIL ===== -->
+@if(showDetailPopup && detailMilestone) {
+<div class="popup-overlay" (click)="closeDetail()">
+  <div class="popup-box popup-detail" (click)="$event.stopPropagation()">
+    <div class="detail-header mb-4" [style.border-color]="getTrimColor(detailMilestone.trimester)">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <div class="detail-week-circle"
+               [style.background]="getTrimColor(detailMilestone.trimester)+'22'"
+               [style.color]="getTrimColor(detailMilestone.trimester)"
+               [style.border-color]="getTrimColor(detailMilestone.trimester)">
+            W{{ detailMilestone.weekNumber }}
+          </div>
+          <div>
+            <span class="detail-trim-badge"
+                  [style.background]="getTrimColor(detailMilestone.trimester)+'18'"
+                  [style.color]="getTrimColor(detailMilestone.trimester)">
+              {{ getTrimLabel(detailMilestone.trimester) }}
+            </span>
+            <h2 class="mb-0 mt-1">{{ detailMilestone.title }}</h2>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button mat-icon-button (click)="openEditForm(detailMilestone); closeDetail()">
+            <mat-icon style="color:#ff9800">edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="closeDetail()"><mat-icon>close</mat-icon></button>
+        </div>
+      </div>
+    </div>
+    @if(detailMilestone.imageUrl) {
+    <div class="detail-image-wrap mb-4">
+      <img [src]="detailMilestone.imageUrl" class="detail-image" />
+    </div>
+    }
+    <div class="detail-measures-row mb-4">
+      @if(detailMilestone.sizeCm) { <div class="measure-chip"><span>📏</span><div><div class="measure-value">{{ detailMilestone.sizeCm }} cm</div><div class="measure-label">Size</div></div></div> }
+      @if(detailMilestone.weightG) { <div class="measure-chip"><span>⚖️</span><div><div class="measure-value">{{ detailMilestone.weightG }} g</div><div class="measure-label">Weight</div></div></div> }
+      @if(detailMilestone.sizeComparison) { <div class="measure-chip"><span>{{ getComparisonEmoji(detailMilestone.sizeComparison) }}</span><div><div class="measure-value">{{ detailMilestone.sizeComparison }}</div><div class="measure-label">Comparison</div></div></div> }
+    </div>
+    <div class="row gx-3">
+      <div class="col-12 mb-3">
+        <div class="detail-section">
+          <div class="detail-section-title"><span class="material-symbols-outlined" [style.color]="getTrimColor(detailMilestone.trimester)">child_care</span> Fetal Development</div>
+          <p class="mb-0">{{ detailMilestone.description }}</p>
+        </div>
+      </div>
+      @if(detailMilestone.motherSymptoms) {
+      <div class="col-12 col-md-6 mb-3">
+        <div class="detail-section">
+          <div class="detail-section-title"><span class="material-symbols-outlined" style="color:#e91e63">pregnant_woman</span> Mother's Symptoms</div>
+          <p class="mb-0">{{ detailMilestone.motherSymptoms }}</p>
+        </div>
+      </div>
+      }
+      @if(detailMilestone.medicalAdvice) {
+      <div class="col-12 col-md-6 mb-3">
+        <div class="detail-section">
+          <div class="detail-section-title"><span class="material-symbols-outlined" style="color:#4caf50">medical_services</span> Medical Advice</div>
+          <p class="mb-0">{{ detailMilestone.medicalAdvice }}</p>
+        </div>
+      </div>
+      }
+    </div>
+    <div class="d-flex justify-content-end gap-2 mt-3 pt-3" style="border-top:1px solid rgba(0,0,0,0.07)">
+      <button mat-button (click)="closeDetail()">Close</button>
+      <button mat-raised-button (click)="openEditForm(detailMilestone); closeDetail()" style="background:#ff9800;color:white;border-radius:20px">
+        <mat-icon class="me-1">edit</mat-icon> Edit this week
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ===== POPUP ADD ===== -->
+@if(showForm) {
+<div class="popup-overlay" (click)="closeForm()">
+  <div class="popup-box popup-large" (click)="$event.stopPropagation()">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h3 class="mb-0"><span class="material-symbols-outlined align-middle me-2 text-theme">add_circle</span>Add a fetal week</h3>
+      <button mat-icon-button (click)="closeForm()"><mat-icon>close</mat-icon></button>
+    </div>
+    <form [formGroup]="milestoneForm" (ngSubmit)="save()">
+      <div class="row gx-3">
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Week number *</mat-label>
+            <mat-select formControlName="weekNumber">
+              @for(week of getUnconfiguredWeeks(); track week) { <mat-option [value]="week">Week {{ week }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Trimester *</mat-label>
+            <mat-select formControlName="trimester">
+              <mat-option value="T1">Trimester 1 (W1–W12)</mat-option>
+              <mat-option value="T2">Trimester 2 (W13–W26)</mat-option>
+              <mat-option value="T3">Trimester 3 (W27–W40)</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Title *</mat-label>
+            <input matInput formControlName="title" placeholder="E.g. Heart formation" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Size (cm)</mat-label><input matInput type="number" formControlName="sizeCm" /></mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Weight (g)</mat-label><input matInput type="number" formControlName="weightG" /></mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Size comparison</mat-label><input matInput formControlName="sizeComparison" /></mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Description *</mat-label><textarea matInput formControlName="description" rows="3"></textarea></mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Mother's symptoms</mat-label><textarea matInput formControlName="motherSymptoms" rows="2"></textarea></mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Medical advice</mat-label><textarea matInput formControlName="medicalAdvice" rows="2"></textarea></mat-form-field>
+        </div>
+        <div class="col-12 mb-2">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Image URL</mat-label><input matInput formControlName="imageUrl" /></mat-form-field>
+        </div>
+      </div>
+      <div class="d-flex gap-2 justify-content-end mt-2">
+        <button mat-button type="button" (click)="closeForm()">Cancel</button>
+        <button mat-raised-button type="submit" [disabled]="milestoneForm.invalid || saving" class="btn-create">
+          @if(saving) { Saving... } @else { Add }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- ===== POPUP EDIT ===== -->
+@if(showEditForm && selectedMilestone) {
+<div class="popup-overlay" (click)="closeEditForm()">
+  <div class="popup-box popup-large" (click)="$event.stopPropagation()">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h3 class="mb-0"><span class="material-symbols-outlined align-middle me-2" style="color:#ff9800">edit</span>Edit — Week {{ selectedMilestone.weekNumber }}</h3>
+      <button mat-icon-button (click)="closeEditForm()"><mat-icon>close</mat-icon></button>
+    </div>
+    <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+      <div class="row gx-3">
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Week number *</mat-label><input matInput type="number" formControlName="weekNumber" [readonly]="true" /></mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Trimester *</mat-label>
+            <mat-select formControlName="trimester">
+              <mat-option value="T1">Trimester 1</mat-option>
+              <mat-option value="T2">Trimester 2</mat-option>
+              <mat-option value="T3">Trimester 3</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Title *</mat-label><input matInput formControlName="title" /></mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Size (cm)</mat-label><input matInput type="number" formControlName="sizeCm" /></mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Weight (g)</mat-label><input matInput type="number" formControlName="weightG" /></mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Size comparison</mat-label><input matInput formControlName="sizeComparison" /></mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Description *</mat-label><textarea matInput formControlName="description" rows="3"></textarea></mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Mother's symptoms</mat-label><textarea matInput formControlName="motherSymptoms" rows="2"></textarea></mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Medical advice</mat-label><textarea matInput formControlName="medicalAdvice" rows="2"></textarea></mat-form-field>
+        </div>
+        <div class="col-12 mb-2">
+          <mat-form-field appearance="outline" class="w-100"><mat-label>Image URL</mat-label><input matInput formControlName="imageUrl" /></mat-form-field>
+        </div>
+      </div>
+      <div class="d-flex gap-2 justify-content-end mt-2">
+        <button mat-button type="button" (click)="closeEditForm()">Cancel</button>
+        <button mat-raised-button type="submit" [disabled]="editForm.invalid || saving" style="background:#ff9800;color:white;border-radius:20px">
+          @if(saving) { Saving... } @else { Save }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+@if(showDeleteMilestoneConfirm && milestoneToDelete) {
+<div class="popup-overlay" (click)="showDeleteMilestoneConfirm = false">
+  <div class="popup-box" style="max-width:420px; text-align:center"
+       (click)="$event.stopPropagation()">
+    <div style="font-size:3rem; margin-bottom:1rem">🗑️</div>
+    <h3 class="ai-popup-title">Delete week {{ milestoneToDelete.weekNumber }}?</h3>
+    <p style="font-family:var(--font-body); color:var(--text-soft); font-size:0.88rem; margin:0.5rem 0 0.5rem">
+      <strong style="color:var(--text-dark)">{{ milestoneToDelete.title }}</strong>
+    </p>
+    <p style="font-family:var(--font-body); color:var(--text-soft); font-size:0.82rem; margin:0 0 1.5rem">
+      This week will be permanently deleted and can be regenerated with AI.
+    </p>
+    <div class="d-flex gap-2 justify-content-center">
+      <button mat-raised-button class="btn-refresh"
+              (click)="showDeleteMilestoneConfirm = false">
+        Cancel
+      </button>
+      <button mat-raised-button
+              style="background:rgba(201,77,106,0.12); color:#c94d6a; border:1.5px solid rgba(201,77,106,0.3); border-radius:24px; font-family:var(--font-body); font-weight:600"
+              (click)="confirmDeleteMilestone()">
+        <span class="material-symbols-outlined" style="font-size:1rem; margin-right:4px">delete</span>
+        Yes, delete
+      </button>
+    </div>
+  </div>
+</div>
+}

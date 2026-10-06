@@ -1,0 +1,232 @@
+<!-- ░░ HERO ░░ -->
+<div >
+  <div class="container">
+    <div class="row gx-3 align-items-center py-4">
+      <div class="col">
+        <span class="hero-eyebrow">🩺 Prenatal Care</span>
+        <h1 class="hero-title">Exams Admin</h1>
+        <p class="hero-sub">All prenatal examinations across the platform</p>
+      </div>
+      <div class="col-auto d-flex gap-2 align-items-center">
+        <button mat-raised-button (click)="loadAll()" class="btn-refresh">
+          <mat-icon class="me-1">refresh</mat-icon>
+          Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container fade-in">
+
+  @if(loading) {
+  <mat-progress-bar mode="indeterminate" class="mb-4" style="border-radius:4px"></mat-progress-bar>
+  }
+
+  <!-- ░░ KPI CARDS ░░ -->
+  <div class="row gx-3 gx-lg-4 mb-4">
+
+    <div class="col-12 col-sm-4">
+      <mat-card class="stat-card mb-3">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" style="background:rgba(58,143,181,0.12); color:#3a8fb5">
+              <span class="material-symbols-outlined">assignment</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ totalExams }}</h1>
+              <p class="stat-label mb-0">Total exams</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="col-12 col-sm-4">
+      <mat-card class="stat-card mb-3" style="animation-delay:0.1s">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" style="background:rgba(77,140,82,0.12); color:#4d8c52">
+              <span class="material-symbols-outlined">task_alt</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ totalDone }}</h1>
+              <p class="stat-label mb-0">Completed</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="col-12 col-sm-4">
+      <mat-card class="stat-card mb-3" style="animation-delay:0.2s">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" style="background:rgba(168,114,46,0.12); color:#a8722e">
+              <span class="material-symbols-outlined">pending_actions</span>
+            </div>
+            <div>
+              <h1 class="stat-number mb-0">{{ totalPending }}</h1>
+              <p class="stat-label mb-0">Pending</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </div>
+
+  <!-- ░░ FILTERS ░░ -->
+  <mat-card class="mb-4">
+    <mat-card-content class="py-3">
+      <div class="row gx-3 align-items-center">
+        <div class="col-12 col-md-3 mb-2 mb-md-0">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
+              <mat-option value="ALL">All</mat-option>
+              <mat-option value="DONE">Done</mat-option>
+              <mat-option value="PENDING">Pending</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-3 mb-2 mb-md-0">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Type</mat-label>
+            <mat-select [(ngModel)]="filterType" (ngModelChange)="applyFilters()">
+              <mat-option value="ALL">All</mat-option>
+              <mat-option value="MANDATORY">Mandatory</mat-option>
+              <mat-option value="OPTIONAL">Optional</mat-option>
+              <mat-option value="CUSTOM">Custom</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-3 mb-2 mb-md-0">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Search exam</mat-label>
+            <input matInput (keyup)="applyFilter($event)" placeholder="Exam name..." />
+            <mat-icon matSuffix style="color:#4d8c52; font-size:1.1rem">search</mat-icon>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-3 mb-2 mb-md-0">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Search patient</mat-label>
+            <input matInput [(ngModel)]="filterPatient"
+                   (ngModelChange)="applyFilters()"
+                   placeholder="Patient name..." />
+            <mat-icon matSuffix style="color:#4d8c52; font-size:1.1rem">person_search</mat-icon>
+          </mat-form-field>
+        </div>
+      </div>
+      <p class="filter-count mb-0 mt-2">
+        <strong>{{ dataSource.data.length }}</strong> result(s) found
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ░░ TABLE ░░ -->
+  <mat-card class="mb-4">
+    <mat-card-header>
+      <div class="w-100 mb-3">
+        <div class="row gx-3 align-items-center">
+          <div class="col-auto">
+            <div class="stat-icon"
+                 style="background:rgba(77,140,82,0.1); color:#4d8c52; width:40px; height:40px; border-radius:12px; animation:none">
+              <span class="material-symbols-outlined" style="font-size:1.2rem">list_alt</span>
+            </div>
+          </div>
+          <div class="col">
+            <span class="table-tag">🩺 Records</span>
+            <h3 class="table-title mb-0">All Exams</h3>
+          </div>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <table mat-table [dataSource]="dataSource" matSort class="w-100 bg-none mb-3">
+
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let e" class="py-2">
+            <span class="id-badge">#{{ e.id }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="pregnancy">
+          <th mat-header-cell *matHeaderCellDef>Patient</th>
+          <td mat-cell *matCellDef="let e" class="py-2">
+            <div class="patient-cell">
+              <div class="patient-avatar">{{ getPatientInitials(e) }}</div>
+              <span class="patient-name">{{ getPatientName(e) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="examName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Exam</th>
+          <td mat-cell *matCellDef="let e" class="py-2">
+            <span style="font-family:var(--font-body); font-size:0.85rem; font-weight:600; color:var(--text-dark)">
+              {{ e.examName }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="examType">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+          <td mat-cell *matCellDef="let e" class="py-2">
+            <span class="type-badge"
+                  [style.background]="getTypeColor(e.examType) + '18'"
+                  [style.color]="getTypeColor(e.examType)"
+                  [style.border-color]="getTypeColor(e.examType) + '40'">
+              {{ getTypeLabel(e.examType) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="recommendedWeek">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Week</th>
+          <td mat-cell *matCellDef="let e" class="py-2">
+            <span class="week-badge">W{{ e.recommendedWeek }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="done">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let e" class="py-2">
+            <span class="status-badge"
+                  [class.status-done]="e.done"
+                  [class.status-pending]="!e.done">
+              {{ e.done ? '✓ Done' : '⏳ Pending' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="doneDate">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date done</th>
+          <td mat-cell *matCellDef="let e" class="py-2">
+            <span style="font-family:var(--font-body); font-size:0.82rem; color:var(--text-mid)">
+              {{ e.doneDate ? (e.doneDate | date:'dd/MM/yyyy') : '—' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="resultNotes">
+          <th mat-header-cell *matHeaderCellDef>Results</th>
+          <td mat-cell *matCellDef="let e" class="py-2">
+            <span style="font-family:var(--font-body); font-size:0.78rem; color:var(--text-soft)">
+              {{ e.resultNotes || '—' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"
+            [class.row-done]="row.done"></tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 25]" class="bg-none"></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+
+</div>

@@ -1,0 +1,465 @@
+<!-- ══════════════════════════════════════════════════════════
+     ADMIN COMMUNITY DASHBOARD — Statistics Only
+     Theme: Pink #ff4f75 · Full animated dashboard
+     ══════════════════════════════════════════════════════════ -->
+<!-- TOAST -->
+<div class="ac-toast" *ngIf="toast"
+     [class.success]="toast.type==='success'"
+     [class.error]="toast.type==='error'"
+     [class.info]="toast.type==='info'">
+  <mat-icon>{{ toast.type==='success' ? 'check_circle' : toast.type==='error' ? 'error_outline' : 'info' }}</mat-icon>
+  {{ toast.message }}
+</div>
+
+<div class="ac-dashboard-wrap">
+
+  <!-- ── PAGE HEADER ─────────────────────────────────────── -->
+  <div class="ac-page-header">
+    <div class="ac-header-left">
+      <div class="ac-header-icon">
+        <mat-icon>insights</mat-icon>
+      </div>
+      <div>
+        <h1 class="ac-page-title">Community Analytics</h1>
+        <p class="ac-page-sub">Real-time overview · Auto-refreshes every 30s</p>
+      </div>
+    </div>
+    <div class="ac-header-actions">
+      <button class="ac-btn ac-btn-export" (click)="exportCSV()">
+        <mat-icon>download</mat-icon><span>CSV</span>
+      </button>
+      <button class="ac-btn ac-btn-pdf" (click)="exportPDF()">
+        <mat-icon>picture_as_pdf</mat-icon><span>PDF</span>
+      </button>
+      <button class="ac-btn ac-btn-live" (click)="goToLiveMode()">
+        <span class="ac-live-pulse-dot"></span>
+        <mat-icon>bolt</mat-icon>
+        <span>Live Community</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="ac-loading-overlay" *ngIf="loading">
+    <div class="ac-spinner-ring"></div>
+    <p>Loading community data…</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ── KPI ROW 1 — Main Metrics ──────────────────────── -->
+    <div class="ac-kpi-grid">
+
+      <div class="ac-kpi-card ac-kpi-pink" style="animation-delay:0ms">
+        <div class="ac-kpi-bg-shape"></div>
+        <div class="ac-kpi-icon-wrap">
+          <mat-icon>article</mat-icon>
+        </div>
+        <div class="ac-kpi-body">
+          <div class="ac-kpi-num">{{ formatNum(totalPosts) }}</div>
+          <div class="ac-kpi-label">Total Posts</div>
+          <div class="ac-kpi-delta">
+            <mat-icon>trending_up</mat-icon>
+            +{{ postsThisWeek }} this week
+          </div>
+        </div>
+        <div class="ac-kpi-spark">
+          <div class="ac-spark-bar" *ngFor="let b of sparkBars" [style.height]="b+'%'"></div>
+        </div>
+      </div>
+
+      <div class="ac-kpi-card ac-kpi-purple" style="animation-delay:80ms">
+        <div class="ac-kpi-bg-shape"></div>
+        <div class="ac-kpi-icon-wrap">
+          <mat-icon>group</mat-icon>
+        </div>
+        <div class="ac-kpi-body">
+          <div class="ac-kpi-num">{{ formatNum(totalUsers) }}</div>
+          <div class="ac-kpi-label">Members</div>
+          <div class="ac-kpi-delta">
+            <mat-icon>trending_up</mat-icon>
+            +{{ newUsersThisWeek }} new this week
+          </div>
+        </div>
+        <div class="ac-kpi-spark">
+          <div class="ac-spark-bar ac-spark-purple" *ngFor="let b of sparkBars2" [style.height]="b+'%'"></div>
+        </div>
+      </div>
+
+      <div class="ac-kpi-card ac-kpi-teal" style="animation-delay:160ms">
+        <div class="ac-kpi-bg-shape"></div>
+        <div class="ac-kpi-icon-wrap">
+          <mat-icon>chat_bubble_outline</mat-icon>
+        </div>
+        <div class="ac-kpi-body">
+          <div class="ac-kpi-num">{{ formatNum(totalComments) }}</div>
+          <div class="ac-kpi-label">Comments</div>
+          <div class="ac-kpi-delta">
+            <mat-icon>data_usage</mat-icon>
+            Avg {{ avgCommentsPerPost }}/post
+          </div>
+        </div>
+        <div class="ac-kpi-spark">
+          <div class="ac-spark-bar ac-spark-teal" *ngFor="let b of sparkBars3" [style.height]="b+'%'"></div>
+        </div>
+      </div>
+
+      <div class="ac-kpi-card ac-kpi-orange" style="animation-delay:240ms">
+        <div class="ac-kpi-bg-shape"></div>
+        <div class="ac-kpi-icon-wrap">
+          <mat-icon>favorite_border</mat-icon>
+        </div>
+        <div class="ac-kpi-body">
+          <div class="ac-kpi-num">{{ formatNum(totalReactions) }}</div>
+          <div class="ac-kpi-label">Reactions</div>
+          <div class="ac-kpi-delta">
+            <mat-icon>data_usage</mat-icon>
+            Avg {{ avgLikesPerPost }}/post
+          </div>
+        </div>
+        <div class="ac-kpi-spark">
+          <div class="ac-spark-bar ac-spark-orange" *ngFor="let b of sparkBars4" [style.height]="b+'%'"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── KPI ROW 2 — Mini Stats ─────────────────────────── -->
+    <div class="ac-mini-grid">
+      <div class="ac-mini-card" style="animation-delay:300ms">
+        <mat-icon style="color:#e74c3c">flag</mat-icon>
+        <div class="ac-mini-num" style="color:#e74c3c">{{ totalReports }}</div>
+        <div class="ac-mini-lbl">Reports</div>
+        <div class="ac-mini-sub" *ngIf="reportsThisWeek>0" style="color:#e74c3c">+{{ reportsThisWeek }} this week</div>
+      </div>
+      <div class="ac-mini-card" style="animation-delay:340ms">
+        <mat-icon style="color:#00b894">mic</mat-icon>
+        <div class="ac-mini-num" style="color:#00b894">{{ totalSpaces }}</div>
+        <div class="ac-mini-lbl">Spaces</div>
+        <div class="ac-mini-sub" *ngIf="liveSpacesCount>0" style="color:#00b894">{{ liveSpacesCount }} live now</div>
+      </div>
+      <div class="ac-mini-card" style="animation-delay:380ms">
+        <mat-icon style="color:#9b59b6">auto_stories</mat-icon>
+        <div class="ac-mini-num" style="color:#9b59b6">{{ totalStories }}</div>
+        <div class="ac-mini-lbl">Stories</div>
+      </div>
+      <div class="ac-mini-card" style="animation-delay:420ms">
+        <mat-icon style="color:#f39c12">bookmark</mat-icon>
+        <div class="ac-mini-num" style="color:#f39c12">{{ totalSavedPosts }}</div>
+        <div class="ac-mini-lbl">Saved Posts</div>
+      </div>
+      <div class="ac-mini-card" style="animation-delay:460ms">
+        <mat-icon style="color:#b08a9a">person_off</mat-icon>
+        <div class="ac-mini-num" style="color:#b08a9a">{{ anonymousPostsCount }}</div>
+        <div class="ac-mini-lbl">Anonymous</div>
+      </div>
+      <div class="ac-mini-card" style="animation-delay:500ms">
+        <mat-icon style="color:#3498db">image</mat-icon>
+        <div class="ac-mini-num" style="color:#3498db">{{ postWithImagesCount }}</div>
+        <div class="ac-mini-lbl">With Images</div>
+      </div>
+      <div class="ac-mini-card" style="animation-delay:540ms">
+        <mat-icon style="color:#22c55e">check_circle</mat-icon>
+        <div class="ac-mini-num" style="color:#22c55e">{{ activeUsersCount }}</div>
+        <div class="ac-mini-lbl">Active Users</div>
+      </div>
+      <div class="ac-mini-card" style="animation-delay:580ms">
+        <mat-icon style="color:#ff4f75">people</mat-icon>
+        <div class="ac-mini-num" style="color:#ff4f75">{{ totalFollowers }}</div>
+        <div class="ac-mini-lbl">Total Followers</div>
+      </div>
+    </div>
+
+    <!-- ── CHARTS ROW 1 ───────────────────────────────────── -->
+    <div class="ac-charts-row">
+
+      <!-- Category Bar Chart -->
+      <div class="ac-chart-card ac-chart-wide" style="animation-delay:200ms">
+        <div class="ac-chart-header">
+          <div class="ac-chart-icon" style="background:rgba(255,79,117,.12)">
+            <mat-icon style="color:#ff4f75">pie_chart</mat-icon>
+          </div>
+          <div>
+            <h3 class="ac-chart-title">Posts by Category</h3>
+            <p class="ac-chart-sub">Distribution across {{ totalPosts }} posts</p>
+          </div>
+        </div>
+        <div class="ac-bar-chart">
+          <div class="ac-bar-row" *ngFor="let t of tagStats; let i=index" [style.animation-delay]="(i*60)+'ms'">
+            <div class="ac-bar-label">
+              <span class="ac-tag-emoji">{{ t.emoji }}</span>
+              <span>{{ t.label }}</span>
+            </div>
+            <div class="ac-bar-track">
+              <div class="ac-bar-fill" [style.width]="t.pct+'%'" [style.background]="t.color"
+                   [style.animation-delay]="(i*80+400)+'ms'"></div>
+            </div>
+            <div class="ac-bar-stats">
+              <span class="ac-bar-val" [style.color]="t.color">{{ t.value }}</span>
+              <span class="ac-bar-pct">{{ t.pct }}%</span>
+            </div>
+          </div>
+          <div *ngIf="tagStats.length===0" class="ac-empty-chart">No posts yet 💝</div>
+        </div>
+        <div class="ac-pill-row" *ngIf="tagStats.length>0">
+          <div class="ac-pct-pill" *ngFor="let t of tagStats"
+               [style.background]="t.color+'15'" [style.border-color]="t.color+'40'">
+            <span [style.color]="t.color" class="ac-pill-val">{{ t.pct }}%</span>
+            <span class="ac-pill-emoji">{{ t.emoji }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Activity Column Chart -->
+      <div class="ac-chart-card" style="animation-delay:260ms">
+        <div class="ac-chart-header">
+          <div class="ac-chart-icon" style="background:rgba(108,92,231,.12)">
+            <mat-icon style="color:#6c5ce7">bar_chart</mat-icon>
+          </div>
+          <div>
+            <h3 class="ac-chart-title">Weekly Activity</h3>
+            <p class="ac-chart-sub">Posts per day of week</p>
+          </div>
+        </div>
+        <div class="ac-col-chart">
+          <div class="ac-col" *ngFor="let d of weeklyActivity; let i=index" [style.animation-delay]="(i*40)+'ms'">
+            <div class="ac-col-val">{{ d.count }}</div>
+            <div class="ac-col-bar-wrap">
+              <div class="ac-col-bar" [style.height]="(d.pct||4)+'%'" [style.animation-delay]="(i*50+500)+'ms'"></div>
+            </div>
+            <div class="ac-col-label">{{ d.day }}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── CHARTS ROW 2 ───────────────────────────────────── -->
+    <div class="ac-charts-row">
+
+      <!-- Reaction Breakdown -->
+      <div class="ac-chart-card" style="animation-delay:320ms">
+        <div class="ac-chart-header">
+          <div class="ac-chart-icon" style="background:rgba(255,79,117,.12)">
+            <mat-icon style="color:#ff4f75">emoji_emotions</mat-icon>
+          </div>
+          <div>
+            <h3 class="ac-chart-title">Reaction Breakdown</h3>
+            <p class="ac-chart-sub">{{ totalReactions }} total reactions</p>
+          </div>
+        </div>
+        <div class="ac-rx-list">
+          <div class="ac-rx-row" *ngFor="let r of reactionStats; let i=index" [style.animation-delay]="(i*50)+'ms'">
+            <span class="ac-rx-emoji">{{ r.emoji }}</span>
+            <div class="ac-rx-info">
+              <div class="ac-rx-top">
+                <span class="ac-rx-label">{{ r.label }}</span>
+                <span class="ac-rx-count">{{ r.value }}</span>
+              </div>
+              <div class="ac-rx-track">
+                <div class="ac-rx-fill" [style.width]="r.pct+'%'" [style.background]="r.color"
+                     [style.animation-delay]="(i*60+400)+'ms'"></div>
+              </div>
+            </div>
+            <span class="ac-rx-pct" [style.color]="r.color">{{ r.pct }}%</span>
+          </div>
+          <div *ngIf="reactionStats.length===0" class="ac-empty-chart">No reactions yet</div>
+        </div>
+      </div>
+
+      <!-- Top Posters -->
+      <div class="ac-chart-card" style="animation-delay:380ms">
+        <div class="ac-chart-header">
+          <div class="ac-chart-icon" style="background:rgba(0,184,148,.12)">
+            <mat-icon style="color:#00b894">emoji_events</mat-icon>
+          </div>
+          <div>
+            <h3 class="ac-chart-title">Top Posters</h3>
+            <p class="ac-chart-sub">Most active community members</p>
+          </div>
+        </div>
+        <div class="ac-poster-list">
+          <div class="ac-poster-row" *ngFor="let p of topPosters; let i=index" [style.animation-delay]="(i*40)+'ms'">
+            <div class="ac-poster-rank" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">{{ i+1 }}</div>
+            <div class="ac-poster-av" [style.background]="'hsl('+(i*55+340)+',65%,58%)'">{{ getInitials(p.name) }}</div>
+            <div class="ac-poster-info">
+              <div class="ac-poster-name">{{ p.name | slice:0:18 }}</div>
+              <div class="ac-poster-bar-wrap">
+                <div class="ac-poster-bar" [style.width]="p.pct+'%'" [style.animation-delay]="(i*60+400)+'ms'"></div>
+              </div>
+            </div>
+            <div class="ac-poster-count">{{ p.count }}</div>
+          </div>
+          <div *ngIf="topPosters.length===0" class="ac-empty-chart">No data yet</div>
+        </div>
+      </div>
+
+      <!-- Trending Hashtags -->
+      <div class="ac-chart-card" style="animation-delay:440ms">
+        <div class="ac-chart-header">
+          <div class="ac-chart-icon" style="background:rgba(232,67,147,.12)">
+            <mat-icon style="color:#e84393">trending_up</mat-icon>
+          </div>
+          <div>
+            <h3 class="ac-chart-title">Trending Hashtags</h3>
+            <p class="ac-chart-sub">Extracted from post content</p>
+          </div>
+        </div>
+        <div class="ac-hashtag-cloud">
+          <span class="ac-hashtag-chip" *ngFor="let h of trendingHashtags; let i=index"
+                [style.font-size]="(0.7 + (trendingHashtags.length-i)*0.045)+'rem'"
+                [style.animation-delay]="(i*30)+'ms'">
+            {{ h.tag }}
+            <span class="ac-ht-count">{{ h.count }}</span>
+          </span>
+          <div *ngIf="trendingHashtags.length===0" class="ac-empty-chart">No hashtags found</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── CHARTS ROW 3 ───────────────────────────────────── -->
+    <div class="ac-charts-row">
+
+      <!-- Monthly Growth -->
+      <div class="ac-chart-card ac-chart-wide" style="animation-delay:480ms">
+        <div class="ac-chart-header">
+          <div class="ac-chart-icon" style="background:rgba(52,152,219,.12)">
+            <mat-icon style="color:#3498db">show_chart</mat-icon>
+          </div>
+          <div>
+            <h3 class="ac-chart-title">Monthly Post Volume</h3>
+            <p class="ac-chart-sub">Last 6 months of community activity</p>
+          </div>
+        </div>
+        <div class="ac-monthly-chart">
+          <div class="ac-monthly-col" *ngFor="let m of monthlyGrowth; let i=index" [style.animation-delay]="(i*60)+'ms'">
+            <div class="ac-monthly-val">{{ m.posts }}</div>
+            <div class="ac-monthly-bar-wrap">
+              <div class="ac-monthly-bar" [style.height]="(m.pct||4)+'%'" [style.animation-delay]="(i*80+500)+'ms'"></div>
+            </div>
+            <div class="ac-monthly-label">{{ m.month }}</div>
+          </div>
+          <div *ngIf="monthlyGrowth.length===0" class="ac-empty-chart" style="width:100%">Insufficient data</div>
+        </div>
+      </div>
+
+      <!-- Engagement Overview radial-ish -->
+      <div class="ac-chart-card" style="animation-delay:540ms">
+        <div class="ac-chart-header">
+          <div class="ac-chart-icon" style="background:rgba(255,79,117,.12)">
+            <mat-icon style="color:#ff4f75">insights</mat-icon>
+          </div>
+          <div>
+            <h3 class="ac-chart-title">Engagement Overview</h3>
+            <p class="ac-chart-sub">All interaction signals</p>
+          </div>
+        </div>
+        <div class="ac-engage-grid">
+          <div class="ac-engage-item" *ngFor="let e of engagementBreakdown; let i=index"
+               [style.animation-delay]="(i*50)+'ms'">
+            <div class="ac-engage-ring" [style.border-color]="e.color+'40'" [style.background]="e.color+'0d'">
+              <mat-icon [style.color]="e.color">{{ e.icon }}</mat-icon>
+            </div>
+            <div class="ac-engage-val" [style.color]="e.color">{{ formatNum(e.value) }}</div>
+            <div class="ac-engage-lbl">{{ e.label }}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── CHARTS ROW 4 ───────────────────────────────────── -->
+    <div class="ac-charts-row">
+
+      <!-- Rating Distribution -->
+      <div class="ac-chart-card" style="animation-delay:580ms">
+        <div class="ac-chart-header">
+          <div class="ac-chart-icon" style="background:rgba(243,156,18,.12)">
+            <mat-icon style="color:#f39c12">star</mat-icon>
+          </div>
+          <div>
+            <h3 class="ac-chart-title">Engagement Quality</h3>
+            <p class="ac-chart-sub">Post quality distribution</p>
+          </div>
+        </div>
+        <div class="ac-rating-list">
+          <div class="ac-rating-row" *ngFor="let r of ratingDist; let i=index" [style.animation-delay]="(i*40)+'ms'">
+            <div class="ac-rating-stars">
+              <mat-icon *ngFor="let s of starsArr(r.star)" style="color:#f39c12;font-size:13px;width:13px;height:13px">star</mat-icon>
+            </div>
+            <div class="ac-rating-track">
+              <div class="ac-rating-fill" [style.width]="r.pct+'%'" [style.animation-delay]="(i*60+400)+'ms'"></div>
+            </div>
+            <span class="ac-rating-pct">{{ r.pct }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Activity Heatmap-style -->
+      <div class="ac-chart-card ac-chart-wide" style="animation-delay:620ms">
+        <div class="ac-chart-header">
+          <div class="ac-chart-icon" style="background:rgba(255,79,117,.12)">
+            <mat-icon style="color:#ff4f75">people_alt</mat-icon>
+          </div>
+          <div>
+            <h3 class="ac-chart-title">Community Health Score</h3>
+            <p class="ac-chart-sub">Key ratios and performance indicators</p>
+          </div>
+        </div>
+        <div class="ac-health-grid">
+          <div class="ac-health-card">
+            <div class="ac-health-score" style="color:#ff4f75">
+              {{ totalPosts > 0 ? (totalReactions / totalPosts * 10 | number:'1.0-0') : 0 }}
+            </div>
+            <div class="ac-health-label">Engagement Score</div>
+            <div class="ac-health-sub">reactions per post × 10</div>
+          </div>
+          <div class="ac-health-card">
+            <div class="ac-health-score" style="color:#6c5ce7">
+              {{ totalPosts > 0 ? (totalComments / totalPosts | number:'1.1-1') : 0 }}
+            </div>
+            <div class="ac-health-label">Comment Rate</div>
+            <div class="ac-health-sub">avg comments / post</div>
+          </div>
+          <div class="ac-health-card">
+            <div class="ac-health-score" style="color:#00b894">
+              {{ totalUsers > 0 ? ((totalUsers - totalReports) / totalUsers * 100 | number:'1.0-0') : 100 }}%
+            </div>
+            <div class="ac-health-label">Community Safety</div>
+            <div class="ac-health-sub">non-reported users</div>
+          </div>
+          <div class="ac-health-card">
+            <div class="ac-health-score" style="color:#f39c12">
+              {{ totalPosts > 0 ? (postWithImagesCount / totalPosts * 100 | number:'1.0-0') : 0 }}%
+            </div>
+            <div class="ac-health-label">Media Richness</div>
+            <div class="ac-health-sub">posts with images</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── LIVE ACTION CTA ────────────────────────────────── -->
+    <div class="ac-cta-banner" (click)="goToLiveMode()">
+      <div class="ac-cta-pulse-ring"></div>
+      <div class="ac-cta-pulse-ring ac-cta-ring2"></div>
+      <div class="ac-cta-content">
+        <div class="ac-cta-icon">
+          <span class="ac-live-pulse-dot"></span>
+          <mat-icon>bolt</mat-icon>
+        </div>
+        <div class="ac-cta-text">
+          <h3>Enter Live Community Mode</h3>
+          <p>Browse, moderate, and interact with the community feed in real-time</p>
+        </div>
+        <div class="ac-cta-arrow">
+          <mat-icon>arrow_forward</mat-icon>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

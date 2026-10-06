@@ -1,0 +1,263 @@
+<section class="document-page">
+  <div class="document-shell">
+    <header class="topbar">
+      <div class="topbar-links">
+        
+      </div>
+    </header>
+
+    <!-- ═══ HERO CARD — 100% ORIGINAL, UNTOUCHED ═══ -->
+    <section class="hero-card">
+      <div class="hero-copy">
+        <p class="eyebrow">Sleep · daily rhythm</p>
+        <h1>
+          Soft nights,
+          <span>beautifully tracked</span>
+        </h1>
+        <p class="hero-text">Track start/end, quality and notes for every sleep session.</p>
+      </div>
+
+      <div class="hero-side">
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-number">{{ sleepLogs.length }}</span>
+            <span class="stat-label">Logs</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">{{ babyId }}</span>
+            <span class="stat-label">Baby ID</span>
+          </div>
+        </div>
+
+        <button type="button" class="add-document-btn" (click)="scrollToForm()">
+          <span class="plus">+</span>
+          Add log
+        </button>
+      </div>
+    </section>
+    <!-- end hero-card — original preserved -->
+
+    <!-- ═══ WEEK CHART (same bg as hero-card) ═══ -->
+    <div class="week-chart-card">
+      <div class="week-chart-title">📅 Sleep this week</div>
+      <div class="week-track">
+        <div *ngFor="let bar of weekBars" class="week-column">
+          <span class="week-value">{{ bar.hoursLabel }}</span>
+          <div
+            class="week-col"
+            [class.today-col]="bar.isToday"
+            [class.good-col]="!bar.isToday && bar.quality === 'GOOD'"
+            [class.rest-col]="!bar.isToday && bar.quality === 'RESTLESS'"
+            [class.interrupted-col]="!bar.isToday && bar.quality === 'INTERRUPTED'"
+            [style.height.%]="bar.heightPct"
+            [attr.title]="bar.label + ' · ' + bar.quality + ' · ' + bar.hoursLabel"
+          ></div>
+        </div>
+      </div>
+      <div class="week-labels">
+        <div *ngFor="let bar of weekBars"
+             class="week-lbl"
+             [class.today-lbl]="bar.isToday">
+          {{ bar.label }}
+        </div>
+      </div>
+
+      <div class="week-legend">
+        <span class="legend-chip"><span class="legend-dot good"></span> Good sleep</span>
+        <span class="legend-chip"><span class="legend-dot restless"></span> Restless sleep</span>
+        <span class="legend-chip"><span class="legend-dot broken"></span> Broken sleep</span>
+      </div>
+    </div>
+
+    <!-- ═══ MESSAGES ═══ -->
+    <div class="messages">
+      <div class="status success" *ngIf="successMessage">✅ {{ successMessage }}</div>
+      <div class="status error"   *ngIf="errorMessage">⚠️ {{ errorMessage }}</div>
+    </div>
+
+    <!-- ═══ MAIN GRID ═══ -->
+    <section class="gallery-section">
+      <div class="documents-grid two-col">
+
+        <!-- ── FORM CARD ── -->
+        <section class="filters-card" #formCard>
+          <div class="filters-head">
+            <span class="filters-title">
+              {{ isEditMode ? '✏️ Edit sleep log' : '🌙 Add sleep log' }}
+            </span>
+          </div>
+
+          <!-- Quality pills (visual selector) -->
+          <div class="quality-selector">
+            <div class="q-pill"
+                 [class.qp-good]="sleepForm.get('quality')?.value === 'GOOD'"
+                 (click)="setQuality('GOOD')">
+              <span class="q-em">😴</span>Good
+            </div>
+            <div class="q-pill"
+                 [class.qp-restless]="sleepForm.get('quality')?.value === 'RESTLESS'"
+                 (click)="setQuality('RESTLESS')">
+              <span class="q-em">😰</span>Restless
+            </div>
+            <div class="q-pill"
+                 [class.qp-interrupted]="sleepForm.get('quality')?.value === 'INTERRUPTED'"
+                 (click)="setQuality('INTERRUPTED')">
+              <span class="q-em">😤</span>Broken
+            </div>
+          </div>
+
+          <form [formGroup]="sleepForm" (ngSubmit)="onSubmit()" class="inline-form">
+            <div class="form-grid">
+              <label class="field">
+                <span>Sleep start</span>
+                <input type="datetime-local" formControlName="sleepStart" />
+                <small class="error-text"
+                       *ngIf="sleepForm.get('sleepStart')?.touched && sleepForm.get('sleepStart')?.invalid">
+                  Sleep start is required.
+                </small>
+              </label>
+
+              <label class="field">
+                <span>Sleep end</span>
+                <input type="datetime-local" formControlName="sleepEnd" />
+                <small class="error-text"
+                       *ngIf="sleepForm.get('sleepEnd')?.touched && sleepForm.get('sleepEnd')?.invalid">
+                  Sleep end is required.
+                </small>
+              </label>
+
+              <!-- hidden select keeps the Angular binding intact -->
+              <label class="field" style="display:none">
+                <select formControlName="quality">
+                  <option value="">-- Select --</option>
+                  <option *ngFor="let qual of sleepQualities" [value]="qual">{{ qual }}</option>
+                </select>
+              </label>
+
+              <label class="field full">
+                <span>Notes</span>
+                <textarea rows="4" formControlName="notes"
+                          placeholder="Add any notes... 💭"></textarea>
+              </label>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="secondary-btn" (click)="resetForm()">Reset</button>
+              <button type="submit" class="primary-btn" [disabled]="submitting">
+                {{ submitting ? 'Saving...' : (isEditMode ? '✅ Update' : '🌙 Add') }}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ── HISTORY CARD ── -->
+        <section class="filters-card">
+          <div class="filters-head">
+            <span class="filters-title">🗓️ Sleep history</span>
+          </div>
+
+          <div class="history-search-row">
+            <input
+              class="history-search"
+              type="text"
+              [value]="searchTerm"
+              (input)="onSearchChange($any($event.target).value)"
+              placeholder="Search by quality, notes, date, duration..."
+            />
+            <div class="history-search-meta">
+              {{ filteredSleepLogs.length }} result{{ filteredSleepLogs.length === 1 ? '' : 's' }}
+            </div>
+          </div>
+
+          <div *ngIf="loading" class="empty-state compact">
+            <h3>Loading...</h3>
+          </div>
+
+          <div *ngIf="!loading && sleepLogs.length === 0" class="empty-state compact">
+            <h3>🌙 No sleep logs yet</h3>
+            <p>Add the first log to start tracking gently.</p>
+            <button type="button" class="empty-add-btn" (click)="scrollToForm()">
+              + Add first log
+            </button>
+          </div>
+
+          <div *ngIf="!loading && sleepLogs.length > 0 && filteredSleepLogs.length === 0" class="empty-state compact">
+            <h3>🔎 No matching logs</h3>
+            <p>Try another search term or clear the search field.</p>
+          </div>
+
+          <div class="logs-list" *ngIf="!loading && paginatedSleepLogs.length > 0">
+            <article class="document-card"
+                     *ngFor="let log of paginatedSleepLogs; trackBy: trackByLogId">
+              <div class="document-body">
+                <div class="log-head">
+                  <span class="log-badge"
+                        [ngClass]="'quality-' + (log.quality || 'other').toLowerCase()">
+                    {{ getQualityEmoji(log.quality) }} {{ log.quality }}
+                  </span>
+                  <span class="document-date">
+                    ⏱ {{ getDurationText(log.sleepStart, log.sleepEnd) }}
+                  </span>
+                </div>
+
+                <p class="document-notes">
+                  <strong>🌛 Start:</strong>
+                  {{ log.sleepStart | date:'dd MMM yyyy HH:mm' }}
+                </p>
+                <p class="document-notes">
+                  <strong>🌞 End:</strong>
+                  {{ log.sleepEnd | date:'dd MMM yyyy HH:mm' }}
+                </p>
+                <p class="document-notes" *ngIf="log.notes">
+                  <strong>📝 Notes:</strong> {{ log.notes }}
+                </p>
+
+                <div class="document-footer">
+                  <div class="card-actions">
+                    <button type="button" class="update-btn" (click)="editLog(log)">✏️ Update</button>
+                    <button type="button" class="delete-btn" (click)="deleteLog(log.id)">🗑 Remove</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="history-pagination" *ngIf="!loading && filteredSleepLogs.length > pageSize">
+            <button
+              type="button"
+              class="page-btn nav"
+              (click)="goToPage(currentPage - 1)"
+              [disabled]="currentPage === 1"
+            >
+              Prev
+            </button>
+
+            <button
+              type="button"
+              *ngFor="let page of pageNumbers"
+              class="page-btn"
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+
+            <button
+              type="button"
+              class="page-btn nav"
+              (click)="goToPage(currentPage + 1)"
+              [disabled]="currentPage === totalPages"
+            >
+              Next
+            </button>
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+    <!-- Emoji rain container -->
+    <div class="emoji-rain-container" id="emojiRainContainer"></div>
+
+  </div>
+</section>

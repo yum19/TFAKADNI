@@ -1,0 +1,626 @@
+<!-- course-detail.component.html -->
+@if (course; as c) {
+  <section class="course-canvas">
+    <div class="canvas-wrap">
+      <!-- ── HERO BANNER ── -->
+      <div class="hero-banner">
+        <div class="hero-grid">
+          <div class="hero-body">
+            <div class="pills-row">
+              <span class="pill pill-cat">{{ c.category || "Course" }}</span>
+              <span class="pill pill-level">{{ c.level || "Beginner" }}</span>
+            </div>
+            <h1 class="hero-title">{{ c.title }}</h1>
+            <p class="hero-desc">{{ c.description }}</p>
+
+            <div class="action-row">
+              @if (enrollment) {
+                <div class="progress-wrap">
+                  <div class="progress-label">
+                    Your progress —
+                    <strong>{{ enrollment.progressPct }}%</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div
+                      class="progress-fill"
+                      [style.width.%]="enrollment.progressPct"
+                    ></div>
+                  </div>
+                </div>
+                <button class="btn-cert" (click)="downloadCertificate()">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="12" y1="18" x2="12" y2="12" />
+                    <polyline points="9 15 12 18 15 15" />
+                  </svg>
+                  Certificate
+                </button>
+              } @else {
+                <button class="btn-enroll" (click)="enroll()">
+                  Start Learning
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-block">
+              <div class="stat-val">{{ c.durationMin }}</div>
+              <div class="stat-lbl">Minutes</div>
+            </div>
+            <div class="stat-block">
+              <div class="stat-val">{{ modules.length }}</div>
+              <div class="stat-lbl">Modules</div>
+            </div>
+            <div class="stat-block">
+              <div class="stat-val">AI</div>
+              <div class="stat-lbl">Enhanced</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MAIN LAYOUT ── -->
+      <div class="main-layout">
+        <!-- ── SIDEBAR ── -->
+        <aside class="sidebar">
+          <!-- Curriculum -->
+          <div class="glass-card sidebar-section">
+            <div class="sidebar-heading">Curriculum</div>
+            <div class="module-list">
+              @for (module of modules; track module.id) {
+                <div
+                  class="module-item"
+                  [class.active]="selectedModule?.id === module.id"
+                  (click)="openModule(module)"
+                >
+                  <div class="mod-num">
+                    @if (selectedModule?.id === module.id) {
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    } @else {
+                      {{ module.orderIndex }}
+                    }
+                  </div>
+                  <div class="mod-info">
+                    <div class="mod-title">{{ module.title }}</div>
+                    <div class="mod-meta">
+                      {{ module.durationMin }}m · {{ module.contentType }}
+                    </div>
+                  </div>
+                  @if (module.quizId) {
+                    <div class="quiz-dot" title="Has quiz"></div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Reviews -->
+          <div class="glass-card sidebar-section">
+            <div class="sidebar-top-row">
+              <div class="sidebar-heading" style="margin-bottom: 0">
+                Reviews
+              </div>
+              <button
+                class="btn-write"
+                (click)="showReviewForm = !showReviewForm"
+              >
+                {{ showReviewForm ? "Cancel" : "+ Write one" }}
+              </button>
+            </div>
+
+            @if (showReviewForm) {
+              <div class="review-form">
+                <textarea
+                  class="review-textarea"
+                  [(ngModel)]="reviewForm.comment"
+                  placeholder="Share your experience..."
+                  rows="3"
+                ></textarea>
+                <button class="btn-save-review" (click)="saveReview()">
+                  Save Review
+                </button>
+              </div>
+            }
+
+            <div class="reviews-list">
+              @for (review of reviews; track $index) {
+                <div class="review-bubble">
+                  <div class="review-stars">
+                    {{ "★".repeat(review.rating)
+                    }}{{ "☆".repeat(5 - review.rating) }} {{ review.rating }}/5
+                  </div>
+                  <p class="review-text">{{ review.comment }}</p>
+                </div>
+              } @empty {
+                <p class="empty-reviews">No reviews yet. Be the first.</p>
+              }
+            </div>
+          </div>
+        </aside>
+
+        <!-- ── WORKSPACE ── -->
+        @if (selectedModule; as module) {
+          <div class="glass-card workspace">
+            <div class="ws-header">
+              <div>
+                <h2 class="ws-title">{{ module.title }}</h2>
+                <p class="ws-sub">
+                  Section {{ module.orderIndex }} of {{ modules.length }}
+                </p>
+              </div>
+              <button class="btn-ai" (click)="simplifyModule()">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path
+                    d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"
+                  />
+                </svg>
+                AI Simplify
+              </button>
+            </div>
+
+            <!-- AI Simplified Output -->
+            @if (simplifiedText) {
+              <div class="ai-insight-block">
+                <div class="ai-insight-label">
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"
+                    />
+                  </svg>
+                  AI Simplified Version
+                </div>
+                <p class="ai-insight-text">{{ simplifiedText }}</p>
+                <button class="btn-dismiss" (click)="simplifiedText = ''">
+                  Dismiss
+                </button>
+              </div>
+            }
+
+            <!-- Content -->
+            @if (module.contentText) {
+              <div class="content-body">
+                <div
+                  class="rich-content"
+                  [innerHTML]="module.contentText | richContent"
+                ></div>
+              </div>
+            }
+
+            <!-- Video -->
+            @if (module.contentUrl && module.contentUrl.endsWith(".mp4")) {
+              <div class="video-wrap">
+                <video controls [src]="module.contentUrl">
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            }
+
+            <!-- External link -->
+            @if (module.contentUrl && !module.contentUrl.endsWith(".mp4")) {
+              <a
+                [href]="module.contentUrl"
+                target="_blank"
+                class="btn-external"
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                  />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+                View External Resource
+              </a>
+            }
+
+            <!-- Quiz trigger -->
+            @if (module.quizId && !selectedQuiz) {
+              <div class="quiz-cta">
+                <div class="quiz-cta-inner">
+                  <div class="quiz-cta-icon">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="quiz-cta-title">
+                      Ready to test your knowledge?
+                    </div>
+                    <div class="quiz-cta-sub">
+                      A short quiz follows this module
+                    </div>
+                  </div>
+                  <button
+                    class="btn-quiz"
+                    (click)="loadQuiz(module)"
+                    [disabled]="loadingQuiz"
+                  >
+                    {{ loadingQuiz ? "Loading..." : "Take Quiz" }}
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (selectedQuiz; as quiz) {
+              <div class="quiz-zone">
+                <div class="quiz-zone-header">
+                  <h3 class="quiz-zone-title">Knowledge Check</h3>
+                  <button
+                    class="btn-dismiss"
+                    (click)="selectedQuiz = undefined"
+                  >
+                    Close Quiz
+                  </button>
+                </div>
+
+                @if (!quizAttempt) {
+                  <div class="mb-4" style="color: #a0aabf; font-size: 0.9rem">
+                    Pass Score: {{ quiz.passScore }}%
+                  </div>
+
+                  @for (
+                    question of quiz.questions;
+                    track question.id;
+                    let i = $index
+                  ) {
+                    <div
+                      class="q-block"
+                      style="
+                        background: rgba(0, 0, 0, 0.15);
+                        padding: 1.5rem;
+                        border-radius: 12px;
+                        margin-bottom: 1.5rem;
+                      "
+                    >
+                      <p class="q-text" style="margin-bottom: 1rem">
+                        <span style="color: #8bb4ff; font-weight: bold"
+                          >{{ i + 1 }}.</span
+                        >
+                        {{ question.questionText }}
+                      </p>
+
+                      @if (question.questionType === "SINGLE_CHOICE") {
+                        <div class="choices-grid">
+                          @for (choice of question.choices; track choice.id) {
+                            <label
+                              class="choice-btn"
+                              [class.selected]="
+                                answers[question.id!] === choice.id
+                              "
+                            >
+                              <input
+                                type="radio"
+                                [name]="'q-' + question.id"
+                                [value]="choice.id"
+                                [(ngModel)]="answers[question.id!]"
+                              />
+                              <span class="choice-text">{{
+                                choice.choiceText
+                              }}</span>
+                            </label>
+                          }
+                        </div>
+                      }
+
+                      @if (question.questionType === "MULTIPLE_CHOICE") {
+                        <div
+                          style="
+                            font-size: 0.85rem;
+                            color: #a0aabf;
+                            margin-bottom: 12px;
+                            display: flex;
+                            align-items: center;
+                            gap: 5px;
+                          "
+                        >
+                          <mat-icon
+                            style="font-size: 16px; width: 16px; height: 16px"
+                            >checklist</mat-icon
+                          >
+                          Select all that apply
+                        </div>
+                        <div class="choices-grid">
+                          @for (choice of question.choices; track choice.id) {
+                            <label
+                              class="choice-btn"
+                              [class.selected]="
+                                answers[question.id!]?.includes(choice.id)
+                              "
+                            >
+                              <input
+                                type="checkbox"
+                                [value]="choice.id"
+                                (change)="
+                                  toggleMultipleChoice(
+                                    question.id!,
+                                    choice.id!,
+                                    $event
+                                  )
+                                "
+                              />
+                              <span class="choice-text">{{
+                                choice.choiceText
+                              }}</span>
+                            </label>
+                          }
+                        </div>
+                      }
+
+                      @if (question.questionType === "OPEN_ENDED") {
+                        <div
+                          style="
+                            font-size: 0.85rem;
+                            color: #8bb4ff;
+                            margin-bottom: 12px;
+                            display: flex;
+                            align-items: center;
+                            gap: 5px;
+                          "
+                        >
+                          <mat-icon
+                            style="font-size: 16px; width: 16px; height: 16px"
+                            >auto_awesome</mat-icon
+                          >
+                          Gemini AI will evaluate your answer
+                        </div>
+                        <textarea
+                          [(ngModel)]="answers[question.id!]"
+                          rows="4"
+                          class="review-textarea"
+                          style="width: 100%"
+                          placeholder="Type your detailed answer here..."
+                        ></textarea>
+                      }
+                    </div>
+                  }
+
+                  <button
+                    class="btn-submit"
+                    style="
+                      width: 100%;
+                      margin-top: 1rem;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      gap: 8px;
+                    "
+                    (click)="submitQuiz()"
+                    [disabled]="loadingQuiz"
+                  >
+                    @if (loadingQuiz) {
+                      <mat-icon
+                        class="spinner"
+                        style="animation: spin 1s linear infinite"
+                        >sync</mat-icon
+                      >
+                      Evaluating with AI...
+                    } @else {
+                      Submit Quiz & Get Feedback
+                    }
+                  </button>
+                }
+
+                @if (quizAttempt) {
+                  <div
+                    class="quiz-result"
+                    [class.passed]="quizAttempt.passed"
+                    [class.failed]="!quizAttempt.passed"
+                    style="margin-top: 1rem"
+                  >
+                    <div
+                      class="quiz-result-score"
+                      style="font-size: 3.5rem; line-height: 1"
+                    >
+                      {{ quizAttempt.score }}%
+                    </div>
+                    <div
+                      class="quiz-result-msg"
+                      style="font-size: 1.2rem; margin-bottom: 2rem"
+                    >
+                      {{
+                        quizAttempt.passed
+                          ? "Excellent! Module completed."
+                          : "Score requirement not met. Review the material and retry."
+                      }}
+                    </div>
+
+                    <div style="text-align: left; width: 100%">
+                      <h4
+                        style="
+                          color: #fff;
+                          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                          padding-bottom: 12px;
+                          margin-bottom: 24px;
+                        "
+                      >
+                        Detailed Feedback
+                      </h4>
+
+                      @for (
+                        ans of quizAttempt.answers;
+                        track ans.id;
+                        let i = $index
+                      ) {
+                        <div
+                          style="
+                            padding: 1.5rem;
+                            margin-bottom: 1.5rem;
+                            border-radius: 12px;
+                            border-left: 4px solid;
+                          "
+                          [style.borderColor]="
+                            ans.correct ? '#4cd137' : '#e84118'
+                          "
+                          style="background: rgba(0, 0, 0, 0.2)"
+                        >
+                          <h6
+                            style="
+                              color: #fff;
+                              margin-bottom: 16px;
+                              font-size: 1.05rem;
+                            "
+                          >
+                            {{ i + 1 }}. {{ ans.question.questionText }}
+                          </h6>
+
+                          @if (ans.question.questionType === "OPEN_ENDED") {
+                            <div
+                              style="
+                                background: rgba(255, 255, 255, 0.05);
+                                padding: 16px;
+                                border-radius: 8px;
+                                margin-bottom: 12px;
+                              "
+                            >
+                              <strong
+                                style="
+                                  color: #a0aabf;
+                                  font-size: 0.75rem;
+                                  text-transform: uppercase;
+                                  letter-spacing: 1px;
+                                  display: block;
+                                  margin-bottom: 6px;
+                                "
+                                >Your Answer:</strong
+                              >
+                              <span style="color: #fff; line-height: 1.5">{{
+                                ans.openEndedAnswer
+                              }}</span>
+                            </div>
+                            <div
+                              style="
+                                background: rgba(139, 180, 255, 0.1);
+                                padding: 16px;
+                                border-radius: 8px;
+                              "
+                            >
+                              <strong
+                                style="
+                                  color: #8bb4ff;
+                                  font-size: 0.75rem;
+                                  text-transform: uppercase;
+                                  letter-spacing: 1px;
+                                  display: flex;
+                                  align-items: center;
+                                  gap: 6px;
+                                  margin-bottom: 6px;
+                                "
+                              >
+                                <mat-icon
+                                  style="
+                                    font-size: 14px;
+                                    width: 14px;
+                                    height: 14px;
+                                  "
+                                  >auto_awesome</mat-icon
+                                >
+                                AI Feedback:
+                              </strong>
+                              <span style="color: #e2e8f0; line-height: 1.5">{{
+                                ans.aiFeedback
+                              }}</span>
+                            </div>
+                          } @else {
+                            <div
+                              style="
+                                display: flex;
+                                align-items: center;
+                                gap: 10px;
+                                background: rgba(255, 255, 255, 0.05);
+                                padding: 12px 16px;
+                                border-radius: 8px;
+                              "
+                            >
+                              <mat-icon
+                                [style.color]="
+                                  ans.correct ? '#4cd137' : '#e84118'
+                                "
+                              >
+                                {{ ans.correct ? "check_circle" : "cancel" }}
+                              </mat-icon>
+                              <span style="color: #e2e8f0">
+                                {{
+                                  ans.correct
+                                    ? "Correctly answered."
+                                    : "Incorrect answer. Please review the material."
+                                }}
+                              </span>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <button
+                      class="btn-retry"
+                      style="width: 100%; margin-top: 1rem"
+                      (click)="loadQuiz(module)"
+                    >
+                      Retake Quiz
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+}

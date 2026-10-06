@@ -1,0 +1,56 @@
+<header class="admin-header">
+  <div class="header-left">
+    <button
+      class="sidebar-toggle-btn"
+      (click)="toggleSidebar.emit()"
+      title="Toggle sidebar"
+    >
+      <mat-icon>{{ sidebarCollapsed ? "menu" : "menu_open" }}</mat-icon>
+    </button>
+
+    <div class="header-identity">
+      <div class="breadcrumb-row">
+        <span class="admin-badge"> <span class="badge-dot"></span>Admin </span>
+        <mat-icon class="breadcrumb-sep">chevron_right</mat-icon>
+        <span class="breadcrumb-current">Management Console</span>
+      </div>
+      <h4 class="admin-title">
+        Studio <span class="title-accent">Command.</span>
+      </h4>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-item">
+      <span class="status-dot status-dot--live"></span>
+      <span>System Live</span>
+    </div>
+    <div class="status-divider"></div>
+    <div class="status-item">
+      <mat-icon>schedule</mat-icon>
+      <span>{{ currentTime | date: "HH:mm" }}</span>
+    </div>
+    <div class="status-divider"></div>
+    <div class="status-item">
+      <mat-icon>admin_panel_settings</mat-icon>
+      <span>Admin</span>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <button class="tool-btn" (click)="toggleMode()" title="Toggle theme">
+      <mat-icon>dark_mode</mat-icon>
+    </button>
+    <button class="tool-btn" (click)="openTheme.emit()" title="Color palette">
+      <mat-icon>palette</mat-icon>
+    </button>
+    <div class="header-sep"></div>
+    <button class="admin-pill" routerLink="/admin/profile">
+      <div class="admin-avatar">
+        <mat-icon>shield</mat-icon>
+      </div>
+      <span class="admin-pill-label">Admin</span>
+      <mat-icon class="admin-pill-chevron">expand_more</mat-icon>
+    </button>
+  </div>
+</header>

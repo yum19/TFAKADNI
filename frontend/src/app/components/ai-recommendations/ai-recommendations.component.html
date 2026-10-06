@@ -1,0 +1,116 @@
+<!-- src/app/components/ai-recommendations/ai-recommendations.component.html -->
+<p style="color:red;font-size:12px">
+</p>
+<div class="rec-wrap" *ngIf="!loading && hasData">
+
+  <!-- Header -->
+  <div class="rec-header">
+    <div class="rec-header-left">
+      <div class="rec-ai-badge">
+        <span class="rec-ai-dot"></span>
+        <span>AI Picks</span>
+      </div>
+      <div class="rec-title-group">
+        <h2 class="rec-title">Curated for You</h2>
+        <p class="rec-subtitle">Based on your pregnancy &amp; baby profile</p>
+      </div>
+    </div>
+    <div class="rec-header-right">
+      <div class="rec-sparkle" aria-hidden="true">✦</div>
+      <span class="rec-count">{{ recommendations.length }} picks</span>
+    </div>
+  </div>
+  <!-- Empty state when no data -->
+  <div class="rec-empty" *ngIf="recommendations.length === 0">
+    <div class="rec-empty-icon">🌸</div>
+    <h3 class="rec-empty-title">No recommendations yet</h3>
+    <p class="rec-empty-sub">
+      Complete your pregnancy profile so our AI can suggest the best products for your journey.
+    </p>
+    <button class="rec-empty-btn" routerLink="/marrainage">
+      Complete My Profile →
+    </button>
+  </div>
+
+  <!-- Scrolling Track -->
+  <div class="rec-track-outer"
+       (mouseenter)="paused = true"
+       (mouseleave)="paused = false"
+       (touchstart)="paused = true"
+       (touchend)="paused = false">
+
+    <!-- Fade masks -->
+    <div class="rec-fade rec-fade-left" aria-hidden="true"></div>
+    <div class="rec-fade rec-fade-right" aria-hidden="true"></div>
+
+    <div class="rec-track" [class.paused]="paused">
+      <div class="rec-card"
+           *ngFor="let rec of doubledList; trackBy: trackById; let i = index"
+           (click)="goToProduct(rec.productId)"
+           [attr.aria-label]="'View ' + rec.nom">
+
+        <!-- Image -->
+        <div class="rec-card-img">
+          <img *ngIf="getImage(rec)" [src]="getImage(rec)" [alt]="rec.nom" loading="lazy" />
+          <div *ngIf="!getImage(rec)" class="rec-card-no-img" aria-hidden="true">✿</div>
+
+          <!-- Score badge -->
+          <div class="rec-score-badge">
+            <span class="rec-score-num">{{ rec.relevanceScore | number:'1.0-0' }}</span>
+            <span class="rec-score-pct">%</span>
+          </div>
+
+          <!-- Category pill -->
+          <div class="rec-cat-pill">{{ rec.categorie }}</div>
+        </div>
+
+        <!-- Body -->
+        <div class="rec-card-body">
+          <p class="rec-card-label">{{ getScoreLabel(rec.relevanceScore) }}</p>
+          <h3 class="rec-card-name">{{ rec.nom }}</h3>
+
+          <div class="rec-ai-reason">
+            <span class="rec-reason-icon">🤖</span>
+            <span class="rec-reason-text">{{ rec.aiReason }}</span>
+          </div>
+
+          <div class="rec-card-footer">
+            <div class="rec-price">
+              <span class="rec-price-val">{{ formatPrice(rec.prix) }}</span>
+              <span class="rec-price-cur">TND</span>
+            </div>
+            <button class="rec-cta" type="button">
+              View
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Hover glow -->
+        <div class="rec-card-glow" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer strip -->
+  <div class="rec-footer-strip">
+    <span>🌸</span>
+    <span>Powered by AI · Personalised for your journey</span>
+    <span>🌸</span>
+  </div>
+
+</div>
+
+<!-- Loading skeleton -->
+<div class="rec-skeleton-wrap" *ngIf="loading">
+  <div class="rec-skeleton-header">
+    <div class="rec-skeleton-pill"></div>
+    <div class="rec-skeleton-title"></div>
+  </div>
+  <div class="rec-skeleton-track">
+    <div class="rec-skeleton-card" *ngFor="let i of [1,2,3,4]"></div>
+  </div>
+</div>

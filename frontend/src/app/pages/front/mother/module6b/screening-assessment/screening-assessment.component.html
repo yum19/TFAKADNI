@@ -1,0 +1,224 @@
+<div class="screening-page">
+  <div class="screening-shell">
+
+    <section class="screening-hero">
+      <div class="hero-left">
+        <div class="hero-kicker">
+          <mat-icon>spa</mat-icon>
+          <span>Postpartum care</span>
+        </div>
+
+        <h1 class="hero-title">EPDS Screening Assessment</h1>
+
+        <p class="hero-lead">
+          Take this gentle check-in at your own pace. Your answers help identify
+          whether you may need extra postpartum support.
+        </p>
+
+        <div class="hero-actions">
+          <button
+            type="button"
+            class="calm-mode-btn"
+            [class.active]="calmModeOn"
+            (click)="toggleCalmMode()"
+          >
+            <mat-icon>{{ calmModeOn ? 'music_note' : 'headphones' }}</mat-icon>
+            <span>{{ calmModeOn ? 'Calm mode on' : 'Soft ambient sound' }}</span>
+          </button>
+
+          <button
+            *ngIf="calmModeOn"
+            type="button"
+            class="mute-btn"
+            (click)="stopMusic()"
+          >
+            <mat-icon>volume_off</mat-icon>
+            <span>Mute</span>
+          </button>
+
+          <a routerLink="/mother/postpartum" class="back-link">
+            Back to postpartum hub
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="assessment-card">
+      <div class="assessment-card-top">
+        <div class="progress-meta">
+          <span class="progress-label">Progress</span>
+          <span class="progress-value">{{ answeredCount }}/{{ totalFields }}</span>
+        </div>
+
+        <div class="progress-bar">
+          <div
+            class="progress-bar-fill"
+            [style.width.%]="progressPercent"
+          ></div>
+        </div>
+
+        <div class="progress-dots" aria-hidden="true">
+          <span
+            class="dot"
+            *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11]; let idx = index"
+            [class.active]="idx < answeredCount"
+          ></span>
+        </div>
+      </div>
+
+      <form [formGroup]="assessmentForm" (ngSubmit)="submitAssessment()" novalidate>
+        <div class="form-section">
+          <h2 class="section-title">About you</h2>
+
+          <div class="question-card age-card" [class.invalid]="hasFieldError('age')">
+            <div class="question-number">1</div>
+
+            <div class="question-body">
+              <label class="question-label" for="age">Your age range</label>
+
+              <div class="age-input-wrap">
+                <select
+                  id="age"
+                  formControlName="age"
+                  class="age-input"
+                >
+                  <option value="" disabled selected>Select your age range</option>
+                  <option *ngFor="let age of ageOptions" [value]="age">
+                    {{ age }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="field-error" *ngIf="ageError">
+                {{ ageError }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2 class="section-title">Your emotional check-in</h2>
+
+          <div
+            class="question-card"
+            *ngFor="let question of questionConfigs"
+            [class.invalid]="hasFieldError(question.key)"
+          >
+            <div class="question-number">{{ question.index + 1 }}</div>
+
+            <div class="question-body">
+              <div class="question-label">{{ question.label }}</div>
+
+              <div class="choice-group">
+                <button
+                  type="button"
+                  class="choice-btn"
+                  *ngFor="let option of question.options"
+                  [class.selected]="isSelected(question.key, option)"
+                  (click)="selectOption(question.key, option)"
+                >
+                  <mat-icon *ngIf="isSelected(question.key, option)">check</mat-icon>
+                  <span>{{ option }}</span>
+                </button>
+              </div>
+
+              <div class="field-error" *ngIf="hasFieldError(question.key)">
+                Please choose one option.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2 class="section-title">Shared review</h2>
+
+          <div class="question-card" [class.invalid]="hasFieldError('sharedWithDoctor')">
+            <div class="question-number">
+              <mat-icon>done</mat-icon>
+            </div>
+
+            <div class="question-body">
+              <div class="question-label">Have you shared this with a doctor?</div>
+
+              <div class="choice-group">
+                <button
+                  type="button"
+                  class="choice-btn"
+                  [class.selected]="isSelected('sharedWithDoctor', true)"
+                  (click)="selectBoolean('sharedWithDoctor', true)"
+                >
+                  <mat-icon *ngIf="isSelected('sharedWithDoctor', true)">check</mat-icon>
+                  <span>Yes</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="choice-btn"
+                  [class.selected]="isSelected('sharedWithDoctor', false)"
+                  (click)="selectBoolean('sharedWithDoctor', false)"
+                >
+                  <mat-icon *ngIf="isSelected('sharedWithDoctor', false)">check</mat-icon>
+                  <span>No</span>
+                </button>
+              </div>
+
+              <div class="field-error" *ngIf="hasFieldError('sharedWithDoctor')">
+                Please choose Yes or No.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-feedback" *ngIf="submitError || submitSuccess">
+          <div class="feedback error" *ngIf="submitError">
+            {{ submitError }}
+          </div>
+
+          <div class="feedback success" *ngIf="submitSuccess">
+            Assessment saved successfully. Redirecting to prediction results...
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="primary-submit-btn"
+            [disabled]="isSubmitting"
+          >
+            <mat-icon>task_alt</mat-icon>
+            <span>{{ isSubmitting ? 'Saving...' : 'Save assessment' }}</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="latest-preview-card" *ngIf="latestAssessment">
+      <div class="latest-preview-header">
+        <h3>Latest saved assessment</h3>
+        <span>{{ latestAssessment.assessmentDate | date:'MMM d, y' }}</span>
+      </div>
+
+      <div class="latest-preview-grid">
+        <div class="preview-pill">
+          <strong>Age</strong>
+          <span>{{ latestAssessment.age }}</span>
+        </div>
+
+        <div class="preview-pill">
+          <strong>Anxious</strong>
+          <span>{{ latestAssessment.feelingAnxious | uppercase }}</span>
+        </div>
+
+        <div class="preview-pill">
+          <strong>Sad / Tearful</strong>
+          <span>{{ latestAssessment.feelingSadOrTearful | uppercase }}</span>
+        </div>
+
+        <div class="preview-pill">
+          <strong>Shared</strong>
+          <span>{{ latestAssessment.sharedWithDoctor ? 'YES' : 'NO' }}</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

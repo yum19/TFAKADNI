@@ -1,0 +1,227 @@
+<section class="document-page">
+  <div class="document-shell">
+    <header class="topbar">
+    
+
+
+    </header>
+
+    <section class="hero-card">
+      <div class="hero-copy">
+        <p class="eyebrow">Baby documents · medical archive</p>
+        <h1>
+          Gentle care,
+          <span>beautifully organized</span>
+        </h1>
+        <p class="hero-text">
+          Keep every important baby document in one soft and harmonious place.
+        </p>
+      </div>
+
+      <div class="hero-side">
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-number">{{ totalCount }}</span>
+            <span class="stat-label">Documents</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">{{ analyseCount + radioCount }}</span>
+            <span class="stat-label">Medical files</span>
+          </div>
+        </div>
+
+        <button type="button" class="add-document-btn" (click)="openAddModal()">
+          <span class="plus">+</span>
+          Add document
+        </button>
+      </div>
+    </section>
+
+    <div class="messages">
+      <div class="status error" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="status success" *ngIf="successMessage">{{ successMessage }}</div>
+    </div>
+
+    <section class="filters-card">
+      <div class="filters-head">
+        <span class="filters-title">Filter documents</span>
+      </div>
+
+      <div class="filters-row">
+        <button type="button" class="filter-chip" [ngClass]="{ active: activeFilter === 'ALL' }" (click)="applyFilter('ALL')">
+          All <span>{{ totalCount }}</span>
+        </button>
+
+        <button type="button" class="filter-chip" [ngClass]="{ active: activeFilter === 'ORDONNANCE' }" (click)="applyFilter('ORDONNANCE')">
+          Ordonnance <span>{{ ordonnanceCount }}</span>
+        </button>
+
+        <button type="button" class="filter-chip" [ngClass]="{ active: activeFilter === 'COMPTE_RENDU' }" (click)="applyFilter('COMPTE_RENDU')">
+          Compte rendu <span>{{ compteRenduCount }}</span>
+        </button>
+
+        <button type="button" class="filter-chip" [ngClass]="{ active: activeFilter === 'ANALYSE' }" (click)="applyFilter('ANALYSE')">
+          Analyse <span>{{ analyseCount }}</span>
+        </button>
+
+        <button type="button" class="filter-chip" [ngClass]="{ active: activeFilter === 'RADIO' }" (click)="applyFilter('RADIO')">
+          Radio <span>{{ radioCount }}</span>
+        </button>
+
+        <button type="button" class="filter-chip" [ngClass]="{ active: activeFilter === 'AUTRE' }" (click)="applyFilter('AUTRE')">
+          Autre <span>{{ autreCount }}</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="gallery-section">
+      <div *ngIf="loading" class="empty-state">
+        <h3>Loading documents...</h3>
+        <p>Please wait a moment.</p>
+      </div>
+
+      <div *ngIf="!loading && filteredDocuments.length === 0" class="empty-state">
+        <h3>No documents yet in this section</h3>
+        <p>Add the first file to build a clear and lovely medical archive.</p>
+        <button type="button" class="empty-add-btn" (click)="openAddModal()">
+          Add first document
+        </button>
+      </div>
+
+      <div class="documents-grid" *ngIf="!loading && filteredDocuments.length > 0">
+        <article class="document-card" *ngFor="let document of filteredDocuments; trackBy: trackByDocumentId">
+          <div class="document-top">
+            <div class="document-icon-wrap">
+              <span class="document-icon">{{ getDocumentIcon(document.documentType) }}</span>
+            </div>
+
+            <div class="document-meta">
+              <span class="document-type-badge" [ngClass]="'type-' + (document.documentType || 'AUTRE').toLowerCase()">
+                {{ formatDocumentType(document.documentType) }}
+              </span>
+              <span class="document-date">{{ document.uploadedAt | date:'dd MMM yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="document-body">
+            <h2 class="document-title">{{ document.title }}</h2>
+
+
+            <p class="document-notes" *ngIf="document.notes">
+              {{ document.notes }}
+            </p>
+
+            <div class="document-footer">
+              <button
+                type="button"
+                class="open-btn"
+                (click)="openFile(document.fileUrl)"
+                [disabled]="!document.fileUrl"
+              >
+                Open file
+              </button>
+
+              <div class="card-actions">
+                <button type="button" class="update-btn" (click)="openEditModal(document)">
+                  Update
+                </button>
+
+                <button type="button" class="delete-btn" (click)="deleteDocument(document.id)">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()"></div>
+
+  <section class="add-modal" *ngIf="showModal">
+    <div class="modal-header">
+      <div>
+        <p class="modal-eyebrow">
+          {{ isEditMode ? 'Update document' : 'New document' }}
+        </p>
+        <h2>
+          {{ isEditMode ? 'Edit this medical file' : 'Add a new medical file' }}
+        </h2>
+      </div>
+
+      <button type="button" class="close-btn" (click)="closeModal()">×</button>
+    </div>
+
+    <form [formGroup]="documentForm" (ngSubmit)="onSubmit()" class="modal-form">
+      <div class="form-grid">
+        <label class="field">
+          <span>Title</span>
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="Vaccination prescription, blood analysis..."
+          />
+        </label>
+
+        <label class="field">
+          <span>Document type</span>
+          <select formControlName="documentType">
+            <option *ngFor="let type of documentTypes" [value]="type">
+              {{ type }}
+            </option>
+          </select>
+        </label>
+
+        <div class="field full">
+          <span>Select file</span>
+
+          <label class="upload-box">
+            <input type="file" (change)="onFileSelected($event)" hidden />
+            <div class="upload-inner">
+              <div class="upload-icon">⬆</div>
+              <div class="upload-title">Click to choose a document</div>
+              <div class="upload-subtitle">
+                The file URL and the real file size will be generated automatically
+              </div>
+            </div>
+          </label>
+
+          <div class="selected-file" *ngIf="selectedFileName">
+            <span>{{ selectedFileName }}</span>
+            <button type="button" class="remove-file-btn" (click)="removeSelectedFile()">
+              Remove file
+            </button>
+          </div>
+
+          <div class="selected-file hint" *ngIf="isEditMode && !selectedFileName">
+            <span>No new file selected. The current saved file will stay unchanged.</span>
+          </div>
+        </div>
+
+        <label class="field full">
+          <span>Notes</span>
+          <textarea
+            rows="4"
+            formControlName="notes"
+            placeholder="Add useful notes about this document..."
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-btn" (click)="closeModal()">
+          Cancel
+        </button>
+
+        <button type="submit" class="primary-btn" [disabled]="submitting">
+          {{
+            submitting
+              ? (isEditMode ? 'Updating...' : 'Saving...')
+              : (isEditMode ? 'Update document' : 'Save document')
+          }}
+        </button>
+      </div>
+    </form>
+  </section>
+</section>

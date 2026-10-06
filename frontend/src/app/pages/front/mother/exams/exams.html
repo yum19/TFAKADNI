@@ -1,0 +1,954 @@
+<!-- ░░ BACKGROUND ░░ -->
+<div class="exams-page-bg">
+  <div
+    class="exams-bg-img"
+    style="background-image: url(&quot;assets/img/bg-pregnancy.jpg&quot;)"
+  ></div>
+  <div class="exams-bg-overlay"></div>
+</div>
+
+<!-- ░░ HERO ░░ -->
+<section class="exams-hero fade-in">
+  <div class="exams-hero__left">
+    <span class="exams-hero__eyebrow">📋 Medical tracking</span>
+    <h1 class="exams-hero__title">
+      My
+      <span
+        style="
+          font-style: italic;
+          background: linear-gradient(135deg, #ff9800, #e91e63, #9c27b0);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        "
+        >Exams</span
+      >
+    </h1>
+    <p class="exams-hero__sub">
+      Track and manage all your prenatal examinations in one place.
+    </p>
+    <div class="exams-hero__actions">
+      <button class="exams-btn exams-btn--primary" (click)="openForm()">
+        <span class="material-symbols-outlined">add_circle</span>
+        Add my exam
+      </button>
+      <!-- History button -->
+      <button
+        class="exams-btn exams-btn--history"
+        (click)="showHistoryPopup = true"
+      >
+        <span class="material-symbols-outlined">history</span>
+        History @if(totalCompleted > 0) {
+        <span class="exams-history-count">{{ totalCompleted }}</span>
+        }
+      </button>
+    </div>
+  </div>
+  <div class="exams-hero__right">
+    <div
+      class="exams-hero__ring"
+      [style.border-color]="getTrimesterColor(currentTrimester) + '50'"
+    >
+      <span
+        class="material-symbols-outlined exams-ring-icon"
+        [style.color]="getTrimesterColor(currentTrimester)"
+        >assignment</span
+      >
+      <span class="exams-ring-value"
+        >{{ totalCompleted }}/{{ totalExams }}</span
+      >
+      <span
+        class="exams-ring-unit"
+        [style.color]="getTrimesterColor(currentTrimester)"
+        >T{{ currentTrimester }} · W{{ currentWeek }}</span
+      >
+    </div>
+  </div>
+</section>
+
+<!-- Sharing banner -->
+@if(isSharedPartner) {
+<div style="max-width: 1200px; margin: 0 auto 1rem; padding: 0 2.5rem">
+  <div
+    style="
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      border-radius: 16px;
+      background: rgba(76, 175, 80, 0.08);
+      border: 1.5px solid rgba(76, 175, 80, 0.3);
+    "
+  >
+    <span
+      class="material-symbols-outlined"
+      style="font-size: 1.6rem; color: #4caf50; flex-shrink: 0"
+      >people</span
+    >
+    <div>
+      <p style="font-weight: 700; font-size: 0.9rem; color: #2e7d32; margin: 0">
+        Shared with your partner
+      </p>
+      <p style="font-size: 0.78rem; color: #4caf50; margin: 0">
+        Your partner can view your prenatal exams checklist
+      </p>
+    </div>
+  </div>
+</div>
+} @if(loading) {
+<div class="exams-loading">
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
+} @if(!loading) {
+
+<!-- ░░ STATS ░░ -->
+<section class="exams-stats fade-in-delay-1">
+  <div class="exams-stat-card exams-stat--sky">
+    <div class="exams-stat__icon">
+      <span class="material-symbols-outlined">assignment</span>
+    </div>
+    <div class="exams-stat__body">
+      <span class="exams-stat__value">{{ totalExams }}</span
+      ><span class="exams-stat__label">Total exams</span>
+    </div>
+    <div class="exams-stat__deco">📋</div>
+  </div>
+  <div
+    class="exams-stat-card exams-stat--green"
+    style="cursor: pointer"
+    (click)="showHistoryPopup = true"
+  >
+    <div class="exams-stat__icon">
+      <span class="material-symbols-outlined">task_alt</span>
+    </div>
+    <div class="exams-stat__body">
+      <span class="exams-stat__value">{{ totalCompleted }}</span
+      ><span class="exams-stat__label">Completed · View history</span>
+    </div>
+    <div class="exams-stat__deco">✓</div>
+  </div>
+  <div class="exams-stat-card exams-stat--gold">
+    <div class="exams-stat__icon">
+      <span class="material-symbols-outlined">pending_actions</span>
+    </div>
+    <div class="exams-stat__body">
+      <span class="exams-stat__value">{{ totalPending }}</span
+      ><span class="exams-stat__label">Pending</span>
+    </div>
+    <div class="exams-stat__deco">⏳</div>
+  </div>
+  <div class="exams-stat-card exams-stat--rose">
+    <div class="exams-stat__icon">
+      <span class="material-symbols-outlined">percent</span>
+    </div>
+    <div class="exams-stat__body">
+      <span class="exams-stat__value"
+        >{{ totalExams ? ((totalCompleted / totalExams) * 100 | number:'1.0-0')
+        : 0 }}%</span
+      >
+      <span class="exams-stat__label">Progress</span>
+    </div>
+    <div class="exams-stat__deco">★</div>
+  </div>
+</section>
+
+<!-- ░░ BENTO GRID — 2 cards row 1, alert-triggered row 2 ░░ -->
+<section class="exams-bento fade-in-delay-2">
+  <!-- ═══ CARD 1 — RECOMMENDED ═══ -->
+  <div class="exams-bento__card exams-bento__card--recommended">
+    <div
+      class="exams-card-tag"
+      [style.background]="getTrimesterColor(currentTrimester) + '18'"
+      [style.color]="getTrimesterColor(currentTrimester)"
+    >
+      🏥 Recommended · T{{ currentTrimester }}
+    </div>
+    <h2 class="exams-card-title">Medical <small>schedule</small></h2>
+    <div
+      class="exams-trim-info"
+      [style.border-color]="getTrimesterColor(currentTrimester) + '30'"
+      [style.background]="getTrimesterColor(currentTrimester) + '08'"
+    >
+      <span
+        class="material-symbols-outlined"
+        [style.color]="getTrimesterColor(currentTrimester)"
+        >info</span
+      >
+      <span>{{ getTrimLabel(currentTrimester) }} · Week {{ currentWeek }}</span>
+      <span
+        class="exams-trim-current-pill"
+        [style.background]="getTrimesterColor(currentTrimester) + '18'"
+        [style.color]="getTrimesterColor(currentTrimester)"
+        >● Current</span
+      >
+    </div>
+    @if(recommendedCurrent.length === 0) {
+    <div class="exams-empty-state">
+      <span class="material-symbols-outlined">task_alt</span>
+      <p>All recommended exams done! 🎉</p>
+    </div>
+    }
+    <div class="exams-list">
+      @for(exam of recommendedCurrent; track exam.id) {
+      <div
+        class="exams-item exams-item--pending"
+        [class.exams-item--overdue]="isOverdue(exam)"
+        [class.exams-item--soon]="isComingSoon(exam)"
+      >
+        <div class="exams-item__check" (click)="openDoneForm(exam)">
+          <span class="material-symbols-outlined">radio_button_unchecked</span>
+        </div>
+        <div class="exams-item__body">
+          <div class="exams-item__badges">
+            <span class="exams-week-badge">W{{ exam.recommendedWeek }}</span>
+            <span
+              class="exams-type-badge"
+              [style.background]="getTypeColor(exam.examType) + '18'"
+              [style.color]="getTypeColor(exam.examType)"
+              [style.border]="'1px solid ' + getTypeColor(exam.examType) + '35'"
+            >
+              {{ getTypeLabel(exam.examType) }}
+            </span>
+            @if(isOverdue(exam)) {
+            <span class="exams-urgency-badge exams-urgency-badge--overdue"
+              >🔴 Due now</span
+            >
+            } @else if(isComingSoon(exam)) {
+            <span class="exams-urgency-badge exams-urgency-badge--soon"
+              >🟡 Coming soon</span
+            >
+            }
+          </div>
+          <h4 class="exams-item__name">{{ exam.examName }}</h4>
+        </div>
+        <div class="exams-item__actions">
+          <button
+            class="exams-action-btn exams-action-btn--done"
+            (click)="openDoneForm(exam, $event)"
+          >
+            <span class="material-symbols-outlined">check_circle</span>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- ═══ CARD 2 — MY PERSONAL EXAMS ═══ -->
+  <div class="exams-bento__card exams-bento__card--custom">
+    <div
+      class="exams-card-tag"
+      style="background: rgba(156, 39, 176, 0.12); color: #9c27b0"
+    >
+      ✏️ My personal exams
+    </div>
+    <h2 class="exams-card-title">My <small>schedule</small></h2>
+    @if(customT1.length === 0 && customT2.length === 0 && customT3.length === 0)
+    {
+    <div class="exams-empty-state">
+      <span class="material-symbols-outlined">add_circle</span>
+      <p>No personal exams yet.<br />Click "Add my exam" to create one!</p>
+    </div>
+    } @if(customT1.length > 0) {
+    <div class="exams-custom-group">
+      <div class="exams-custom-group-header" style="--g-color: #c94d6a">
+        <span
+          class="exams-custom-group-badge"
+          style="background: rgba(201, 77, 106, 0.12); color: #c94d6a"
+          >T1</span
+        >
+        <span>Trimester 1 · W1–W12</span>
+        @if(currentTrimester === 1) {
+        <span class="exams-trim-current">● Now</span> }
+      </div>
+      @for(exam of customT1; track exam.id) {
+      <ng-container
+        *ngTemplateOutlet="customItem; context: { $implicit: exam }"
+      ></ng-container>
+      }
+    </div>
+    } @if(customT2.length > 0) {
+    <div class="exams-custom-group">
+      <div class="exams-custom-group-header" style="--g-color: #ff9800">
+        <span
+          class="exams-custom-group-badge"
+          style="background: rgba(255, 152, 0, 0.12); color: #ff9800"
+          >T2</span
+        >
+        <span>Trimester 2 · W13–W26</span>
+        @if(currentTrimester === 2) {
+        <span class="exams-trim-current">● Now</span> }
+      </div>
+      @for(exam of customT2; track exam.id) {
+      <ng-container
+        *ngTemplateOutlet="customItem; context: { $implicit: exam }"
+      ></ng-container>
+      }
+    </div>
+    } @if(customT3.length > 0) {
+    <div class="exams-custom-group">
+      <div class="exams-custom-group-header" style="--g-color: #9c27b0">
+        <span
+          class="exams-custom-group-badge"
+          style="background: rgba(156, 39, 176, 0.12); color: #9c27b0"
+          >T3</span
+        >
+        <span>Trimester 3 · W27–W40</span>
+        @if(currentTrimester === 3) {
+        <span class="exams-trim-current">● Now</span> }
+      </div>
+      @for(exam of customT3; track exam.id) {
+      <ng-container
+        *ngTemplateOutlet="customItem; context: { $implicit: exam }"
+      ></ng-container>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- ═══ CARD 3 — ALERT-TRIGGERED ═══ -->
+  <div class="exams-bento__card exams-bento__card--alert-triggered">
+    <div
+      class="exams-card-tag"
+      style="background: rgba(147, 51, 148, 0.12); color: #7b1fa2"
+    >
+      🔔 Alert-triggered · {{ alertTriggeredExams.length }}
+    </div>
+    <h2 class="exams-card-title">Urgent <small>recommendations</small></h2>
+    <div class="exams-alert-info-banner">
+      <span class="material-symbols-outlined">info</span>
+      <span
+        >These exams were automatically recommended based on your health alerts.
+        Please consult your doctor.</span
+      >
+    </div>
+    @if(alertTriggeredExams.length === 0) {
+    <div class="exams-empty-state">
+      <span class="material-symbols-outlined">verified</span>
+      <p>No urgent exams recommended.<br />Your vitals look good! 🎉</p>
+    </div>
+    }
+    <div class="exams-list">
+      @for(exam of alertTriggeredExams; track exam.id) {
+      <div
+        class="exams-item exams-item--alert-triggered"
+        [style.box-shadow]="'inset 4px 0 0 ' + getSeverityColor(exam.alertSeverity)"
+      >
+        <div
+          class="exams-alert-severity-icon"
+          [style.background]="getSeverityColor(exam.alertSeverity) + '18'"
+          [style.border]="'2px solid ' + getSeverityColor(exam.alertSeverity) + '40'"
+        >
+          <span
+            class="material-symbols-outlined"
+            [style.color]="getSeverityColor(exam.alertSeverity)"
+          >
+            {{ getSeverityIcon(exam.alertSeverity) }}
+          </span>
+        </div>
+        <div class="exams-item__body">
+          <div class="exams-item__badges">
+            <span class="exams-week-badge">W{{ exam.recommendedWeek }}</span>
+            <span
+              class="exams-alert-severity-badge"
+              [style.background]="getSeverityColor(exam.alertSeverity) + '18'"
+              [style.color]="getSeverityColor(exam.alertSeverity)"
+              [style.border]="'1px solid ' + getSeverityColor(exam.alertSeverity) + '40'"
+            >
+              {{ exam.alertSeverity }}
+            </span>
+            <span class="exams-alert-origin-badge">
+              <span class="material-symbols-outlined" style="font-size: 0.7rem"
+                >notifications_active</span
+              >
+              From alert
+            </span>
+          </div>
+          <h4 class="exams-item__name">{{ exam.examName }}</h4>
+          @if(exam.resultNotes) {
+          <div class="exams-alert-reason">
+            <span class="material-symbols-outlined">article</span>
+            {{ exam.resultNotes }}
+          </div>
+          }
+        </div>
+        <div class="exams-item__actions">
+          <button
+            class="exams-action-btn exams-action-btn--done"
+            (click)="openDoneForm(exam, $event)"
+          >
+            <span class="material-symbols-outlined">check_circle</span>
+          </button>
+          <button
+            class="exams-action-btn exams-action-btn--delete"
+            (click)="deleteExam(exam, $event)"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</section>
+}
+
+<!-- ===== TEMPLATE CUSTOM ITEM ===== -->
+<ng-template #customItem let-exam>
+  <div
+    class="exams-item exams-item--pending"
+    [class.exams-item--overdue]="isOverdue(exam)"
+    [class.exams-item--soon]="isComingSoon(exam)"
+  >
+    <div class="exams-item__check" (click)="openDoneForm(exam)">
+      <span class="material-symbols-outlined">radio_button_unchecked</span>
+    </div>
+    <div class="exams-item__body">
+      <div class="exams-item__badges">
+        <span class="exams-week-badge">W{{ exam.recommendedWeek }}</span>
+        @if(isOverdue(exam)) {
+        <span class="exams-urgency-badge exams-urgency-badge--overdue"
+          >🔴 Due now</span
+        >
+        } @else if(isComingSoon(exam)) {
+        <span class="exams-urgency-badge exams-urgency-badge--soon"
+          >🟡 Coming soon</span
+        >
+        }
+      </div>
+      <h4 class="exams-item__name">{{ exam.examName }}</h4>
+      @if(exam.resultNotes) {
+      <p class="exams-item__notes">{{ exam.resultNotes }}</p>
+      }
+    </div>
+    <div class="exams-item__actions">
+      <button
+        class="exams-action-btn exams-action-btn--done"
+        (click)="openDoneForm(exam, $event)"
+      >
+        <span class="material-symbols-outlined">check_circle</span>
+      </button>
+      <button
+        class="exams-action-btn exams-action-btn--edit"
+        (click)="openEditForm(exam, $event)"
+      >
+        <span class="material-symbols-outlined">edit</span>
+      </button>
+      <button
+        class="exams-action-btn exams-action-btn--delete"
+        (click)="deleteExam(exam, $event)"
+      >
+        <span class="material-symbols-outlined">delete</span>
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ░░ NO PREGNANCY ALERT ░░ -->
+@if(showNoPregnancyAlert) {
+<div class="exams-popup-overlay" (click)="showNoPregnancyAlert = false">
+  <div class="exams-popup-box no-preg-box" (click)="$event.stopPropagation()">
+    <div class="no-preg-emoji">🤰</div>
+    <h3 class="no-preg-title">No active pregnancy</h3>
+    <p class="no-preg-desc">
+      You need to create a pregnancy record before adding personal exams.
+    </p>
+    <div class="no-preg-actions">
+      <a
+        routerLink="/mother/pregnancy/pregnancy"
+        class="exams-btn exams-btn--primary"
+        style="text-decoration: none"
+        (click)="showNoPregnancyAlert = false"
+      >
+        <span class="material-symbols-outlined">pregnant_woman</span>
+        Create my pregnancy record
+      </a>
+      <button
+        class="exams-btn"
+        style="background: rgba(0, 0, 0, 0.05); color: #666"
+        (click)="showNoPregnancyAlert = false"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ░░ HISTORY POPUP ░░ -->
+@if(showHistoryPopup) {
+<div
+  class="exams-popup-overlay"
+  (click)="showHistoryPopup = false; historyFilter = 'ALL'"
+>
+  <div
+    class="exams-popup-box exams-history-popup-box"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header -->
+    <div class="exams-popup-header">
+      <div class="exams-popup-icon exams-popup-icon--history">
+        <span class="material-symbols-outlined">history</span>
+      </div>
+      <div>
+        <h3 class="exams-popup-title">Exam History</h3>
+        <p class="exams-popup-sub">
+          {{ totalCompleted }} completed examination{{ totalCompleted !== 1 ?
+          's' : '' }}
+        </p>
+      </div>
+      <button
+        mat-icon-button
+        (click)="showHistoryPopup = false; historyFilter = 'ALL'"
+        class="ms-auto"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="exams-history-progress">
+      <div class="exams-history-progress__bar">
+        <div
+          class="exams-history-progress__fill"
+          [style.width]="totalExams ? ((totalCompleted / totalExams) * 100) + '%' : '0%'"
+        ></div>
+      </div>
+      <span class="exams-history-progress__label">
+        {{ totalExams ? ((totalCompleted / totalExams) * 100 | number:'1.0-0') :
+        0 }}% complete
+      </span>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="exams-history-filters">
+      <button
+        class="exams-filter-btn"
+        [class.exams-filter-btn--active]="historyFilter === 'ALL'"
+        (click)="historyFilter = 'ALL'"
+      >
+        All · {{ completedExams.length }}
+      </button>
+      <button
+        class="exams-filter-btn"
+        [class.exams-filter-btn--active]="historyFilter === 'MANDATORY'"
+        (click)="historyFilter = 'MANDATORY'"
+      >
+        🏥 Recommended · {{ countByFilter.mandatory }}
+      </button>
+      <button
+        class="exams-filter-btn"
+        [class.exams-filter-btn--active]="historyFilter === 'CUSTOM'"
+        (click)="historyFilter = 'CUSTOM'"
+      >
+        ✏️ My exams · {{ countByFilter.custom }}
+      </button>
+      <button
+        class="exams-filter-btn"
+        [class.exams-filter-btn--active]="historyFilter === 'ALERT'"
+        (click)="historyFilter = 'ALERT'"
+      >
+        🚨 From alert · {{ countByFilter.alert }}
+      </button>
+    </div>
+
+    <!-- Empty state -->
+    @if(filteredCompletedExams.length === 0) {
+    <div class="exams-empty-state" style="padding: 2rem 1rem">
+      <span class="material-symbols-outlined">history</span>
+      <p>
+        @if(completedExams.length === 0) { No completed exams yet.<br />Start
+        marking your exams as done! } @else { No exams in this category yet. }
+      </p>
+    </div>
+    }
+
+    <!-- History list -->
+    <div class="exams-history-popup-list">
+      @for(exam of filteredCompletedExams; track exam.id) {
+      <div class="exams-history-popup-item">
+        <!-- Done icon -->
+        <div class="exams-history-popup-icon">
+          <span class="material-symbols-outlined">task_alt</span>
+        </div>
+
+        <div class="exams-history-popup-body">
+          <!-- Badges row -->
+          <div class="exams-item__badges" style="margin-bottom: 6px">
+            <span class="exams-week-badge exams-week-badge--done"
+              >W{{ exam.recommendedWeek }}</span
+            >
+            <span
+              class="exams-type-badge"
+              [style.background]="getTypeColor(exam.examType) + '12'"
+              [style.color]="getTypeColor(exam.examType)"
+              [style.border]="'1px solid ' + getTypeColor(exam.examType) + '25'"
+            >
+              {{ getTypeLabel(exam.examType) }}
+            </span>
+            @if(exam.doneDate) {
+            <span class="exams-done-date">
+              <span class="material-symbols-outlined">calendar_today</span>
+              {{ exam.doneDate | date:'MMM dd, yyyy' }}
+            </span>
+            } @if(exam.vital) {
+            <span class="exams-alert-origin-badge">
+              <span class="material-symbols-outlined" style="font-size: 0.7rem"
+                >notifications_active</span
+              >
+              From alert
+            </span>
+            }
+          </div>
+
+          <!-- Name -->
+          <h4 class="exams-history-popup-name">{{ exam.examName }}</h4>
+
+          <!-- Result notes -->
+          @if(exam.resultNotes) {
+          <div class="exams-result-box" style="margin-top: 6px">
+            <span class="material-symbols-outlined">description</span>
+            {{ exam.resultNotes }}
+          </div>
+          }
+
+          <!-- Document link -->
+          @if(exam.documentUrl) {
+          <a [href]="exam.documentUrl" target="_blank" class="exams-doc-link">
+            <span class="material-symbols-outlined">link</span>
+            View document
+          </a>
+          }
+        </div>
+
+        <!-- Done badge + edit -->
+        <div class="exams-item__actions">
+          <span class="exams-done-badge">✓ Done</span>
+          <button
+            class="exams-action-btn exams-action-btn--edit"
+            (click)="openEditForm(exam, $event); showHistoryPopup = false"
+          >
+            <span class="material-symbols-outlined">edit</span>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="exams-history-popup-footer">
+      <button
+        class="exams-btn"
+        style="background: rgba(0, 0, 0, 0.05); color: #666"
+        (click)="showHistoryPopup = false; historyFilter = 'ALL'"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ░░ ADD POPUP ░░ -->
+@if(showForm) {
+<div class="exams-popup-overlay" (click)="closeForm()">
+  <div class="exams-popup-box" (click)="$event.stopPropagation()">
+    <div class="exams-popup-header">
+      <div class="exams-popup-icon">
+        <span class="material-symbols-outlined">add_circle</span>
+      </div>
+      <div>
+        <h3 class="exams-popup-title">Add my exam</h3>
+        <p class="exams-popup-sub">Create a personal examination</p>
+      </div>
+      <button mat-icon-button (click)="closeForm()" class="ms-auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <form [formGroup]="examForm" (ngSubmit)="save()">
+      <div class="row gx-3">
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Exam name *</mat-label
+            ><input
+              matInput
+              formControlName="examName"
+              placeholder="e.g. Blood test"
+          /></mat-form-field>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Type *</mat-label>
+            <mat-select formControlName="examType">
+              <mat-option value="MANDATORY">Mandatory</mat-option>
+              <mat-option value="OPTIONAL">Optional</mat-option>
+              <mat-option value="CUSTOM">Custom</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Recommended week *</mat-label
+            ><input
+              matInput
+              type="number"
+              formControlName="recommendedWeek"
+              placeholder="20"
+          /></mat-form-field>
+        </div>
+        <div class="col-12 mb-2">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Notes</mat-label
+            ><textarea
+              matInput
+              formControlName="resultNotes"
+              rows="2"
+            ></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="d-flex gap-2 justify-content-end mt-2">
+        <button mat-button type="button" (click)="closeForm()">Cancel</button>
+        <button
+          mat-raised-button
+          type="submit"
+          [disabled]="examForm.invalid || saving"
+          class="exams-btn exams-btn--primary"
+        >
+          @if(saving) { Saving... } @else { Add exam }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- ░░ MARK AS DONE POPUP ░░ -->
+@if(showDoneForm && selectedExam) {
+<div class="exams-popup-overlay" (click)="closeDoneForm()">
+  <div class="exams-popup-box" (click)="$event.stopPropagation()">
+    <div class="exams-popup-header">
+      <div class="exams-popup-icon exams-popup-icon--done">
+        <span class="material-symbols-outlined">task_alt</span>
+      </div>
+      <div>
+        <h3 class="exams-popup-title">Mark as done</h3>
+        <p class="exams-popup-sub">{{ selectedExam.examName }}</p>
+      </div>
+      <button mat-icon-button (click)="closeDoneForm()" class="ms-auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <form [formGroup]="doneForm" (ngSubmit)="markAsDone()">
+      <div class="row gx-3">
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Completion date *</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="doneDate"
+              readonly
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Notes / Results</mat-label
+            ><textarea
+              matInput
+              formControlName="resultNotes"
+              rows="3"
+            ></textarea>
+          </mat-form-field>
+        </div>
+        <div class="col-12 mb-2">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Document link (optional)</mat-label
+            ><input
+              matInput
+              formControlName="documentUrl"
+              placeholder="https://..."
+          /></mat-form-field>
+        </div>
+      </div>
+      <div class="d-flex gap-2 justify-content-end mt-2">
+        <button mat-button type="button" (click)="closeDoneForm()">
+          Cancel
+        </button>
+        <button
+          mat-raised-button
+          type="submit"
+          [disabled]="doneForm.invalid || saving"
+          class="exams-btn exams-btn--done"
+        >
+          @if(saving) { Saving... } @else { ✓ Confirm done }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- ░░ EDIT POPUP ░░ -->
+@if(showEditForm && selectedExam) {
+<div class="exams-popup-overlay" (click)="closeEditForm()">
+  <div class="exams-popup-box" (click)="$event.stopPropagation()">
+    <div class="exams-popup-header">
+      <div class="exams-popup-icon exams-popup-icon--edit">
+        <span class="material-symbols-outlined">edit</span>
+      </div>
+      <div>
+        <h3 class="exams-popup-title">Edit exam</h3>
+        <p class="exams-popup-sub">{{ selectedExam.examName }}</p>
+      </div>
+      <button mat-icon-button (click)="closeEditForm()" class="ms-auto">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+      <div class="row gx-3">
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Exam name *</mat-label
+            ><input matInput formControlName="examName"
+          /></mat-form-field>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Type *</mat-label>
+            <mat-select formControlName="examType">
+              <mat-option value="MANDATORY">Mandatory</mat-option>
+              <mat-option value="OPTIONAL">Optional</mat-option>
+              <mat-option value="CUSTOM">Custom</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Recommended week *</mat-label
+            ><input matInput type="number" formControlName="recommendedWeek"
+          /></mat-form-field>
+        </div>
+        <div class="col-12 mb-3">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Notes / Results</mat-label
+            ><textarea
+              matInput
+              formControlName="resultNotes"
+              rows="2"
+            ></textarea>
+          </mat-form-field>
+        </div>
+        <div class="col-12 mb-2">
+          <mat-form-field appearance="outline" class="w-100"
+            ><mat-label>Document link</mat-label
+            ><input
+              matInput
+              formControlName="documentUrl"
+              placeholder="https://..."
+          /></mat-form-field>
+        </div>
+      </div>
+      <div class="d-flex gap-2 justify-content-end mt-2">
+        <button mat-button type="button" (click)="closeEditForm()">
+          Cancel
+        </button>
+        <button
+          mat-raised-button
+          type="submit"
+          [disabled]="editForm.invalid || saving"
+          class="exams-btn exams-btn--edit"
+        >
+          @if(saving) { Saving... } @else { Save changes }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+<!-- Delete confirm -->
+@if(showDeleteExamConfirm) {
+<div class="exams-popup-overlay" (click)="showDeleteExamConfirm = false">
+  <div
+    class="exams-popup-box"
+    style="max-width: 420px; text-align: center"
+    (click)="$event.stopPropagation()"
+  >
+    <div style="font-size: 3rem; margin-bottom: 1rem">🗑️</div>
+    <h3 class="exams-popup-title">Delete this exam?</h3>
+    <p
+      style="
+        color: var(--text-mid);
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        margin: 0.5rem 0 1.5rem;
+      "
+    >
+      This custom exam will be permanently removed.
+    </p>
+    <div class="d-flex gap-2 justify-content-center">
+      <button
+        class="exams-btn"
+        style="
+          background: rgba(0, 0, 0, 0.05);
+          color: #666;
+          border: 1.5px solid rgba(0, 0, 0, 0.1);
+        "
+        (click)="showDeleteExamConfirm = false"
+      >
+        Cancel
+      </button>
+      <button
+        class="exams-btn"
+        style="
+          background: rgba(244, 67, 54, 0.1);
+          color: #c62828;
+          border: 1.5px solid rgba(244, 67, 54, 0.3);
+        "
+        (click)="confirmDeleteExam()"
+      >
+        <span class="material-symbols-outlined">delete</span> Yes, delete
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Cannot delete -->
+@if(showCannotDeleteExam) {
+<div class="exams-popup-overlay" (click)="showCannotDeleteExam = false">
+  <div
+    class="exams-popup-box"
+    style="max-width: 420px; text-align: center"
+    (click)="$event.stopPropagation()"
+  >
+    <div style="font-size: 3rem; margin-bottom: 1rem">🔒</div>
+    <h3 class="exams-popup-title">Cannot delete this exam</h3>
+    <p
+      style="
+        color: var(--text-mid);
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        margin: 0.5rem 0 1.5rem;
+      "
+    >
+      Mandatory and optional exams cannot be deleted — only custom exams can be
+      removed.
+    </p>
+    <div class="d-flex justify-content-center">
+      <button
+        class="exams-btn exams-btn--primary"
+        (click)="showCannotDeleteExam = false"
+      >
+        Got it
+      </button>
+    </div>
+  </div>
+</div>
+}

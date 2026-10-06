@@ -1,0 +1,310 @@
+<div class="dp-wrap">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════ -->
+  <div class="dp-header">
+    <div class="dp-header-left">
+      <button class="dp-back-btn" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Retour au catalogue
+      </button>
+      <nav class="dp-breadcrumb">
+        <span class="dp-bc-link" (click)="goBack()">Produits</span>
+        <mat-icon class="dp-bc-sep">chevron_right</mat-icon>
+        <span class="dp-bc-cur">{{ produit?.nom ?? '...' }}</span>
+      </nav>
+    </div>
+
+    <div class="dp-header-actions" *ngIf="produit">
+      <button class="dp-btn-secondary" (click)="modifierProduit()">
+        <mat-icon>edit</mat-icon> Modifier
+      </button>
+      <button class="dp-btn-danger" (click)="supprimerProduit()" [disabled]="deleting">
+        <span class="dp-mini-spinner" *ngIf="deleting"></span>
+        <mat-icon *ngIf="!deleting">delete_outline</mat-icon>
+        {{ deleting ? 'Suppression...' : 'Supprimer' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ LOADING ══════════════════════════════════════════════ -->
+  <div *ngIf="loading" class="dp-loading">
+    <span></span><span></span><span></span>
+  </div>
+
+  <!-- ══ NOT FOUND ════════════════════════════════════════════ -->
+  <div *ngIf="!loading && notFound" class="dp-not-found">
+    <div class="dp-nf-circle"><mat-icon>search_off</mat-icon></div>
+    <h2>Produit introuvable</h2>
+    <p>Ce produit n'existe pas ou a été supprimé du catalogue.</p>
+    <button class="dp-btn-primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon> Retour au catalogue
+    </button>
+  </div>
+
+  <!-- ══ CONTENT ══════════════════════════════════════════════ -->
+  <div *ngIf="!loading && produit" class="dp-content">
+
+    <!-- ─── ROW 1: Gallery + Main Info ──────────────────────── -->
+    <div class="dp-top-row">
+
+      <!-- Gallery -->
+      <div class="dp-gallery-card dp-card">
+        <div class="dp-card-label">
+          <mat-icon>photo_library</mat-icon>
+          Images du produit
+          <span class="dp-img-count-badge">{{ produit.images?.length ?? 0 }}</span>
+        </div>
+
+        <!-- Main image -->
+        <div class="dp-main-img-wrap">
+          <img *ngIf="selectedImage" [src]="selectedImage" [alt]="produit.nom" class="dp-main-img" />
+          <div *ngIf="!selectedImage" class="dp-no-img">
+            <mat-icon>image_not_supported</mat-icon>
+            <span>Aucune image</span>
+          </div>
+
+          <!-- Navigation arrows -->
+          <button *ngIf="(produit.images?.length ?? 0) > 1"
+            class="dp-arrow dp-arrow-l" (click)="prevImage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button *ngIf="(produit.images?.length ?? 0) > 1"
+            class="dp-arrow dp-arrow-r" (click)="nextImage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+
+          <!-- Counter -->
+          <div *ngIf="(produit.images?.length ?? 0) > 1" class="dp-img-counter">
+            {{ selectedImageIndex + 1 }} / {{ produit.images!.length }}
+          </div>
+        </div>
+
+        <!-- Thumbnails -->
+        <div *ngIf="(produit.images?.length ?? 0) > 0" class="dp-thumbs">
+          <button *ngFor="let img of produit.images; let i = index"
+            class="dp-thumb" [class.active]="selectedImageIndex === i"
+            (click)="selectImage(i)">
+            <img [src]="img" [alt]="'Image ' + (i+1)" />
+            <span *ngIf="i === 0" class="dp-thumb-main-label">Principale</span>
+          </button>
+        </div>
+
+        <div *ngIf="!produit.images || produit.images.length === 0" class="dp-no-images-note">
+          <mat-icon>add_photo_alternate</mat-icon>
+          <span>Aucune image — modifiez le produit pour en ajouter</span>
+        </div>
+      </div>
+
+      <!-- Main info -->
+      <div class="dp-info-col">
+
+        <!-- Identity card -->
+        <div class="dp-card dp-identity">
+          <div class="dp-card-label">
+            <mat-icon>info_outline</mat-icon>
+            Informations générales
+          </div>
+
+          <div class="dp-prod-top">
+            <span *ngIf="produit.categorie" class="dp-cat-chip">
+              <mat-icon>category</mat-icon>{{ produit.categorie.nom }}
+            </span>
+            <span class="dp-stock-chip" [attr.data-s]="stockBadge(produit.stock)">
+              {{ stockLabel(produit.stock) }}
+            </span>
+          </div>
+
+          <h1 class="dp-prod-name">{{ produit.nom }}</h1>
+
+          <div class="dp-desc-block" *ngIf="produit.description">
+            <div class="dp-field-label">Description</div>
+            <p class="dp-desc-text">{{ produit.description }}</p>
+          </div>
+          <div class="dp-no-desc" *ngIf="!produit.description">
+            <mat-icon>notes</mat-icon> Aucune description renseignée.
+          </div>
+        </div>
+
+        <!-- KPI cards row -->
+        <div class="dp-kpi-row">
+          <div class="dp-kpi dp-kpi-pink">
+            <div class="dp-kpi-ico"><mat-icon>payments</mat-icon></div>
+            <div class="dp-kpi-body">
+              <div class="dp-kpi-value">{{ produit.prix | number:'1.2-2' }}</div>
+              <div class="dp-kpi-label">Prix unitaire (TND)</div>
+            </div>
+          </div>
+          <div class="dp-kpi dp-kpi-teal">
+            <div class="dp-kpi-ico"><mat-icon>inventory</mat-icon></div>
+            <div class="dp-kpi-body">
+              <div class="dp-kpi-value">{{ produit.stock ?? 0 }}</div>
+              <div class="dp-kpi-label">Unités en stock</div>
+            </div>
+          </div>
+          <div class="dp-kpi dp-kpi-purple">
+            <div class="dp-kpi-ico"><mat-icon>account_balance_wallet</mat-icon></div>
+            <div class="dp-kpi-body">
+              <div class="dp-kpi-value">{{ valeurStock | number:'1.0-0' }}</div>
+              <div class="dp-kpi-label">Valeur totale (TND)</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── ROW 2: Stock detail + Details table ──────────────── -->
+    <div class="dp-bottom-row">
+
+      <!-- Stock gauge card -->
+      <div class="dp-card dp-stock-card">
+        <div class="dp-card-label">
+          <mat-icon>bar_chart</mat-icon>
+          Analyse du stock
+        </div>
+
+        <div class="dp-stock-status-big" [attr.data-s]="stockBadge(produit.stock)">
+          <div class="dp-ss-ico">
+            <mat-icon>{{ (produit.stock ?? 0) === 0 ? 'cancel' : (produit.stock ?? 0) <= 5 ? 'warning' : 'check_circle' }}</mat-icon>
+          </div>
+          <div>
+            <div class="dp-ss-label">{{ stockLabel(produit.stock) }}</div>
+            <div class="dp-ss-sub">{{ produit.stock ?? 0 }} unité(s) disponible(s)</div>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="dp-stock-bar-wrap">
+          <div class="dp-stock-bar-labels">
+            <span>Niveau de stock</span>
+            <span>{{ stockPercent(produit.stock) }}%</span>
+          </div>
+          <div class="dp-stock-bar-track">
+            <div class="dp-stock-bar-fill"
+              [attr.data-s]="stockBadge(produit.stock)"
+              [style.width]="stockPercent(produit.stock) + '%'">
+            </div>
+          </div>
+          <div class="dp-stock-bar-marks">
+            <span>0</span>
+            <span class="dp-mark-warn">5</span>
+            <span class="dp-mark-mid">20</span>
+            <span>100+</span>
+          </div>
+        </div>
+
+        <!-- Thresholds -->
+        <div class="dp-thresholds">
+          <div class="dp-threshold dp-thr-red">
+            <mat-icon>cancel</mat-icon>
+            <span>Rupture : 0</span>
+          </div>
+          <div class="dp-threshold dp-thr-orange">
+            <mat-icon>warning</mat-icon>
+            <span>Critique : 1–5</span>
+          </div>
+          <div class="dp-threshold dp-thr-yellow">
+            <mat-icon>info</mat-icon>
+            <span>Moyen : 6–20</span>
+          </div>
+          <div class="dp-threshold dp-thr-green">
+            <mat-icon>check_circle</mat-icon>
+            <span>OK : 20+</span>
+          </div>
+        </div>
+
+        <!-- Quick actions in stock card -->
+        <div class="dp-stock-actions">
+          <button class="dp-btn-primary dp-btn-full" (click)="modifierProduit()">
+            <mat-icon>edit</mat-icon> Mettre à jour le stock
+          </button>
+        </div>
+      </div>
+
+      <!-- Details table card -->
+      <div class="dp-card dp-details-card">
+        <div class="dp-card-label">
+          <mat-icon>table_chart</mat-icon>
+          Fiche produit complète
+        </div>
+
+        <div class="dp-details-table">
+          <div class="dp-detail-row">
+            <div class="dp-detail-key">
+              <mat-icon>tag</mat-icon> ID produit
+            </div>
+            <div class="dp-detail-val dp-id-val">#{{ produit.id }}</div>
+          </div>
+          <div class="dp-detail-row">
+            <div class="dp-detail-key">
+              <mat-icon>label</mat-icon> Nom
+            </div>
+            <div class="dp-detail-val">{{ produit.nom }}</div>
+          </div>
+          <div class="dp-detail-row">
+            <div class="dp-detail-key">
+              <mat-icon>category</mat-icon> Catégorie
+            </div>
+            <div class="dp-detail-val">
+              <span *ngIf="produit.categorie" class="dp-cat-chip">{{ produit.categorie.nom }}</span>
+              <span *ngIf="!produit.categorie" class="dp-none">—</span>
+            </div>
+          </div>
+          <div class="dp-detail-row" *ngIf="produit.categorie?.parent">
+            <div class="dp-detail-key">
+              <mat-icon>account_tree</mat-icon> Catégorie parente
+            </div>
+            <div class="dp-detail-val">{{ produit.categorie?.parent?.nom }}</div>
+          </div>
+          <div class="dp-detail-row">
+            <div class="dp-detail-key">
+              <mat-icon>payments</mat-icon> Prix unitaire
+            </div>
+            <div class="dp-detail-val dp-price-val">{{ produit.prix | number:'1.2-2' }} TND</div>
+          </div>
+          <div class="dp-detail-row">
+            <div class="dp-detail-key">
+              <mat-icon>inventory</mat-icon> Stock actuel
+            </div>
+            <div class="dp-detail-val">
+              <span class="dp-stock-chip" [attr.data-s]="stockBadge(produit.stock)">
+                {{ produit.stock ?? 0 }} unité(s) — {{ stockLabel(produit.stock) }}
+              </span>
+            </div>
+          </div>
+          <div class="dp-detail-row">
+            <div class="dp-detail-key">
+              <mat-icon>account_balance_wallet</mat-icon> Valeur en stock
+            </div>
+            <div class="dp-detail-val dp-price-val">{{ valeurStock | number:'1.2-2' }} TND</div>
+          </div>
+          <div class="dp-detail-row">
+            <div class="dp-detail-key">
+              <mat-icon>photo_library</mat-icon> Images
+            </div>
+            <div class="dp-detail-val">{{ produit.images?.length ?? 0 }} image(s)</div>
+          </div>
+          <div class="dp-detail-row dp-detail-row-desc" *ngIf="produit.description">
+            <div class="dp-detail-key">
+              <mat-icon>notes</mat-icon> Description
+            </div>
+            <div class="dp-detail-val dp-desc-val">{{ produit.description }}</div>
+          </div>
+        </div>
+
+        <!-- Footer actions -->
+        <div class="dp-details-footer">
+          <button class="dp-btn-secondary dp-btn-full" (click)="modifierProduit()">
+            <mat-icon>edit</mat-icon> Modifier ce produit
+          </button>
+          <button class="dp-btn-danger dp-btn-full" (click)="supprimerProduit()" [disabled]="deleting">
+            <span class="dp-mini-spinner" *ngIf="deleting"></span>
+            <mat-icon *ngIf="!deleting">delete_outline</mat-icon>
+            {{ deleting ? 'Suppression...' : 'Supprimer le produit' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

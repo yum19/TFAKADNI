@@ -1,0 +1,266 @@
+<section class="mother-recommendations">
+  <div class="reco-wrap">
+    <!-- ── Hero Strip ── -->
+    <div class="hero-strip">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="eyebrow-spark"></span>
+          AI Curation
+        </div>
+        <h1 class="hero-title">Smart <em>Picks.</em></h1>
+        <p class="hero-lead">
+          We've narrowed the choices. Review these tailored paths, then let your
+          intuition decide what feels right today.
+        </p>
+        <div class="reco-count-pill">
+          <div class="rcp-dots"><span></span><span></span><span></span></div>
+          {{ recommendations.length }} tailored recommendation{{
+            recommendations.length !== 1 ? "s" : ""
+          }}
+        </div>
+      </div>
+
+      <!-- Week Selector Card -->
+      <div class="week-card">
+        <div class="week-card-top">
+          <div class="week-card-label">Your Progress</div>
+          <div class="week-card-title">Adjust to see new picks</div>
+          <div class="week-card-sub">AI adapts to your trimester</div>
+        </div>
+        <div class="week-card-body">
+          <!-- Stepper -->
+          <div class="week-stepper">
+            <button
+              class="step-btn"
+              (click)="
+                currentWeek =
+                  currentWeek && currentWeek > 1 ? currentWeek - 1 : 1;
+                refresh()
+              "
+            >
+              −
+            </button>
+            <div class="week-display">
+              <span class="week-num">{{ currentWeek ?? "—" }}</span>
+              <span class="week-unit">weeks</span>
+            </div>
+            <button
+              class="step-btn"
+              (click)="
+                currentWeek =
+                  currentWeek && currentWeek < 45 ? currentWeek + 1 : 45;
+                refresh()
+              "
+            >
+              +
+            </button>
+          </div>
+
+          <!-- Trimester track -->
+          <div class="trimester-track">
+            <div class="trimester-label-row">
+              <span class="trim-label">Trimester</span>
+              <span class="trim-badge">
+                {{
+                  currentWeek && currentWeek <= 12
+                    ? "First"
+                    : currentWeek && currentWeek <= 26
+                      ? "Second"
+                      : "Third"
+                }}
+              </span>
+            </div>
+            <div class="trim-bar">
+              <div
+                class="trim-fill"
+                [style.width.%]="((currentWeek ?? 1) / 45) * 100"
+              >
+                <div class="trim-shimmer"></div>
+              </div>
+            </div>
+            <div class="seg-dots">
+              <div
+                class="seg"
+                [class.active]="currentWeek && currentWeek <= 12"
+              >
+                <div class="seg-dot"></div>
+                <span class="seg-lbl">1st</span>
+              </div>
+              <div class="seg-line"></div>
+              <div
+                class="seg"
+                [class.active]="
+                  currentWeek && currentWeek > 12 && currentWeek <= 26
+                "
+              >
+                <div class="seg-dot"></div>
+                <span class="seg-lbl">2nd</span>
+              </div>
+              <div class="seg-line"></div>
+              <div class="seg" [class.active]="currentWeek && currentWeek > 26">
+                <div class="seg-dot"></div>
+                <span class="seg-lbl">3rd</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-refresh" (click)="refresh()">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+            Update Feed
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Section Meta ── -->
+    <div class="section-meta">
+      <span class="section-chip">Recommended For You</span>
+      <div class="section-line"></div>
+      <span class="section-count">Week {{ currentWeek ?? "—" }}</span>
+    </div>
+
+    <!-- ── Main Layout ── -->
+    <div class="main-layout">
+      <!-- Guidance Sidebar -->
+      <div class="guidance-sidebar">
+        <div class="guidance-card">
+          <div class="guidance-card-top">
+            <div class="guidance-icon-wrap">🧭</div>
+            <div>
+              <h4 class="guidance-title">How to choose</h4>
+              <p class="guidance-sub">{{ notes.length }} guiding principles</p>
+            </div>
+          </div>
+          <div class="guide-list">
+            <div class="guide-item" *ngFor="let note of notes; let i = index">
+              <div class="guide-num">{{ i + 1 }}</div>
+              <p class="guide-text">{{ note }}</p>
+            </div>
+          </div>
+          <div class="progress-block">
+            <div class="pb-label">Overall progress</div>
+            <div class="pb-val">Week {{ currentWeek ?? "—" }} of 45</div>
+            <div class="pb-bar">
+              <div
+                class="pb-fill"
+                [style.width.%]="((currentWeek ?? 1) / 45) * 100"
+              ></div>
+            </div>
+            <div class="pb-week">
+              {{
+                currentWeek && currentWeek <= 12
+                  ? "First"
+                  : currentWeek && currentWeek <= 26
+                    ? "Second"
+                    : "Third"
+              }}
+              Trimester ·
+              {{ ((currentWeek ?? 1) / 45) * 100 | number: "1.0-0" }}%
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommendation Cards -->
+      <div class="cards-area">
+        <!-- Empty -->
+        <div class="empty-state" *ngIf="recommendations.length === 0">
+          <div class="empty-orb">🔍</div>
+          <h4 class="empty-title">Refining your results…</h4>
+          <p class="empty-body">
+            Enter your current week above to see tailored recommendations.
+          </p>
+        </div>
+
+        <div class="cards-grid" *ngIf="recommendations.length > 0">
+          <article
+            class="reco-card"
+            *ngFor="let item of recommendations; let i = index"
+          >
+            <div
+              class="reco-card-bar"
+              [class.bar-rose]="i % 4 === 0"
+              [class.bar-gold]="i % 4 === 1"
+              [class.bar-sage]="i % 4 === 2"
+              [class.bar-sky]="i % 4 === 3"
+            ></div>
+            <div class="reco-card-body">
+              <div class="reason-pill">
+                <div class="reason-pill-dot"></div>
+                {{
+                  item.recommendationReason
+                    ? "Tailored to you"
+                    : "Popular choice"
+                }}
+              </div>
+              <h3 class="reco-title">{{ item.title }}</h3>
+              <p class="reco-reason">
+                {{
+                  item.recommendationReason ||
+                    "Based on your current week and previous learning patterns."
+                }}
+              </p>
+              <div class="reco-footer">
+                <div class="reco-meta">
+                  <div class="meta-chip">
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                    {{ item.level || "Beginner" }}
+                  </div>
+                  <div class="meta-chip">
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 6v6l4 2" />
+                    </svg>
+                    {{ item.durationMin || 20 }} min
+                  </div>
+                </div>
+                <a
+                  [routerLink]="['/front/mother/courses', item.id]"
+                  class="btn-start"
+                >
+                  Start Lesson
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

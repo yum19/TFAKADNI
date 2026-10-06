@@ -1,0 +1,119 @@
+<!-- src/app/features/communaute/pages/saved-posts/saved-posts.component.html -->
+
+<app-index-header></app-index-header>
+
+<div class="sp-wrap">
+
+  <!-- ── HERO HEADER ──────────────────────────────────────────── -->
+  <div class="sp-hero">
+    <div class="sp-hero-inner">
+      <button class="sp-back-btn" (click)="goBack()" type="button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="sp-hero-text">
+        <h1 class="sp-hero-title">
+          <mat-icon class="sp-hero-icon">bookmark</mat-icon>
+          My Saved Posts
+        </h1>
+        <p class="sp-hero-sub">{{ savedPosts.length }} post{{ savedPosts.length !== 1 ? 's' : '' }} in your collection</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTENT ──────────────────────────────────────────────── -->
+  <div class="sp-content">
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="sp-loading">
+      <div class="sp-loader"></div>
+      <p>Loading your saved posts…</p>
+    </div>
+
+    <!-- Empty -->
+    <div *ngIf="!loading && savedPosts.length === 0" class="sp-empty">
+      <div class="sp-empty-icon">🔖</div>
+      <h2>Nothing saved yet</h2>
+      <p>Tap the <strong>Save</strong> button on any post to keep it here for later.</p>
+      <button class="sp-browse-btn" (click)="goBack()" type="button">
+        <mat-icon>explore</mat-icon> Browse Community
+      </button>
+    </div>
+
+    <!-- Grid -->
+    <div *ngIf="!loading && savedPosts.length > 0" class="sp-grid">
+      <div
+        *ngFor="let item of savedPosts; let i = index"
+        class="sp-card"
+        [class.sp-card--removing]="removingId === item.postId"
+        [style.animation-delay]="(i * 55) + 'ms'">
+
+        <!-- Card header -->
+        <div class="sp-card-header">
+          <div class="sp-card-av">
+            <span>{{ item.anonyme ? '👤' : '👩' }}</span>
+          </div>
+          <div class="sp-card-meta">
+            <div class="sp-card-author">{{ item.authorName }}</div>
+            <div class="sp-card-time">
+              <mat-icon>schedule</mat-icon>
+              Saved {{ item.savedAt | date:'MMM d, y' }}
+            </div>
+          </div>
+          <!-- Tag pill -->
+          <div class="sp-tag" [attr.data-tag]="item.tag">
+            <span>{{ tagEmoji[item.tag] }}</span>
+            <span>{{ tagLabels[item.tag] }}</span>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <p class="sp-card-text" (click)="goToPost(item.postId)">
+          {{ item.contenu | slice:0:240 }}{{ item.contenu.length > 240 ? '…' : '' }}
+        </p>
+
+        <!-- Image strip -->
+        <div *ngIf="item.images && item.images.length > 0" class="sp-img-strip" (click)="goToPost(item.postId)">
+          <img
+            *ngFor="let img of item.images | slice:0:3"
+            [src]="img"
+            class="sp-img"
+            [class.sp-img--solo]="item.images.length === 1"
+            alt="saved post image" />
+          <div *ngIf="item.images.length > 3" class="sp-img-more">+{{ item.images.length - 3 }}</div>
+        </div>
+
+        <!-- Footer stats + actions -->
+        <div class="sp-card-footer">
+          <div class="sp-card-stats">
+            <span class="sp-stat">
+              <mat-icon>thumb_up</mat-icon> {{ item.likes ?? 0 }}
+            </span>
+            <span class="sp-stat">
+              <mat-icon>chat_bubble_outline</mat-icon> {{ item.commentCount }}
+            </span>
+            <span class="sp-stat">
+              <mat-icon>calendar_today</mat-icon> {{ item.postDate | date:'MMM d' }}
+            </span>
+          </div>
+          <div class="sp-card-actions">
+            <button class="sp-view-btn" (click)="goToPost(item.postId)" type="button">
+              <mat-icon>open_in_new</mat-icon> View Post
+            </button>
+            <button
+              class="sp-unsave-btn"
+              [class.sp-unsave-btn--removing]="removingId === item.postId"
+              (click)="unsave(item)"
+              type="button"
+              title="Remove from saved">
+              <mat-icon>{{ removingId === item.postId ? 'autorenew' : 'bookmark_remove' }}</mat-icon>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<app-index-footer></app-index-footer>

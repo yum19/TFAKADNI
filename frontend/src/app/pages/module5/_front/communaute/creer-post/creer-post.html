@@ -1,0 +1,199 @@
+<div class="cp-overlay" (click)="closeModal($event)">
+
+  <div class="cp-modal" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="cp-header">
+      <div class="cp-header-left">
+        <div class="cp-header-avatar">👩</div>
+        <div>
+          <div class="cp-header-name">{{ newPost.anonyme ? 'Anonymous' : 'You' }}</div>
+          <div class="cp-header-sub">
+            <span class="cp-tag-badge" [attr.data-tag]="newPost.tag">
+              {{ tagEmoji[newPost.tag!] }} {{ tagLabels[newPost.tag!] }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <button class="cp-close-btn" (click)="cancelAndGoBack()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="cp-body">
+
+      <!-- TEXTAREA + AUTOCOMPLETE + AI TOOLBAR -->
+<div class="cp-ai-toolbar">
+  <span class="cp-ai-label">✨ AI Writer</span>
+  <button
+    class="cp-ai-generate-btn"
+    type="button"
+    (click)="generateWithAI()"
+    [disabled]="isGenerating">
+    <span class="cp-ai-spinner" *ngIf="isGenerating"></span>
+    <mat-icon *ngIf="!isGenerating">auto_awesome</mat-icon>
+    {{ isGenerating ? 'Generating…' : 'Generate post' }}
+  </button>
+</div>
+
+<div class="cp-textarea-wrap" (click)="$event.stopPropagation()">
+  <textarea
+    class="cp-textarea"
+    [attr.maxLength]="maxChars"
+    placeholder="Start typing… use # for hashtags 💭"
+    (input)="onTextInput($event)"
+    (keydown)="onKeydown($event)"
+    (blur)="closeSuggestions()"
+    [value]="newPost.contenu || ''">
+  </textarea>
+
+  <div class="cp-char-ring" [class.warning]="charPercent > 75">
+    <svg viewBox="0 0 36 36">
+      <circle cx="18" cy="18" r="15" fill="none" stroke="#f0f0f0" stroke-width="3"/>
+      <circle cx="18" cy="18" r="15" fill="none"
+        [attr.stroke]="charColor"
+        stroke-width="3"
+        stroke-linecap="round"
+        [style.stroke-dasharray]="'94.2'"
+        [style.stroke-dashoffset]="94.2 - (charPercent / 100 * 94.2)"
+        transform="rotate(-90 18 18)"/>
+    </svg>
+    <span *ngIf="charPercent > 75">{{ maxChars - charCount }}</span>
+  </div>
+
+  <!-- ══ HASHTAG SUGGESTIONS DROPDOWN ══ -->
+  <ul class="cp-suggestions cp-hashtag-suggestions"
+      *ngIf="showHashtagSuggestions && hashtagSuggestions.length > 0">
+    <li class="cp-hashtag-suggestions-header">
+      <mat-icon>trending_up</mat-icon> Trending hashtags
+    </li>
+    <li
+      *ngFor="let h of hashtagSuggestions; let i = index"
+      class="cp-suggestion-item cp-hashtag-item"
+      [class.active]="i === selectedHashtagIndex"
+      (mousedown)="applyHashtagSuggestion(h)">
+      <span class="cp-hashtag-tag">{{ h.tag }}</span>
+      <span class="cp-hashtag-count">{{ h.count }} post{{ h.count !== 1 ? 's' : '' }}</span>
+    </li>
+  </ul>
+
+  <!-- ══ WORD AUTOCOMPLETE DROPDOWN ══ -->
+  <ul class="cp-suggestions"
+      *ngIf="showSuggestions && suggestions.length > 0 && !showHashtagSuggestions">
+    <li
+      *ngFor="let s of suggestions; let i = index"
+      class="cp-suggestion-item"
+      [class.active]="i === selectedSuggestionIndex"
+      (mousedown)="applySuggestion(s)">
+      <mat-icon class="cp-sugg-icon">text_fields</mat-icon>
+      {{ s }}
+    </li>
+  </ul>
+</div>
+
+      <!-- IMAGE PREVIEWS -->
+      <div class="cp-previews" *ngIf="previewImages.length > 0">
+        <div class="cp-preview-grid" [class.single]="previewImages.length === 1" [class.double]="previewImages.length === 2">
+          <div class="cp-preview-item" *ngFor="let img of previewImages; let i = index">
+            <img [src]="img" alt="preview" />
+            <button class="cp-preview-remove" (click)="removeImage(i)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRAG & DROP UPLOAD ZONE -->
+      <div
+        class="cp-upload-zone"
+        [class.drag-over]="dragOver"
+        [class.has-images]="previewImages.length > 0"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()"
+        *ngIf="previewImages.length < 4">
+        <input
+          #fileInput
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          (change)="onFileSelect($event)" />
+        <mat-icon class="cp-upload-ico">{{ dragOver ? 'file_download' : 'add_photo_alternate' }}</mat-icon>
+        <span class="cp-upload-text">
+          {{ dragOver ? 'Drop here' : (previewImages.length > 0 ? 'Add more photos' : 'Add photos') }}
+        </span>
+        <span class="cp-upload-hint" *ngIf="previewImages.length === 0">
+          Drag & drop or click · max 4 images
+        </span>
+      </div>
+
+      <div class="cp-divider"></div>
+
+      <!-- TAGS -->
+      <div class="cp-section">
+        <div class="cp-section-label">
+          <mat-icon>label_outline</mat-icon> Category
+        </div>
+        <div class="cp-tags">
+          <button
+            *ngFor="let tag of availableTags"
+            class="cp-tag-btn"
+            [class.active]="newPost.tag === tag"
+            [attr.data-tag]="tag"
+            (click)="selectTag(tag)">
+            {{ tagEmoji[tag] }} {{ tagLabels[tag] }}
+          </button>
+        </div>
+      </div>
+
+      <div class="cp-divider"></div>
+
+      <!-- ANONYMOUS -->
+      <div class="cp-anonyme-row">
+        <div class="cp-anonyme-info">
+          <mat-icon>visibility_off</mat-icon>
+          <div>
+            <div class="cp-anonyme-title">Post anonymously</div>
+            <div class="cp-anonyme-sub">Your name will not be visible</div>
+          </div>
+        </div>
+        <label class="cp-toggle">
+          <input type="checkbox" [(ngModel)]="newPost.anonyme" />
+          <span class="cp-toggle-track">
+            <span class="cp-toggle-thumb"></span>
+          </span>
+        </label>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="cp-footer">
+      <div class="cp-footer-meta">
+        <span class="cp-img-count" *ngIf="previewImages.length > 0">
+          <mat-icon>image</mat-icon> {{ previewImages.length }}/4
+        </span>
+        <span class="cp-char-count" [class.warning]="charPercent > 75">
+          {{ charCount }}/{{ maxChars }}
+        </span>
+      </div>
+      <div class="cp-footer-actions">
+        <button class="cp-cancel-btn" (click)="cancelAndGoBack()">
+          Cancel
+        </button>
+        <button
+          class="cp-publish-btn"
+          [disabled]="!newPost.contenu?.trim() || isSubmitting"
+          (click)="publishPost()">
+          <span class="cp-publish-spinner" *ngIf="isSubmitting"></span>
+          <mat-icon *ngIf="!isSubmitting">send</mat-icon>
+          {{ isSubmitting ? 'Publishing…' : 'Publish' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

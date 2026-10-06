@@ -1,0 +1,125 @@
+<footer class="front-footer">
+  <div class="footer-glow"></div>
+
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand-col">
+        <a routerLink="/" class="footer-brand-link">
+          <div class="brand-wrapper">
+            @if (session.role === "PARTNER") {
+              <img
+                src="assets/img/logo-partner-v2.png"
+                alt="MAMA-AI"
+                class="footer-logo"
+              />
+            } @else {
+              <img
+                src="assets/img/logo-mother.png"
+                alt="MAMA-AI"
+                class="footer-logo"
+              />
+            }
+            <span class="brand-text"
+              >MAMA<span class="text-accent">AI</span></span
+            >
+          </div>
+        </a>
+        <p class="footer-desc">
+          Module 7 is our most advanced release, bridging the gap between
+          clinical learning and real-world partner collaboration. Designed to
+          make motherhood feel lighter, every single week.
+        </p>
+        <div class="footer-badges">
+          <span class="footer-badge">
+            <mat-icon>verified_user</mat-icon> Clinical Grade
+          </span>
+          <span class="footer-badge">
+            <mat-icon>auto_awesome</mat-icon> AI Powered
+          </span>
+          <span class="footer-badge">
+            <mat-icon>local_hospital</mat-icon> Healthcare
+          </span>
+        </div>
+      </div>
+
+      <div class="footer-links-col">
+        <h6 class="footer-heading">The Academy</h6>
+        <nav class="footer-nav">
+          <a routerLink="/front/mother/courses" class="footer-link">
+            <mat-icon>school</mat-icon> Learning Paths
+          </a>
+          <a routerLink="/front/mother/enrollments" class="footer-link">
+            <mat-icon>trending_up</mat-icon> Growth Tracker
+          </a>
+          <a routerLink="/front/mother/recommendations" class="footer-link">
+            <mat-icon>recommend</mat-icon> Smart Picks
+          </a>
+          <a routerLink="/front/mother/ai" class="footer-link">
+            <mat-icon>psychology</mat-icon> AI Simplifier
+          </a>
+        </nav>
+      </div>
+
+      <div class="footer-links-col">
+        <h6 class="footer-heading">Partner Hub</h6>
+        <nav class="footer-nav">
+          <a routerLink="/front/partner/guides" class="footer-link">
+            <mat-icon>menu_book</mat-icon> Support Guides
+          </a>
+          <a routerLink="/front/partner/invites" class="footer-link">
+            <mat-icon>mail_outline</mat-icon> Invite Center
+          </a>
+          <a routerLink="/front/partner/notes" class="footer-link">
+            <mat-icon>edit_note</mat-icon> Collaborative Notes
+          </a>
+          <a routerLink="/front/partner/ai" class="footer-link">
+            <mat-icon>science</mat-icon> Intelligence Lab
+          </a>
+        </nav>
+      </div>
+
+      <div class="footer-reminder-col">
+        <h6 class="footer-heading">Support Signature</h6>
+        <div class="reminder-card">
+          <div class="reminder-item">
+            <div class="reminder-dot"></div>
+            <p>
+              Focus on <strong>one specific action</strong> each week rather
+              than a perfect plan.
+            </p>
+          </div>
+          <div class="reminder-item">
+            <div class="reminder-dot"></div>
+            <p>
+              Use AI tools to summarize, then use your
+              <strong>intuition</strong> to decide.
+            </p>
+          </div>
+          <div class="reminder-item">
+            <div class="reminder-dot"></div>
+            <p>
+              Partners: support is about <strong>reducing mental load</strong>,
+              not just tasks.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="bottom-left">
+        <span class="copyright">© 2026 MAMA-AI Studio</span>
+        <span class="divider">|</span>
+        <span class="module-tag">Module 7 Enterprise</span>
+      </div>
+      <div class="bottom-right">
+        <a routerLink="/front/profile" class="bottom-link">Privacy</a>
+        <a routerLink="/front/billing" class="bottom-link">Terms</a>
+        <button class="contact-btn">
+          <mat-icon>support_agent</mat-icon>
+          Contact Support
+        </button>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,700 @@
+<!-- ══════════════════════════════════════════════════════════════
+     ADMIN LIVE COMMUNITY — liste-posts-admin.html
+     Full CRUD · TFAKADNI identity · Pink #ff4f75 theme
+     All post bindings use $any(post) to bypass strict Post typing
+     ══════════════════════════════════════════════════════════════ -->
+
+<div class="alp-wrap" (click)="closeAllPickers()">
+
+  <!-- ── TOAST ───────────────────────────────────────────── -->
+  <div class="alp-toast" *ngIf="toast"
+       [class.success]="toast.type==='success'"
+       [class.error]="toast.type==='error'"
+       [class.info]="toast.type==='info'">
+    <mat-icon>{{ toast.type==='success' ? 'check_circle' : toast.type==='error' ? 'error_outline' : 'info' }}</mat-icon>
+    {{ toast.message }}
+  </div>
+
+  <!-- ── ADMIN TOP BAR ──────────────────────────────────── -->
+  <div class="alp-topbar">
+    <div class="alp-topbar-inner">
+
+      <!-- Admin Identity -->
+      <div class="alp-admin-id">
+        <div class="alp-admin-crown">👑</div>
+        <div class="alp-admin-info">
+          <div class="alp-admin-name">
+            TFAKADNI
+            <span class="alp-verified-tick">✓</span>
+            <span class="alp-admin-badge">ADMIN</span>
+          </div>
+          <div class="alp-admin-sub">Live Community Moderation</div>
+        </div>
+        <div class="alp-live-badge">
+          <span class="alp-live-dot"></span>
+          LIVE
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="alp-search-wrap">
+        <mat-icon class="alp-search-icon">search</mat-icon>
+        <input class="alp-search-input"
+               placeholder="Search posts, users, topics…"
+               [(ngModel)]="searchQuery"
+               (input)="applySearch()" />
+      </div>
+
+      <!-- Actions -->
+      <div class="alp-topbar-actions">
+        <button class="alp-btn alp-btn-compose" (click)="openComposeModal()">
+          <mat-icon>add</mat-icon><span>Post as Admin</span>
+        </button>
+        <button class="alp-btn alp-btn-back" (click)="goBackToDashboard()">
+          <mat-icon>arrow_back</mat-icon><span>Dashboard</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── LAYOUT ─────────────────────────────────────────── -->
+  <div class="alp-layout">
+
+    <!-- ══ LEFT SIDEBAR ══════════════════════════════════ -->
+    <aside class="alp-left-sidebar">
+
+      <!-- Admin Profile Card -->
+      <div class="alp-card alp-admin-profile-card">
+        <div class="alp-profile-cover"></div>
+        <div class="alp-profile-body">
+          <div class="alp-profile-av-wrap">
+            <div class="alp-profile-av">👑</div>
+            <span class="alp-online-dot"></span>
+          </div>
+          <div class="alp-profile-name">
+            TFAKADNI
+            <span class="alp-verified-tick">✓</span>
+          </div>
+          <div class="alp-profile-handle">&#64;admin · Community Manager</div>
+          <div class="alp-profile-stats">
+            <div class="alp-ps-item">
+              <span class="alp-ps-num">{{ adminPostsCount }}</span>
+              <span class="alp-ps-lbl">Admin Posts</span>
+            </div>
+            <div class="alp-ps-div"></div>
+            <div class="alp-ps-item">
+              <span class="alp-ps-num">{{ totalPosts }}</span>
+              <span class="alp-ps-lbl">Total Posts</span>
+            </div>
+            <div class="alp-ps-div"></div>
+            <div class="alp-ps-item">
+              <span class="alp-ps-num">{{ totalUsers }}</span>
+              <span class="alp-ps-lbl">Members</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Moderation Stats -->
+      <div class="alp-card alp-mod-card">
+        <h3 class="alp-sidebar-title">
+          <mat-icon>admin_panel_settings</mat-icon><span>Moderation</span>
+        </h3>
+        <div class="alp-mod-stat" [class.alp-mod-danger]="pendingReports > 0">
+          <mat-icon>flag</mat-icon>
+          <div class="alp-mod-info">
+            <span class="alp-mod-num">{{ pendingReports }}</span>
+            <span class="alp-mod-lbl">Pending Reports</span>
+          </div>
+        </div>
+        <div class="alp-mod-stat">
+          <mat-icon style="color:#6c5ce7">article</mat-icon>
+          <div class="alp-mod-info">
+            <span class="alp-mod-num">{{ totalPosts }}</span>
+            <span class="alp-mod-lbl">All Posts</span>
+          </div>
+        </div>
+        <div class="alp-mod-stat">
+          <mat-icon style="color:#00b894">chat_bubble</mat-icon>
+          <div class="alp-mod-info">
+            <span class="alp-mod-num">{{ totalComments }}</span>
+            <span class="alp-mod-lbl">Comments</span>
+          </div>
+        </div>
+        <div class="alp-mod-stat">
+          <mat-icon style="color:#f39c12">auto_stories</mat-icon>
+          <div class="alp-mod-info">
+            <span class="alp-mod-num">{{ totalStories }}</span>
+            <span class="alp-mod-lbl">Stories</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Filters -->
+      <div class="alp-card alp-filters-card">
+        <h3 class="alp-sidebar-title"><mat-icon>filter_list</mat-icon><span>Filter Posts</span></h3>
+        <div class="alp-filter-btns">
+          <button class="alp-filter-btn" [class.active]="activeFilter==='all'"       (click)="setFilter('all')">
+            <mat-icon>all_inbox</mat-icon> All Posts
+          </button>
+          <button class="alp-filter-btn" [class.active]="activeFilter==='admin'"     (click)="setFilter('admin')">
+            <span>👑</span> Admin Posts
+          </button>
+          <button class="alp-filter-btn" [class.active]="activeFilter==='reported'"  (click)="setFilter('reported')">
+            <mat-icon style="color:#e74c3c">flag</mat-icon> Reported
+          </button>
+          <button class="alp-filter-btn" [class.active]="activeFilter==='anonymous'" (click)="setFilter('anonymous')">
+            <mat-icon>person_off</mat-icon> Anonymous
+          </button>
+          <button class="alp-filter-btn" [class.active]="activeFilter==='GROSSESSE'"  (click)="setFilter('GROSSESSE')">
+            🤰 Grossesse
+          </button>
+          <button class="alp-filter-btn" [class.active]="activeFilter==='POSTPARTUM'" (click)="setFilter('POSTPARTUM')">
+            👶 Postpartum
+          </button>
+          <button class="alp-filter-btn" [class.active]="activeFilter==='FERTILITE'"  (click)="setFilter('FERTILITE')">
+            🌸 Fertilité
+          </button>
+          <button class="alp-filter-btn" [class.active]="activeFilter==='NUTRITION'"  (click)="setFilter('NUTRITION')">
+            🥗 Nutrition
+          </button>
+        </div>
+      </div>
+
+      <!-- Story Management -->
+      <div class="alp-card alp-story-mgmt-card">
+        <h3 class="alp-sidebar-title"><mat-icon>auto_stories</mat-icon><span>Active Stories</span></h3>
+        <div class="alp-story-list">
+          <div class="alp-story-item" *ngFor="let s of activeStories">
+            <div class="alp-story-av" [style.background]="getStoryColor(s)">
+              {{ s.contenu ? s.contenu.substring(0,1).toUpperCase() : '✨' }}
+            </div>
+            <div class="alp-story-info">
+              <div class="alp-story-type">{{ s.type === 'TEXT' ? 'Text' : 'Photo' }} Story</div>
+            </div>
+            <button class="alp-icon-btn alp-del-btn" (click)="deleteStory(s)" title="Delete story">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+          <div *ngIf="activeStories.length===0" class="alp-no-stories">No active stories</div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ══ MAIN FEED ════════════════════════════════════ -->
+    <main class="alp-main">
+
+      <!-- ADMIN COMPOSE CARD -->
+      <div class="alp-card alp-admin-compose">
+        <div class="alp-compose-header">
+          <div class="alp-compose-av">👑</div>
+          <div class="alp-compose-meta">
+            <div class="alp-compose-name">
+              TFAKADNI
+              <span class="alp-verified-tick">✓</span>
+              <span class="alp-admin-badge">ADMIN</span>
+            </div>
+            <div class="alp-compose-sub">Post to the community as Admin</div>
+          </div>
+        </div>
+        <textarea class="alp-compose-textarea"
+                  placeholder="Write an announcement or post to share with the community… 💖"
+                  [(ngModel)]="newPostContent"
+                  rows="3"></textarea>
+        <div class="alp-compose-footer">
+          <div class="alp-tag-selector">
+            <button class="alp-tag-btn"
+                    *ngFor="let tag of availableTags"
+                    [class.active]="newPostTag === tag.value"
+                    (click)="newPostTag = tag.value">
+              {{ tag.emoji }} {{ tag.label }}
+            </button>
+          </div>
+          <button class="alp-post-btn"
+                  (click)="postAsAdmin()"
+                  [disabled]="!newPostContent.trim() || posting">
+            <mat-icon>{{ posting ? 'hourglass_empty' : 'send' }}</mat-icon>
+            <span>{{ posting ? 'Posting…' : 'Post to Community' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- FEED CONTROLS -->
+      <div class="alp-feed-controls">
+        <div class="alp-tabs">
+          <button class="alp-tab" [class.active]="activeTab==='all'"
+                  (click)="activeTab='all'; applySearch()">
+            <mat-icon>all_inbox</mat-icon> All Posts
+            <span class="alp-tab-badge">{{ totalPosts }}</span>
+          </button>
+          <button class="alp-tab" [class.active]="activeTab==='admin'"
+                  (click)="activeTab='admin'; applySearch()">
+            <span>👑</span> Admin Posts
+            <span class="alp-tab-badge">{{ adminPostsCount }}</span>
+          </button>
+          <button class="alp-tab alp-tab-reports" [class.active]="activeTab==='reports'"
+                  (click)="activeTab='reports'; applySearch()">
+            <mat-icon>flag</mat-icon> Reports
+            <span class="alp-tab-badge alp-badge-danger" *ngIf="pendingReports > 0">{{ pendingReports }}</span>
+          </button>
+        </div>
+        <div class="alp-sort-wrap" (click)="$event.stopPropagation()">
+          <button class="alp-sort-btn" [matMenuTriggerFor]="sortMenu">
+            <mat-icon>sort</mat-icon>
+            <span>{{ sortLabel }}</span>
+            <mat-icon class="alp-sort-chevron">expand_more</mat-icon>
+          </button>
+          <mat-menu #sortMenu="matMenu">
+            <button mat-menu-item (click)="setSortMode('recent')"
+                    [class.alp-sort-active]="sortMode==='recent'">
+              <mat-icon>schedule</mat-icon><span>Most Recent</span>
+            </button>
+            <button mat-menu-item (click)="setSortMode('oldest')"
+                    [class.alp-sort-active]="sortMode==='oldest'">
+              <mat-icon>history</mat-icon><span>Oldest First</span>
+            </button>
+            <button mat-menu-item (click)="setSortMode('top')"
+                    [class.alp-sort-active]="sortMode==='top'">
+              <mat-icon>thumb_up</mat-icon><span>Most Liked</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div *ngIf="loading" class="alp-loading">
+        <div class="alp-loader"></div>
+        <p>Loading community feed…</p>
+      </div>
+
+      <!-- EMPTY -->
+      <div *ngIf="!loading && filteredPosts.length === 0" class="alp-card alp-empty">
+        <div class="alp-empty-icon">💝</div>
+        <h3>No posts found</h3>
+        <p>Try a different filter or be the first to post!</p>
+      </div>
+
+      <!-- ── FEED ─────────────────────────────────────── -->
+      <div *ngIf="!loading && filteredPosts.length > 0" class="alp-feed">
+
+        <!--
+          NOTE: All method calls pass $any(post) to bypass the strict Post model.
+          The component uses AnyPost (= any) internally, but *ngFor infers the
+          array element type from the template variable `post`, so we cast at
+          the binding site to silence template strict-mode errors.
+        -->
+        <div class="alp-card alp-post"
+             *ngFor="let post of filteredPosts; let i = index"
+             [class.alp-admin-post]="isAdminPost($any(post))"
+             [style.animation-delay]="(i * 50) + 'ms'">
+
+          <!-- Admin top accent bar -->
+          <div class="alp-admin-post-bar" *ngIf="isAdminPost($any(post))"></div>
+
+          <!-- POST HEADER -->
+          <div class="alp-post-header">
+            <div class="alp-post-av" [class.alp-av-admin]="isAdminPost($any(post))">
+              <span>{{ isAdminPost($any(post)) ? '👑' : ($any(post).anonyme ? '👤' : '👩') }}</span>
+            </div>
+
+            <div class="alp-post-meta">
+              <div class="alp-post-name">
+                <span *ngIf="isAdminPost($any(post))" class="alp-author-teal">TFAKADNI</span>
+                <span *ngIf="!isAdminPost($any(post))">{{ getPostAuthorName($any(post)) }}</span>
+                <span class="alp-verified-tick"  *ngIf="isAdminPost($any(post))">✓</span>
+                <span class="alp-admin-badge"    *ngIf="isAdminPost($any(post))">ADMIN</span>
+                <mat-icon class="alp-verified-icon" *ngIf="!isAdminPost($any(post))">verified</mat-icon>
+              </div>
+              <div class="alp-post-time">{{ $any(post).date | date:'MMM d, y · h:mm a' }}</div>
+            </div>
+
+            <div class="alp-ptag" [attr.data-tag]="$any(post).tag">
+              <span>{{ tagEmoji[$any(post).tag] }}</span>
+              <span>{{ tagLabels[$any(post).tag] }}</span>
+            </div>
+
+            <!-- Admin action buttons always visible -->
+            <div class="alp-post-admin-actions" (click)="$event.stopPropagation()">
+              <button class="alp-icon-btn alp-edit-btn"
+                      (click)="openEditPostModal($any(post))" title="Edit post">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="alp-icon-btn alp-del-btn"
+                      (click)="deletePost($any(post))" title="Delete post">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+              <button class="alp-icon-btn" [matMenuTriggerFor]="postMenu">
+                <mat-icon>more_horiz</mat-icon>
+              </button>
+              <mat-menu #postMenu="matMenu">
+                <button mat-menu-item (click)="openEditPostModal($any(post))">
+                  <mat-icon>edit</mat-icon><span>Edit Post</span>
+                </button>
+                <button mat-menu-item (click)="deletePost($any(post))">
+                  <mat-icon>delete</mat-icon><span>Delete Post</span>
+                </button>
+                <button mat-menu-item (click)="sharePost($any(post), $event)">
+                  <mat-icon>link</mat-icon><span>Copy Link</span>
+                </button>
+                <button mat-menu-item (click)="pinPost($any(post))">
+                  <mat-icon>push_pin</mat-icon><span>Pin Post</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="forceDeletePost($any(post))" style="color:#e74c3c">
+                  <mat-icon style="color:#e74c3c">gavel</mat-icon><span>Force Remove</span>
+                </button>
+              </mat-menu>
+            </div>
+          </div><!-- /post-header -->
+
+          <!-- POST BODY -->
+          <p class="alp-post-text">
+            {{ ($any(post).contenu || '') | slice:0:400 }}{{ ($any(post).contenu || '').length > 400 ? '…' : '' }}
+          </p>
+
+          <!-- AI Summary -->
+          <div *ngIf="postSummaryMap[$any(post).id]" class="alp-ai-summary">
+            <mat-icon>auto_awesome</mat-icon>
+            <span>{{ postSummaryMap[$any(post).id] }}</span>
+          </div>
+
+          <!-- Hashtags -->
+          <div class="alp-post-tags" *ngIf="extractHashtags($any(post).contenu || '').length > 0">
+            <span class="alp-hashtag"
+                  *ngFor="let ht of extractHashtags($any(post).contenu || '')">{{ ht }}</span>
+          </div>
+
+          <!-- Images -->
+          <div *ngIf="$any(post).images && $any(post).images.length > 0"
+               class="alp-post-images">
+            <img *ngFor="let img of $any(post).images | slice:0:4"
+                 [src]="img" class="alp-post-img"
+                 [class.solo]="$any(post).images.length === 1"
+                 [class.duo]="$any(post).images.length === 2"
+                 alt="Post image" />
+            <div *ngIf="$any(post).images.length > 4" class="alp-img-more">
+              <mat-icon>add</mat-icon>
+              <span>{{ $any(post).images.length - 4 }}</span>
+            </div>
+          </div>
+
+          <!-- Report badge -->
+          <div class="alp-report-badge"
+               *ngIf="$any(post).reports && $any(post).reports.length > 0">
+            <mat-icon>flag</mat-icon>
+            {{ $any(post).reports.length }} report{{ $any(post).reports.length > 1 ? 's' : '' }} — review required
+          </div>
+
+          <!-- STATS -->
+          <div class="alp-post-stats">
+            <div class="alp-stat-item">
+              <mat-icon>favorite</mat-icon>
+              <span>{{ $any(post).reactionSummary?.total ?? 0 }} Likes</span>
+            </div>
+            <div class="alp-stat-item">
+              <mat-icon>chat_bubble_outline</mat-icon>
+              <span>{{ $any(post).commentaires?.length ?? 0 }} Comments</span>
+            </div>
+            <div class="alp-stat-item">
+              <mat-icon>bookmark_border</mat-icon>
+              <span>{{ $any(post).savedCount ?? 0 }} Saved</span>
+            </div>
+            <div class="alp-stat-item alp-stat-share"
+                 (click)="sharePost($any(post), $event)">
+              <mat-icon>share</mat-icon>
+              <span>{{ copiedPostId === $any(post).id ? 'Copied!' : 'Share' }}</span>
+            </div>
+          </div>
+
+          <!-- ADMIN ACTION BAR -->
+          <div class="alp-admin-action-bar">
+            <button class="alp-action-btn alp-action-edit"
+                    (click)="openEditPostModal($any(post))">
+              <mat-icon>edit</mat-icon><span>Edit</span>
+            </button>
+            <button class="alp-action-btn alp-action-delete"
+                    (click)="deletePost($any(post))">
+              <mat-icon>delete_outline</mat-icon><span>Delete</span>
+            </button>
+            <button class="alp-action-btn alp-action-summarize"
+                    (click)="summarizePost($any(post), $event)"
+                    [disabled]="summarizingPostId === $any(post).id">
+              <mat-icon>{{ summarizingPostId === $any(post).id ? 'hourglass_empty' : 'auto_awesome' }}</mat-icon>
+              <span>{{ summarizingPostId === $any(post).id ? 'Summarizing…' : 'AI Summary' }}</span>
+            </button>
+            <button class="alp-action-btn alp-action-pin"
+                    (click)="pinPost($any(post))">
+              <mat-icon>push_pin</mat-icon><span>Pin</span>
+            </button>
+          </div>
+
+          <!-- COMMENT INPUT -->
+          <div class="alp-comment-input-row">
+            <div class="alp-comment-av-admin">👑</div>
+            <div class="alp-comment-input-wrap">
+              <input class="alp-comment-input"
+                     placeholder="Comment as TFAKADNI…"
+                     [(ngModel)]="commentInputs[$any(post).id]"
+                     (keyup.enter)="submitComment($any(post))" />
+              <button class="alp-comment-send" (click)="submitComment($any(post))">
+                <mat-icon>send</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- COMMENTS LIST -->
+          <div *ngIf="$any(post).commentaires && $any(post).commentaires.length > 0"
+               class="alp-comments">
+
+            <div class="alp-comment"
+                 *ngFor="let c of $any(post).commentaires | slice:0:3">
+              <div class="alp-comment-av-sm"></div>
+              <div class="alp-comment-body">
+
+                <div class="alp-comment-header">
+                  <span class="alp-comment-name">{{ getCommentAuthorName($any(c)) }}</span>
+                  <span class="alp-comment-time">{{ $any(c).date | date:'MMM d · h:mm a' }}</span>
+                  <div class="alp-comment-admin-actions">
+                    <button class="alp-icon-btn alp-edit-btn"
+                            (click)="startEditComment($any(post), $any(c).id, $any(c).contenu)"
+                            title="Edit">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button class="alp-icon-btn alp-del-btn"
+                            (click)="deleteComment($any(post), $any(c).id)"
+                            title="Delete">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- View mode -->
+                <ng-container *ngIf="!(editingCommentId === $any(c).id && editingCommentPostId === $any(post).id)">
+                  <div class="alp-comment-text">{{ $any(c).contenu }}</div>
+                </ng-container>
+
+                <!-- Edit mode -->
+                <ng-container *ngIf="editingCommentId === $any(c).id && editingCommentPostId === $any(post).id">
+                  <div class="alp-comment-edit-wrap">
+                    <textarea class="alp-comment-edit-input"
+                              [(ngModel)]="editingCommentText"
+                              rows="2"
+                              (keyup.escape)="cancelEditComment()"></textarea>
+                    <div class="alp-comment-edit-actions">
+                      <button class="alp-btn-cancel" (click)="cancelEditComment()">Cancel</button>
+                      <button class="alp-btn-save"
+                              (click)="saveEditComment($any(post), $any(c).id)">
+                        <mat-icon>check</mat-icon> Save
+                      </button>
+                    </div>
+                  </div>
+                </ng-container>
+
+              </div>
+            </div><!-- /comment -->
+
+            <button *ngIf="$any(post).commentaires.length > 3"
+                    class="alp-view-more"
+                    [routerLink]="['/communaute', $any(post).id]">
+              <mat-icon>expand_more</mat-icon>
+              View {{ $any(post).commentaires.length - 3 }}
+              more comment{{ $any(post).commentaires.length - 3 > 1 ? 's' : '' }}
+            </button>
+
+          </div><!-- /comments -->
+
+        </div><!-- /alp-post -->
+
+      </div><!-- /alp-feed -->
+
+    </main>
+
+    <!-- ══ RIGHT SIDEBAR ════════════════════════════════ -->
+    <aside class="alp-right-sidebar">
+
+      <!-- Community Health -->
+      <div class="alp-card alp-health-card">
+        <h3 class="alp-sidebar-title"><mat-icon>monitor_heart</mat-icon><span>Community Health</span></h3>
+        <div class="alp-health-item">
+          <div class="alp-health-label">Engagement Rate</div>
+          <div class="alp-health-bar-wrap">
+            <div class="alp-health-bar" [style.width]="engagementRate + '%'"
+                 style="background:#ff4f75"></div>
+          </div>
+          <div class="alp-health-val" style="color:#ff4f75">{{ engagementRate }}%</div>
+        </div>
+        <div class="alp-health-item">
+          <div class="alp-health-label">Comment Activity</div>
+          <div class="alp-health-bar-wrap">
+            <div class="alp-health-bar" [style.width]="commentRate + '%'"
+                 style="background:#6c5ce7"></div>
+          </div>
+          <div class="alp-health-val" style="color:#6c5ce7">{{ commentRate }}%</div>
+        </div>
+        <div class="alp-health-item">
+          <div class="alp-health-label">Community Safety</div>
+          <div class="alp-health-bar-wrap">
+            <div class="alp-health-bar" [style.width]="safetyScore + '%'"
+                 style="background:#00b894"></div>
+          </div>
+          <div class="alp-health-val" style="color:#00b894">{{ safetyScore }}%</div>
+        </div>
+        <div class="alp-health-item">
+          <div class="alp-health-label">Media Richness</div>
+          <div class="alp-health-bar-wrap">
+            <div class="alp-health-bar" [style.width]="mediaRichness + '%'"
+                 style="background:#f39c12"></div>
+          </div>
+          <div class="alp-health-val" style="color:#f39c12">{{ mediaRichness }}%</div>
+        </div>
+      </div>
+
+      <!-- Pending Reports -->
+      <div class="alp-card alp-reports-card" *ngIf="allReports.length > 0">
+        <h3 class="alp-sidebar-title alp-title-danger">
+          <mat-icon>flag</mat-icon>
+          <span>Pending Reports</span>
+          <span class="alp-reports-badge">{{ allReports.length }}</span>
+        </h3>
+        <div class="alp-report-item" *ngFor="let r of allReports | slice:0:4">
+          <div class="alp-report-icon"><mat-icon>flag</mat-icon></div>
+          <div class="alp-report-info">
+            <div class="alp-report-reason">{{ r.reason ?? r.motif ?? 'Reported content' }}</div>
+            <div class="alp-report-post">Post #{{ r.postId ?? r.post?.id ?? '?' }}</div>
+          </div>
+          <div class="alp-report-date">{{ (r.createdAt ?? r.date) | date:'MMM d' }}</div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="alp-card alp-quick-stats-card">
+        <h3 class="alp-sidebar-title"><mat-icon>insights</mat-icon><span>Quick Stats</span></h3>
+        <div class="alp-quick-stat">
+          <span class="alp-qs-label">Posts today</span>
+          <span class="alp-qs-val" style="color:#ff4f75">{{ postsToday }}</span>
+        </div>
+        <div class="alp-quick-stat">
+          <span class="alp-qs-label">Active users</span>
+          <span class="alp-qs-val" style="color:#6c5ce7">{{ activeUsersCount }}</span>
+        </div>
+        <div class="alp-quick-stat">
+          <span class="alp-qs-label">Total reactions</span>
+          <span class="alp-qs-val" style="color:#00b894">{{ totalReactions }}</span>
+        </div>
+        <div class="alp-quick-stat">
+          <span class="alp-qs-label">Anonymous posts</span>
+          <span class="alp-qs-val" style="color:#b08a9a">{{ anonymousPosts }}</span>
+        </div>
+      </div>
+
+      <!-- Top Members -->
+      <div class="alp-card alp-top-members-card">
+        <h3 class="alp-sidebar-title"><mat-icon>emoji_events</mat-icon><span>Top Members</span></h3>
+        <div class="alp-member-item" *ngFor="let u of topPosters; let i = index">
+          <div class="alp-member-rank"
+               [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">{{ i + 1 }}</div>
+          <div class="alp-member-av" [style.background]="'hsl(' + (i * 55 + 340) + ',65%,58%)'">
+            {{ getInitials(u.name) }}
+          </div>
+          <div class="alp-member-info">
+            <div class="alp-member-name">{{ u.name | slice:0:16 }}</div>
+            <div class="alp-member-count">{{ u.count }} posts</div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div><!-- /alp-layout -->
+
+
+  <!-- ══ EDIT POST MODAL ════════════════════════════════ -->
+  <div class="alp-modal-backdrop" *ngIf="editingPost" (click)="cancelEditPost()">
+    <div class="alp-modal" (click)="$event.stopPropagation()">
+      <div class="alp-modal-header">
+        <div class="alp-modal-title">
+          <mat-icon>edit</mat-icon> Edit Post #{{ editingPost.id }}
+        </div>
+        <button class="alp-modal-close" (click)="cancelEditPost()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="alp-modal-body">
+        <div class="alp-form-group">
+          <label class="alp-form-label">Category</label>
+          <div class="alp-tag-selector">
+            <button class="alp-tag-btn"
+                    *ngFor="let tag of availableTags"
+                    [class.active]="editPostTag === tag.value"
+                    (click)="editPostTag = tag.value">
+              {{ tag.emoji }} {{ tag.label }}
+            </button>
+          </div>
+        </div>
+        <div class="alp-form-group">
+          <label class="alp-form-label">Content</label>
+          <textarea class="alp-form-textarea"
+                    [(ngModel)]="editPostContent"
+                    rows="6"
+                    placeholder="Edit post content…"></textarea>
+        </div>
+      </div>
+      <div class="alp-modal-footer">
+        <button class="alp-btn-cancel" (click)="cancelEditPost()">Cancel</button>
+        <button class="alp-btn-save" (click)="saveEditPost()">
+          <mat-icon>save</mat-icon> Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COMPOSE MODAL (Admin post) ════════════════════ -->
+  <div class="alp-modal-backdrop" *ngIf="showComposeModal" (click)="closeComposeModal()">
+    <div class="alp-modal" (click)="$event.stopPropagation()">
+      <div class="alp-modal-header">
+        <div class="alp-modal-title">
+          <span class="alp-admin-crown-sm">👑</span>
+          Post as TFAKADNI
+          <span class="alp-verified-tick">✓</span>
+        </div>
+        <button class="alp-modal-close" (click)="closeComposeModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="alp-modal-body">
+        <div class="alp-form-group">
+          <label class="alp-form-label">Category</label>
+          <div class="alp-tag-selector">
+            <button class="alp-tag-btn"
+                    *ngFor="let tag of availableTags"
+                    [class.active]="newPostTag === tag.value"
+                    (click)="newPostTag = tag.value">
+              {{ tag.emoji }} {{ tag.label }}
+            </button>
+          </div>
+        </div>
+        <div class="alp-form-group">
+          <label class="alp-form-label">Your message to the community</label>
+          <textarea class="alp-form-textarea"
+                    [(ngModel)]="newPostContent"
+                    rows="6"
+                    placeholder="Write an announcement or post for the community… 💖"></textarea>
+        </div>
+      </div>
+      <div class="alp-modal-footer">
+        <button class="alp-btn-cancel" (click)="closeComposeModal()">Cancel</button>
+        <button class="alp-btn-post"
+                (click)="postAsAdmin()"
+                [disabled]="!newPostContent.trim() || posting">
+          <mat-icon>bolt</mat-icon> Publish as Admin
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /alp-wrap -->
+
+<!-- MESSENGER BUBBLE -->
+<app-messenger-bubble></app-messenger-bubble>

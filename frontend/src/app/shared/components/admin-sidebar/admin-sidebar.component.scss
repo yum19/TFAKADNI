@@ -1,0 +1,522 @@
+$t: 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+$w-full: 256px;
+$w-mini: 68px;
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+// ── Shell ───────────────────────────────────────────────
+.admin-sidebar {
+  position: relative;
+  width: $w-full;
+  height: 100vh;
+  background: var(--mat-sys-surface-container-low);
+  border-right: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 60%, transparent);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width $t;
+
+  // Collapsed state
+  &.collapsed {
+    width: $w-mini;
+  }
+}
+
+// Ambient top-left glow
+.sidebar-glow {
+  pointer-events: none;
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--mat-sys-primary) 18%, transparent) 0%,
+    transparent 70%
+  );
+  z-index: 0;
+  animation: glowPulse 6s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.15); }
+}
+
+// ── Header ──────────────────────────────────────────────
+.sidebar-header {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  padding: 18px 14px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 68px;
+}
+
+.brand-link {
+  text-decoration: none;
+  flex-shrink: 0;
+  display: block;
+}
+
+.logo-ring {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--mat-sys-primary) 10%, var(--mat-sys-surface));
+  border: 1px solid color-mix(in srgb, var(--mat-sys-primary) 28%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.3s ease;
+  overflow: visible;
+
+  img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    position: relative;
+    z-index: 1;
+  }
+
+  &:hover {
+    transform: rotate(-10deg) scale(1.12);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--mat-sys-primary) 30%, transparent);
+  }
+}
+
+.logo-ring-pulse {
+  position: absolute;
+  inset: -3px;
+  border-radius: 14px;
+  border: 1.5px solid color-mix(in srgb, var(--mat-sys-primary) 35%, transparent);
+  animation: ringPulse 3s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%       { opacity: 0;   transform: scale(1.2); }
+}
+
+.brand-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  transition: opacity $t, max-width $t;
+  max-width: 200px;
+
+  &.hidden {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+  }
+}
+
+.brand-title {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  color: var(--mat-sys-on-surface);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.brand-accent {
+  color: var(--mat-sys-primary);
+  margin-left: 1px;
+}
+
+.brand-sub {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--mat-sys-on-surface-variant);
+  opacity: 0.45;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+// ── Collapse button ──────────────────────────────────────
+.collapse-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 70%, transparent);
+  background: color-mix(in srgb, var(--mat-sys-surface-container) 80%, transparent);
+  color: var(--mat-sys-on-surface-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: all 0.2s ease;
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+    border-color: color-mix(in srgb, var(--mat-sys-primary) 40%, transparent);
+    color: var(--mat-sys-primary);
+
+    mat-icon { transform: translateX(-1px); }
+  }
+}
+
+// ── Rule ─────────────────────────────────────────────────
+.sidebar-rule {
+  flex-shrink: 0;
+  height: 1px;
+  margin: 0 14px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--mat-sys-primary) 30%, transparent),
+    color-mix(in srgb, var(--mat-sys-outline-variant) 40%, transparent) 60%,
+    transparent
+  );
+
+  &--footer {
+    margin-bottom: 0;
+  }
+}
+
+// ── Nav scroll area ──────────────────────────────────────
+.nav-scroll {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--mat-sys-outline-variant) 50%, transparent) transparent;
+
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--mat-sys-outline-variant) 60%, transparent);
+    border-radius: 3px;
+  }
+}
+
+// ── Section ──────────────────────────────────────────────
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.section-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--mat-sys-on-surface-variant);
+  opacity: 0.38;
+  padding: 0 10px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity $t, max-height $t;
+  max-height: 30px;
+
+  &.hidden {
+    opacity: 0;
+    max-height: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+}
+
+// ── Nav item ─────────────────────────────────────────────
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  height: 42px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: color $t;
+
+  .collapsed & {
+    justify-content: center;
+    padding: 0;
+    width: 46px;
+    margin: 0 auto;
+  }
+
+  // Hover fill layer
+  .nav-item-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--mat-sys-primary) 0%, transparent);
+    transition: background $t;
+    z-index: 0;
+  }
+
+  &:hover {
+    color: var(--mat-sys-on-surface);
+
+    .nav-item-bg {
+      background: color-mix(in srgb, var(--mat-sys-surface-container-high) 90%, transparent);
+    }
+
+    .nav-item-icon mat-icon {
+      color: var(--mat-sys-primary);
+      transform: scale(1.1);
+    }
+  }
+
+  // Active state
+  &--active {
+    color: var(--mat-sys-on-primary-container);
+
+    .nav-item-bg {
+      background: color-mix(in srgb, var(--mat-sys-primary-container) 85%, transparent);
+    }
+
+    .nav-item-icon {
+      background: color-mix(in srgb, var(--mat-sys-primary) 16%, transparent);
+
+      mat-icon { color: var(--mat-sys-primary); }
+    }
+
+    // Left accent bar
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 25%;
+      bottom: 25%;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: var(--mat-sys-primary);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--mat-sys-primary) 60%, transparent);
+      z-index: 2;
+    }
+  }
+}
+
+.nav-item-icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+    color: var(--mat-sys-on-surface-variant);
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+}
+
+.nav-item-label {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity $t, max-width $t;
+  max-width: 200px;
+
+  &.hidden {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+  }
+}
+
+.nav-item-badge {
+  position: relative;
+  z-index: 1;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--mat-sys-primary);
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+
+  .nav-item--active & { opacity: 1; }
+
+  &.hidden { display: none; }
+}
+
+// ── Footer ───────────────────────────────────────────────
+.sidebar-footer {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  padding: 14px 10px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// ── Tip card ─────────────────────────────────────────────
+.tip-card {
+  position: relative;
+  background: color-mix(in srgb, var(--mat-sys-surface-container) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 60%, transparent);
+  border-radius: 12px;
+  padding: 12px 13px;
+  overflow: hidden;
+  animation: fadeUp 0.25s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: radial-gradient(
+      ellipse at top left,
+      color-mix(in srgb, var(--mat-sys-primary) 8%, transparent),
+      transparent 65%
+    );
+    pointer-events: none;
+  }
+}
+
+.tip-card-stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--mat-sys-primary),
+    color-mix(in srgb, var(--mat-sys-primary) 30%, transparent),
+    transparent
+  );
+}
+
+.tip-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 7px;
+
+  mat-icon {
+    font-size: 11px;
+    width: 11px;
+    height: 11px;
+    color: var(--mat-sys-primary);
+  }
+
+  span {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--mat-sys-primary);
+  }
+}
+
+.tip-card p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// ── Logout ────────────────────────────────────────────────
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 60%, transparent);
+  background: transparent;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+
+  // Collapsed: shrink to icon-only square
+  &.collapsed {
+    width: 46px;
+    margin: 0 auto;
+    padding: 0;
+    border-radius: 10px;
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    transition: transform 0.22s ease;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-error-container) 80%, transparent);
+    border-color: color-mix(in srgb, var(--mat-sys-error) 30%, transparent);
+    color: var(--mat-sys-on-error-container);
+
+    mat-icon { transform: translateX(-2px); }
+  }
+}
+
+.logout-label {
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity $t, max-width $t;
+  max-width: 150px;
+
+  &.hidden {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+  }
+}
+
+// ── Utilities ────────────────────────────────────────────
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

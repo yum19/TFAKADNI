@@ -1,0 +1,25 @@
+{
+  "features": [
+    "age",
+    "weight_kg",
+    "height_cm",
+    "bmi",
+    "has_diabetes",
+    "has_hypertension",
+    "rh_negative",
+    "age_group",
+    "bmi_category",
+    "blood_type_enc",
+    "medical_history_enc"
+  ],
+  "classes": [
+    "ELEVE",
+    "FAIBLE",
+    "MOYEN"
+  ],
+  "accuracy": 0.9688,
+  "cv_mean": 0.9657,
+  "model_type": "VotingClassifier(GB+RF)",
+  "target": "risk_complication",
+  "n_samples": 12000
+}

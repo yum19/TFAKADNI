@@ -1,0 +1,484 @@
+<div class="babies-container">
+  <!-- Hero -->
+  <div class="babies-hero hero-with-epds-cta">
+    <img
+      class="babies-hero-image"
+      src="assets/img/postpartum.png"
+      alt="Postpartum"
+    />
+    <div class="babies-hero-overlay"></div>
+
+    <div class="hero-cta-overlay">
+      <a
+        class="hero-epds-btn"
+        routerLink="/mother/postpartum/screening-assessment"
+      >
+        <span class="hero-epds-text">{{ uiTexts.heroEpdsButton }}</span>
+        <span class="hero-epds-icon">→</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- About Section -->
+  <section class="about-babies-section">
+    <div class="about-content">
+      <div class="about-header">
+        <h1 class="about-title">{{ uiTexts.aboutTitle }}</h1>
+        <p class="about-subtitle">{{ uiTexts.aboutSubtitle }}</p>
+
+        <button
+          class="storytelling-launch-btn"
+          type="button"
+          (click)="openStorytellingPopup()"
+        >
+          <span class="storytelling-launch-icon">🎧</span>
+          <span>{{ uiTexts.storytellingButtonLabel }}</span>
+          <span class="storytelling-launch-badge" *ngIf="savedStoriesCount > 0">
+            {{ savedStoriesCount > 9 ? "9+" : savedStoriesCount }}
+          </span>
+        </button>
+      </div>
+
+      <div class="about-grid">
+        <!-- Card 1 : Latest Screening Result -->
+        <div class="about-card result-card" [ngClass]="riskClass">
+          <div *ngIf="loadingScreening" class="state-loading">
+            <div class="spinner spinner-pink"></div>
+          </div>
+
+          <ng-container *ngIf="!loadingScreening && !prediction">
+            <div class="glow"></div>
+            <span class="big-icon">🩺</span>
+            <div class="result-badge badge-empty">
+              <span class="badge-dot dot-empty"></span
+              >{{ uiTexts.noScreeningBadge }}
+            </div>
+            <div class="result-title title-empty">
+              {{ uiTexts.noScreeningTitle }}
+            </div>
+            <div class="result-sub">{{ uiTexts.noScreeningSub }}</div>
+            <div class="divider"></div>
+            <div class="result-footer">
+              <span class="footer-date">—</span>
+              <span class="footer-model">IA-v1</span>
+            </div>
+            <button
+              class="btn-action"
+              routerLink="/mother/postpartum/screenings"
+            >
+              {{ uiTexts.takeScreening }} <span class="btn-arrow">→</span>
+            </button>
+          </ng-container>
+
+          <ng-container *ngIf="!loadingScreening && prediction">
+            <div class="glow"></div>
+            <span class="big-icon">{{ riskEmoji }}</span>
+            <div class="result-badge" [ngClass]="badgeClass">
+              <span class="badge-dot" [ngClass]="dotClass"></span>
+              {{
+                displayedPredictionRiskLevel ||
+                  (prediction.riskLevel | titlecase)
+              }}
+              {{ uiTexts.latestRiskSuffix }}
+            </div>
+            <div class="result-kicker">{{ latestTestSubtitle }}</div>
+            <div class="result-title" [ngClass]="titleColorClass">
+              {{ riskTitle }}
+            </div>
+            <div class="result-sub result-subtle">{{ riskSummary }}</div>
+            <div class="divider"></div>
+            <div class="result-footer">
+              <span class="footer-date">{{
+                formatDisplayDate(prediction.predictionDate)
+              }}</span>
+              <span class="footer-model">{{ prediction.modelVersion }}</span>
+            </div>
+            <button
+              class="btn-action"
+              routerLink="/mother/postpartum/predictions"
+            >
+              {{ uiTexts.viewOtherResults }} <span class="btn-arrow">→</span>
+            </button>
+          </ng-container>
+        </div>
+
+        <!-- Card 2 : Latest Mood -->
+        <div class="about-card mood-card">
+          <div *ngIf="loadingMood" class="state-loading">
+            <div class="spinner spinner-red"></div>
+          </div>
+
+          <ng-container *ngIf="!loadingMood && !latestMood">
+            <div class="mood-glow"></div>
+            <span class="big-icon">📝</span>
+            <div class="result-badge badge-mood-empty">
+              <span class="badge-dot dot-empty"></span>{{ uiTexts.noMoodBadge }}
+            </div>
+            <div class="result-title title-mood-empty">
+              {{ uiTexts.noMoodTitle }}
+            </div>
+            <div class="result-sub">{{ uiTexts.noMoodSub }}</div>
+            <div class="divider"></div>
+            <div class="result-footer">
+              <span class="footer-date">—</span>
+              <span class="footer-model">Mood Log</span>
+            </div>
+            <button
+              class="btn-action btn-mood"
+              routerLink="/mother/postpartum/mood-log"
+            >
+              {{ uiTexts.addMoodLog }} <span class="btn-arrow">→</span>
+            </button>
+          </ng-container>
+
+          <ng-container *ngIf="!loadingMood && latestMood">
+            <div class="mood-glow"></div>
+            <span class="big-icon">{{ moodEmoji }}</span>
+
+            <div class="mood-score-row">
+              <div class="result-badge badge-mood">
+                <span class="badge-dot dot-mood"></span
+                >{{ uiTexts.latestMoodBadge }}
+              </div>
+
+              <div class="score-circle">
+                <span class="score-num">{{ latestMood.moodScore }}</span>
+                <span class="score-max">/10</span>
+              </div>
+            </div>
+
+            <div class="result-title title-mood">{{ moodTitle }}</div>
+
+            <div
+              class="emotion-pill"
+              *ngIf="displayedMoodEmotion || latestMood.emotionType"
+            >
+              {{ displayedMoodEmotion || latestMood.emotionType }}
+            </div>
+
+            <div class="result-sub">
+              {{ displayedMoodNotes || uiTexts.latestMoodSaved }}
+            </div>
+
+            <div class="divider"></div>
+            <div class="result-footer">
+              <span class="footer-date">{{
+                formatDisplayDate(latestMood.logDate)
+              }}</span>
+              <span class="footer-model">Mood Log</span>
+            </div>
+
+            <button
+              class="btn-action btn-mood"
+              routerLink="/mother/postpartum/mood-log"
+            >
+              {{ uiTexts.viewMoodHistory }} <span class="btn-arrow">→</span>
+            </button>
+          </ng-container>
+        </div>
+
+        <!-- Card 3 : Next Appointment -->
+        <div class="about-card appt-card">
+          <div *ngIf="loadingAppt" class="state-loading">
+            <div class="spinner spinner-blue"></div>
+          </div>
+
+          <ng-container *ngIf="!loadingAppt && !nextAppointment">
+            <div class="appt-glow"></div>
+            <span class="big-icon">📅</span>
+            <div class="result-badge badge-appt-empty">
+              <span class="badge-dot dot-empty"></span
+              >{{ uiTexts.noAppointmentBadge }}
+            </div>
+            <div class="result-title title-appt-empty">
+              {{ uiTexts.noAppointmentTitle }}
+            </div>
+            <div class="result-sub">{{ uiTexts.noAppointmentSub }}</div>
+            <div class="divider"></div>
+            <div class="result-footer">
+              <span class="footer-date">—</span>
+              <span class="footer-model">Appointment</span>
+            </div>
+            <button
+              class="btn-action btn-appt"
+              routerLink="/mother/postpartum/appointments"
+            >
+              {{ uiTexts.scheduleAppointment }} <span class="btn-arrow">→</span>
+            </button>
+          </ng-container>
+
+          <ng-container *ngIf="!loadingAppt && nextAppointment">
+            <div class="appt-glow"></div>
+
+            <div class="appt-header-row">
+              <span class="big-icon">🧠</span>
+              <span class="status-pill" [ngClass]="apptStatusClass">
+                {{ displayedAppointmentStatus }}
+              </span>
+            </div>
+
+            <div class="result-badge badge-appt">
+              <span class="badge-dot dot-appt"></span
+              >{{ uiTexts.nextAppointmentBadge }}
+            </div>
+
+            <div class="result-title title-appt">{{ uiTexts.apptTitle }}</div>
+
+            <div class="appt-info-list">
+              <div class="appt-info-row">
+                <span class="appt-info-icon">📆</span>
+                <span class="appt-info-label">{{ uiTexts.dateLabel }}</span>
+                <span class="appt-info-value">
+                  {{ formatDisplayDate(nextAppointment.appointmentDate) }}
+                </span>
+              </div>
+
+              <div class="appt-info-row">
+                <span class="appt-info-icon">⏰</span>
+                <span class="appt-info-label">{{ uiTexts.timeLabel }}</span>
+                <span class="appt-info-value">
+                  {{ formatDisplayTime(nextAppointment.appointmentDate) }}
+                </span>
+              </div>
+
+              <div
+                class="appt-info-row"
+                *ngIf="displayedAppointmentType || nextAppointment.type"
+              >
+                <span class="appt-info-icon">🩺</span>
+                <span class="appt-info-label">{{ uiTexts.typeLabel }}</span>
+                <span class="appt-info-value">
+                  {{ displayedAppointmentType || nextAppointment.type }}
+                </span>
+              </div>
+
+              <div
+                class="appt-info-row"
+                *ngIf="displayedAppointmentLocation || nextAppointment.location"
+              >
+                <span class="appt-info-icon">📍</span>
+                <span class="appt-info-label">{{ uiTexts.placeLabel }}</span>
+                <span class="appt-info-value">
+                  {{ displayedAppointmentLocation || nextAppointment.location }}
+                </span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="result-footer">
+              <span class="footer-date">{{
+                formatDisplayDate(nextAppointment.createdAt)
+              }}</span>
+              <span class="footer-model">Appointment</span>
+            </div>
+
+            <button
+              class="btn-action btn-appt"
+              routerLink="/mother/postpartum/appointments"
+            >
+              {{ uiTexts.viewAppointments }} <span class="btn-arrow">→</span>
+            </button>
+          </ng-container>
+        </div>
+
+        <!-- LARGE RESOURCES CARD -->
+        <div class="resource-section-card">
+          <div class="resource-section-glow resource-glow-left"></div>
+          <div class="resource-section-glow resource-glow-right"></div>
+
+          <div class="resource-section-header">
+            <div>
+              <div class="resource-kicker">
+                {{ uiTexts.personalizedSupport }}
+              </div>
+              <h2 class="resource-section-title">
+                {{ uiTexts.resourcesTitle }}
+              </h2>
+              <p class="resource-section-subtitle">{{ resourcesSubtitle }}</p>
+            </div>
+
+            <div class="resource-header-actions">
+              <button
+                class="resource-more-btn"
+                routerLink="/mother/postpartum/resources"
+              >
+                {{ uiTexts.viewMoreResources }} <span class="btn-arrow">→</span>
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="loadingResources" class="resource-loading">
+            <div class="spinner spinner-blue"></div>
+          </div>
+
+          <ng-container
+            *ngIf="!loadingResources && displayResources.length > 0"
+          >
+            <div class="resource-cards-grid">
+              <div
+                class="resource-mini-card"
+                *ngFor="
+                  let resource of displayResources;
+                  trackBy: trackByResourceId
+                "
+                [ngClass]="getTypeClass(resource.type)"
+              >
+                <div class="resource-mini-top">
+                  <div
+                    class="resource-type-badge"
+                    [ngClass]="getTypeClass(resource.type)"
+                  >
+                    <span>{{ getTypeIcon(resource.type) }}</span>
+                    <span>{{ getTypeLabel(resource.type) }}</span>
+                  </div>
+
+                  <div class="resource-tags">
+                    <span class="resource-tag">{{ resource.category }}</span>
+                    <span class="resource-tag">{{
+                      getLanguageLabel(resource.language)
+                    }}</span>
+                  </div>
+                </div>
+
+                <h3 class="resource-mini-title">{{ resource.title }}</h3>
+
+                <p class="resource-mini-desc">
+                  {{ getShortDescription(resource.description) }}
+                </p>
+
+                <div class="resource-mini-footer">
+                  <span class="resource-risk-pill">
+                    {{ uiTexts.riskLabel }}: {{ resource.riskLevelTarget }}
+                  </span>
+
+                  <button
+                    class="resource-open-btn"
+                    type="button"
+                    (click)="openResource(resource.url)"
+                  >
+                    {{ uiTexts.resourceOpen }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="resource-section-bottom">
+              <button
+                class="storytelling-launch-btn mobile-only-btn"
+                type="button"
+                (click)="openStorytellingPopup()"
+              >
+                <span class="storytelling-launch-icon">🎧</span>
+                <span>Emotional stories</span>
+              </button>
+
+              <button
+                class="resource-more-btn mobile-only-btn"
+                routerLink="/mother/postpartum/resources"
+              >
+                {{ uiTexts.viewMoreResources }} <span class="btn-arrow">→</span>
+              </button>
+            </div>
+          </ng-container>
+
+          <ng-container
+            *ngIf="!loadingResources && displayResources.length === 0"
+          >
+            <div class="resource-empty-state">
+              <div class="resource-empty-icon">✨</div>
+              <div class="resource-empty-title">
+                {{ uiTexts.noResourcesTitle }}
+              </div>
+              <div class="resource-empty-sub">
+                {{ uiTexts.noResourcesSub }}
+              </div>
+
+              <div class="resource-header-actions">
+                <button
+                  class="storytelling-launch-btn"
+                  type="button"
+                  (click)="openStorytellingPopup()"
+                >
+                  <span class="storytelling-launch-icon">🎧</span>
+                  <span>Emotional stories</span>
+                </button>
+
+                <button
+                  class="resource-more-btn"
+                  routerLink="/mother/postpartum/resources"
+                >
+                  {{ uiTexts.viewResourcesPage }}
+                  <span class="btn-arrow">→</span>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="about-footer">
+        <p class="footer-text">
+          {{ uiTexts.footerText }}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div
+    class="translation-popup-overlay"
+    *ngIf="loadingTranslations && !translationPopupDismissed"
+  >
+    <div
+      class="translation-popup"
+      [attr.dir]="currentLang === 'ar' ? 'rtl' : 'ltr'"
+    >
+      <div class="translation-popup-glow"></div>
+
+      <button
+        class="translation-popup-close-btn"
+        type="button"
+        (click)="closeTranslationPopup()"
+        aria-label="Close translation popup"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <div class="translation-popup-icon">
+        <mat-icon>translate</mat-icon>
+      </div>
+
+      <div class="translation-spinner-wrap">
+        <div class="translation-spinner-ring"></div>
+        <div class="translation-spinner-core"></div>
+      </div>
+
+      <h3>{{ uiTexts.translationPopupTitle }}</h3>
+      <p>{{ uiTexts.translationPopupMessage }}</p>
+    </div>
+  </div>
+
+  <app-storytelling-popup
+    [visible]="showStorytellingPopup"
+    (storiesChanged)="refreshStoryBadge()"
+    (closePopup)="closeStorytellingPopup()"
+  >
+  </app-storytelling-popup>
+
+  <!-- HEALING MISSIONS FLOATING -->
+  <div class="healing-helper-wrapper">
+    <div class="helper-label">Your challenges for today</div>
+
+    <a
+      class="healing-avatar-btn"
+      routerLink="/mother/postpartum/healing-missions"
+      aria-label="Open healing missions"
+    >
+      <span class="healing-orbit healing-orbit-one"></span>
+      <span class="healing-orbit healing-orbit-two"></span>
+      <span class="healing-orbit healing-orbit-three"></span>
+      <div class="healing-avatar-core">
+        <mat-icon>spa</mat-icon>
+      </div>
+    </a>
+  </div>
+</div>

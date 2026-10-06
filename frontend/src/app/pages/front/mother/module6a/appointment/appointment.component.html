@@ -1,0 +1,342 @@
+<div class="appt-shell">
+  <section class="hero-card">
+    <div class="hero-copy">
+      <p class="eyebrow">Baby appointments · medical archive</p>
+      <h1>
+        Medical care,
+        <span>beautifully scheduled</span>
+      </h1>
+      <p class="hero-text">
+        Keep every appointment in one calm and organized place, with a clear view of upcoming visits, past records, and status updates.
+      </p>
+    </div>
+
+    <div class="hero-side">
+      <div class="hero-stats">
+        <div class="hero-stat planned">
+          <span class="stat-val">{{ plannedCount }}</span>
+          <span class="stat-lbl">Planned</span>
+        </div>
+
+        <div class="hero-stat done">
+          <span class="stat-val">{{ doneCount }}</span>
+          <span class="stat-lbl">Done</span>
+        </div>
+
+        <div class="hero-stat cancelled">
+          <span class="stat-val">{{ cancelledCount }}</span>
+          <span class="stat-lbl">Cancelled</span>
+        </div>
+
+        <div class="hero-stat missed">
+          <span class="stat-val">{{ missedCount }}</span>
+          <span class="stat-lbl">Missed</span>
+        </div>
+      </div>
+
+      <button class="btn-add-primary hero-action" (click)="openAddModal()">
+        <span class="btn-plus">＋</span> New Appointment
+      </button>
+    </div>
+  </section>
+
+  <div class="flash success" *ngIf="successMessage">
+    <span>✅</span> {{ successMessage }}
+    <button class="flash-close" (click)="successMessage=''">×</button>
+  </div>
+
+  <div class="flash error" *ngIf="errorMessage">
+    <span>⚠️</span> {{ errorMessage }}
+    <button class="flash-close" (click)="errorMessage=''">×</button>
+  </div>
+
+  <div class="appointment-main-grid">
+  <div class="calendar-card">
+    <div class="cal-header">
+      <div class="cal-header-left">
+        <span class="cal-label">Weekly Timeline</span>
+        <div class="cal-nav">
+          <button class="nav-btn" (click)="prevWeek()">‹</button>
+          <span class="week-range">🗓 {{ getWeekRangeLabel() }}</span>
+          <button class="nav-btn" (click)="nextWeek()">›</button>
+        </div>
+      </div>
+      <button class="btn-today" (click)="goToday()">Today</button>
+    </div>
+
+    <div *ngIf="loading" class="cal-loading">
+      <div class="spinner"></div>
+      <span>Loading appointments…</span>
+    </div>
+
+    <div class="cal-grid-wrapper" *ngIf="!loading">
+      <div class="cal-grid">
+        <div class="gutter-head"></div>
+
+        <div
+          class="day-head"
+          *ngFor="let day of weekDays"
+          [class.today]="isToday(day)"
+          [class.past-day]="isPastDay(day)"
+          (click)="openAddModal(day)"
+        >
+          <span class="day-name">{{ getDayName(day) }}</span>
+          <span class="day-number" [class.today-circle]="isToday(day)">{{ getDayNumber(day) }}</span>
+          <span class="dot-indicator" *ngIf="hasAppointmentsOnDay(day)"></span>
+          <span class="day-readonly" *ngIf="isPastDay(day)">Past day</span>
+        </div>
+
+        <ng-container *ngFor="let hour of calendarHours">
+          <div class="time-label">{{ formatHour(hour) }}</div>
+
+          <div
+            class="cal-cell"
+            *ngFor="let day of weekDays"
+            [class.today-col]="isToday(day)"
+            [class.past-cell]="isPastDay(day)"
+            (click)="openAddModal(day)"
+          >
+            <div
+              class="appt-chip"
+              [class]="getTypeColor(appt.type)"
+              [class.focused-chip]="focusedAppointmentId === appt.id"
+              [attr.data-appt-id]="appt.id"
+              *ngFor="let appt of getAppointmentsForDayAndHour(day, hour)"
+              (click)="$event.stopPropagation()"
+            >
+              <div class="chip-top">
+                <span class="chip-emoji">{{ getTypeEmoji(appt.type) }}</span>
+                <span class="chip-time">{{ formatAppointmentTime(appt.appointmentDate) }}</span>
+                <span class="chip-upcoming" *ngIf="getDisplayStatus(appt) === 'PLANNED'">★</span>
+              </div>
+
+              <div class="chip-doctor">{{ appt.doctorName }}</div>
+              <div class="chip-type">{{ appt.type }}</div>
+
+              <div class="chip-status">
+                <span [class]="'status-badge ' + getStatusClassByAppointment(appt)">
+                  {{ getVisibleStatusLabel(appt) }}</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-section">
+    <div class="list-header">
+      <h2>All Appointments</h2>
+      <span class="count-badge">{{ appointments.length }}</span>
+    </div>
+
+    <div *ngIf="!loading && appointments.length === 0" class="empty-state">
+      <div class="empty-icon">🩺</div>
+      <p>No appointments yet.</p>
+      <button class="btn-add-primary" (click)="openAddModal()">Schedule first appointment</button>
+    </div>
+
+    <div class="list-grid" *ngIf="!loading && appointments.length > 0">
+      <div
+        class="list-item"
+        [class.focused-item]="focusedAppointmentId === a.id"
+        *ngFor="let a of appointments; trackBy: trackByAppointmentId"
+        (click)="focusAppointmentInCalendar(a)"
+      >
+        <div class="list-item-left" [class]="getTypeColor(a.type)">
+          <span class="list-emoji">{{ getTypeEmoji(a.type) }}</span>
+        </div>
+
+        <div class="list-item-body">
+          <div class="list-top">
+            <strong class="list-doctor">{{ a.doctorName }}</strong>
+            <span [class]="'status-badge ' + getStatusClassByAppointment(a)">
+              {{ getVisibleStatusLabel(a) }}
+            </span>
+          </div>
+
+          <div class="list-meta">
+            <span>📅 {{ a.appointmentDate | date:'dd MMM yyyy, HH:mm' }}</span>
+            <span *ngIf="a.location">📍 {{ a.location }}</span>
+            <span>{{ getTypeEmoji(a.type) }} {{ a.type }}</span>
+          </div>
+
+          <div class="list-notes" *ngIf="a.notes">{{ a.notes }}</div>
+        </div>
+
+        <div class="list-item-actions">
+          <button
+            class="status-action-btn"
+            *ngIf="canChangeStatus(a)"
+            (click)="$event.stopPropagation(); openStatusModal(a)"
+          >
+            Change status
+          </button>
+
+          <button
+            class="icon-btn edit"
+            *ngIf="canUpdateAppointment(a)"
+            (click)="$event.stopPropagation(); editAppointment(a)"
+            title="Edit"
+          >
+            ✏️
+          </button>
+
+          <button
+            class="icon-btn del"
+            *ngIf="canDeleteAppointment(a)"
+            (click)="$event.stopPropagation(); deleteAppointment(a.id)"
+            title="Delete"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MAIN MODAL -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h3>{{ isEditMode ? '✏️ Edit Appointment' : '➕ New Appointment' }}</h3>
+        <p>Status is automatically saved as <strong>PLANNED</strong>.</p>
+      </div>
+      <button class="modal-close" (click)="closeModal()">×</button>
+    </div>
+
+    <div class="modal-flash error" *ngIf="errorMessage">⚠️ {{ errorMessage }}</div>
+
+    <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="modal-form">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>📅 Date <span class="req">*</span></label>
+          <input type="date" formControlName="appointmentDate" />
+          <small class="err" *ngIf="appointmentForm.get('appointmentDate')?.touched && appointmentForm.get('appointmentDate')?.invalid">
+            Date is required.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>🕙 Time <span class="req">*</span></label>
+          <input type="time" formControlName="appointmentTime" />
+          <small class="err" *ngIf="appointmentForm.get('appointmentTime')?.touched && appointmentForm.get('appointmentTime')?.invalid">
+            Time is required.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>👨‍⚕️ Doctor Name <span class="req">*</span></label>
+        <input type="text" formControlName="doctorName" placeholder="Dr. Full Name" />
+        <small class="err" *ngIf="appointmentForm.get('doctorName')?.touched && appointmentForm.get('doctorName')?.invalid">
+          Doctor name is required.
+        </small>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>🏥 Type <span class="req">*</span></label>
+          <select formControlName="type">
+            <option value="">-- Select --</option>
+            <option *ngFor="let type of appointmentTypes" [value]="type">{{ type }}</option>
+          </select>
+          <small class="err" *ngIf="appointmentForm.get('type')?.touched && appointmentForm.get('type')?.invalid">
+            Type is required.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>🔔 Reminder Date</label>
+          <input type="date" formControlName="reminderDate" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>📍 Location</label>
+        <input type="text" formControlName="location" placeholder="Clinic / Hospital / Office" />
+      </div>
+
+      <div class="form-group">
+        <label>📝 Notes</label>
+        <textarea rows="4" formControlName="notes" placeholder="Optional notes..."></textarea>
+      </div>
+
+      <div class="modal-flash error" *ngIf="appointmentForm.errors?.['appointmentBeforeToday']">
+        Appointment date cannot be before today.
+      </div>
+
+      <div class="modal-flash error" *ngIf="appointmentForm.errors?.['reminderAfterAppointment']">
+        Reminder date must be on or before the appointment date.
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="submitting">
+          {{ submitting ? 'Saving...' : (isEditMode ? 'Update Appointment' : 'Add Appointment') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- STATUS MODAL -->
+<div class="modal-overlay" *ngIf="showStatusModal" (click)="closeStatusModal()">
+  <div class="modal-box status-modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h3>🔄 Change Appointment Status</h3>
+        <p *ngIf="modalTargetAppointment">
+          {{ modalTargetAppointment.doctorName }} • {{ modalTargetAppointment.appointmentDate | date:'dd MMM yyyy, HH:mm' }}
+        </p>
+      </div>
+      <button class="modal-close" (click)="closeStatusModal()">×</button>
+    </div>
+
+    <div class="status-grid two-cols">
+      <button
+        type="button"
+        class="status-choice done"
+        [class.active]="selectedStatusAction === 'DONE'"
+        (click)="chooseStatusAction('DONE')"
+      >
+        ✅ Done
+      </button>
+
+      <button
+        type="button"
+        class="status-choice cancelled"
+        [class.active]="selectedStatusAction === 'CANCELLED'"
+        (click)="chooseStatusAction('CANCELLED')"
+      >
+        ❌ Cancelled
+      </button>
+    </div>
+
+    <div class="form-group status-notes-box">
+      <label>📝 Notes</label>
+      <textarea
+        rows="3"
+        [(ngModel)]="statusNotes"
+        [ngModelOptions]="{ standalone: true }"
+        placeholder="Optional note..."
+      ></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" (click)="closeStatusModal()">Close</button>
+      <button
+        type="button"
+        class="btn-primary"
+        [disabled]="!selectedStatusAction || statusSubmitting"
+        (click)="submitStatusAction()"
+      >
+        {{ statusSubmitting ? 'Saving...' : 'Save changes' }}
+      </button>
+    </div>
+  </div>
+</div>

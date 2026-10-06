@@ -1,0 +1,124 @@
+<section class="htl-wrap">
+  <div class="htl-header">
+    <div class="htl-header-left">
+      <span class="htl-header-icon">🗓</span>
+      <div>
+        <h2 class="htl-title">Historique chronologique</h2>
+        <p class="htl-subtitle">Chaque moment, de gauche a droite dans le temps</p>
+      </div>
+    </div>
+    <span class="htl-count-pill">{{ filtered.length }} evenement{{ filtered.length !== 1 ? 's' : '' }}</span>
+  </div>
+
+  <div class="htl-filters">
+    <button
+      type="button"
+      class="htl-chip"
+      [ngClass]="{ 'htl-chip-active': activeType === 'ALL' }"
+      (click)="setType('ALL')"
+      >All</button>
+
+    <button
+      type="button"
+      class="htl-chip"
+      *ngFor="let type of availableTypes; trackBy: trackByType"
+      [ngClass]="{ 'htl-chip-active': activeType === type }"
+      (click)="setType(type)"
+    >{{ getIcon(type) }} {{ formatType(type) }}</button>
+  </div>
+
+  <div
+    class="htl-scroll"
+    #scrollContainer
+    [class.htl-dragging]="isDragging"
+    (mousedown)="onMouseDown($event, scrollContainer)"
+    (mousemove)="onMouseMove($event, scrollContainer)"
+    (mouseup)="onMouseUp()"
+    (mouseleave)="onMouseLeave()"
+  >
+    <div class="htl-empty" *ngIf="filtered.length === 0">
+      <span class="htl-empty-icon">🌸</span>
+      <span>No events for this filter</span>
+    </div>
+
+    <div class="htl-track" *ngIf="filtered.length > 0">
+      <div class="htl-spine"></div>
+
+      <div
+        class="htl-node-wrap"
+        *ngFor="let event of filtered; let i = index; trackBy: trackBySourceId"
+        [ngClass]="isAbove(i) ? 'htl-above' : 'htl-below'"
+        [style.animation-delay]="(i * 0.05) + 's'"
+      >
+        <div class="htl-node-label">
+          <strong class="htl-node-name">{{ truncate(event.title) }}</strong>
+          <span class="htl-node-date">{{ event.eventDateTime | date:'d MMM yy' }}</span>
+        </div>
+
+        <div class="htl-stem"></div>
+
+        <div
+          class="htl-node"
+          [ngClass]="[
+            nodeTypeClass(event.eventType),
+            isDone(event) ? 'htl-node-done' : '',
+            isImportant(event) ? 'htl-node-important' : '',
+            isUnusual(event) ? 'htl-node-unusual' : '',
+            isSelected(event) ? 'htl-node-selected' : ''
+          ]"
+          (click)="selectEvent(event)"
+          [attr.title]="event.title"
+        >
+          <span class="htl-node-icon">{{ getIcon(event.eventType) }}</span>
+          <div class="htl-pulse-ring" *ngIf="hasHighPriority(event)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="htl-panel" *ngIf="selectedEvent">
+    <div class="htl-panel-bar">
+      <div class="htl-panel-icon-wrap">
+        <span class="htl-panel-big-icon">{{ getIcon(selectedEvent.eventType) }}</span>
+      </div>
+      <div class="htl-panel-meta">
+        <h3 class="htl-panel-title">{{ selectedEvent.title }}</h3>
+        <p class="htl-panel-when">
+            {{ selectedEvent.eventDateTime | date:"EEEE, MMM d, yyyy 'at' HH:mm" : '' : 'en' }}
+          &nbsp;·&nbsp;
+          {{ formatType(selectedEvent.eventType) }}
+        </p>
+      </div>
+      <button type="button" class="htl-panel-close" (click)="closePanel()">&#x2715;</button>
+    </div>
+
+    <div class="htl-panel-badges">
+      <span class="htl-badge" [ngClass]="statusClass(selectedEvent.status)">
+        {{ formatStatus(selectedEvent.status) }}
+      </span>
+      <span
+        class="htl-badge htl-badge-priority"
+        [ngClass]="{
+          'htl-badge-important': isImportant(selectedEvent),
+          'htl-badge-unusual': isUnusual(selectedEvent)
+        }"
+        *ngIf="hasHighPriority(selectedEvent)"
+      >
+        {{ formatPriority(selectedEvent.priority) }}
+      </span>
+      <span class="htl-badge htl-badge-type">{{ formatType(selectedEvent.eventType) }}</span>
+    </div>
+
+    <p class="htl-panel-desc" *ngIf="selectedEvent.description">
+      {{ selectedEvent.description }}
+    </p>
+
+    <a
+      *ngIf="selectedEvent.actionUrl"
+      [href]="selectedEvent.actionUrl"
+      class="htl-panel-link"
+      target="_blank"
+      rel="noopener noreferrer"
+      >View details &rarr;</a>
+  </div>
+</section>

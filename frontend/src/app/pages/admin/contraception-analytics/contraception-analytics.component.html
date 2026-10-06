@@ -1,0 +1,336 @@
+<div class="container fade-in py-3 py-lg-4">
+  <div class="hero-card mb-4">
+    <div class="row gx-3 align-items-center">
+      <div class="col-12 col-lg mb-3 mb-lg-0">
+        <p class="hero-kicker">Admin analytics</p>
+        <h3 class="hero-title mb-2">Contraception Analytics</h3>
+        <p class="hero-subtitle mb-0">
+          Monitor AI recommendations, breastfeeding context, method adoption, chat usage,
+          and weekly recommendation trends in one professional dashboard.
+        </p>
+      </div>
+
+      <div class="col-12 col-lg-auto mb-3 mb-lg-0">
+        <div class="export-actions">
+          <button
+            mat-stroked-button
+            class="secondary-action"
+            [disabled]="!overview || exportingCsv"
+            (click)="exportCsv()"
+            [title]="!overview ? 'Load data first' : 'Download CSV spreadsheet'">
+            <mat-icon class="material-icons-outlined">
+              {{ exportingCsv ? 'hourglass_empty' : 'table_view' }}
+            </mat-icon>
+            {{ exportingCsv ? 'Exporting…' : 'Export CSV' }}
+          </button>
+
+          <button
+            mat-flat-button
+            class="primary-action"
+            [disabled]="!overview || exportingPdf"
+            (click)="exportPdf()"
+            [title]="!overview ? 'Load data first' : 'Download PDF report'">
+            <mat-icon class="material-icons-outlined">
+              {{ exportingPdf ? 'hourglass_empty' : 'picture_as_pdf' }}
+            </mat-icon>
+            {{ exportingPdf ? 'Generating…' : 'Export PDF' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="state-card mb-4">
+      <mat-spinner diameter="42"></mat-spinner>
+      <div>
+        <h4 class="mb-1">Loading contraception analytics...</h4>
+        <p class="mb-0 text-secondary">Please wait while we fetch the latest recommendation and usage insights.</p>
+      </div>
+    </div>
+  }
+
+  @if (!loading && error) {
+    <div class="state-card error-state mb-4">
+      <mat-icon class="material-icons-outlined">error</mat-icon>
+      <div>
+        <h4 class="mb-1">Unable to load contraception analytics</h4>
+        <p class="mb-2 text-secondary">{{ error }}</p>
+        <button mat-flat-button class="primary-action" (click)="loadAnalytics()">
+          <mat-icon class="material-icons-outlined">refresh</mat-icon>
+          Retry
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (!loading && !error && overview) {
+    <div class="row gx-3 gx-lg-4 mb-1">
+      @for (metric of metrics; track metric.label) {
+        <div class="col-12 col-sm-6 col-lg-3">
+          <mat-card class="metric-card" [ngClass]="metric.tone">
+            <mat-card-content>
+              <div class="metric-head">
+                <div class="metric-icon">
+                  <mat-icon class="material-icons-outlined">{{ metric.icon }}</mat-icon>
+                </div>
+                <p class="metric-label mb-0">{{ metric.label }}</p>
+              </div>
+              <h1 class="metric-value mb-1">{{ metric.value }}</h1>
+              <p class="metric-helper mb-0">{{ metric.helper }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12 col-xl-6 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Breastfeeding context</h3>
+              <p class="text-secondary small mb-0">
+                Interactive donut chart showing whether recommendation requests came from breastfeeding mothers.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <apx-chart
+              [series]="breastfeedingDonutChart.series!"
+              [chart]="breastfeedingDonutChart.chart!"
+              [labels]="breastfeedingDonutChart.labels!"
+              [legend]="breastfeedingDonutChart.legend!"
+              [tooltip]="breastfeedingDonutChart.tooltip!"
+              [stroke]="breastfeedingDonutChart.stroke!"
+              [dataLabels]="breastfeedingDonutChart.dataLabels!"
+              [colors]="breastfeedingDonutChart.colors!"
+              [responsive]="breastfeedingDonutChart.responsive!"
+              [plotOptions]="breastfeedingDonutChart.plotOptions!">
+            </apx-chart>
+            <div class="note-box mt-3">
+              <mat-icon class="material-icons-outlined">pregnant_woman</mat-icon>
+              <p class="mb-0">
+                Breastfeeding context strongly influences postpartum contraception guidance and recommendation patterns.
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-xl-6 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Top recommendation preferences</h3>
+              <p class="text-secondary small mb-0">
+                Horizontal bar chart showing the preferences most frequently expressed by mothers.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <apx-chart
+              [series]="preferencesBarChart.series!"
+              [chart]="preferencesBarChart.chart!"
+              [xaxis]="preferencesBarChart.xaxis!"
+              [yaxis]="preferencesBarChart.yaxis!"
+              [stroke]="preferencesBarChart.stroke!"
+              [tooltip]="preferencesBarChart.tooltip!"
+              [dataLabels]="preferencesBarChart.dataLabels!"
+              [plotOptions]="preferencesBarChart.plotOptions!"
+              [colors]="preferencesBarChart.colors!">
+            </apx-chart>
+            <div class="note-box mt-3">
+              <mat-icon class="material-icons-outlined">tune</mat-icon>
+              <p class="mb-0">
+                Preference trends help explain why the AI recommends certain methods more often than others.
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12 col-xl-8 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Method status matrix</h3>
+              <p class="text-secondary small mb-0">
+                Compare active, stopped, and changed contraception logs by method.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <apx-chart
+              [series]="methodStatusChart.series!"
+              [chart]="methodStatusChart.chart!"
+              [xaxis]="methodStatusChart.xaxis!"
+              [yaxis]="methodStatusChart.yaxis!"
+              [stroke]="methodStatusChart.stroke!"
+              [tooltip]="methodStatusChart.tooltip!"
+              [dataLabels]="methodStatusChart.dataLabels!"
+              [plotOptions]="methodStatusChart.plotOptions!"
+              [colors]="methodStatusChart.colors!"
+              [legend]="methodStatusChart.legend!">
+            </apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-xl-4 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Adoption gauge</h3>
+              <p class="text-secondary small mb-0">
+                Half-donut gauge representing recommendation conversion into active contraception.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="gauge-shell">
+              <apx-chart
+                [series]="conversionGaugeChart.series!"
+                [chart]="conversionGaugeChart.chart!"
+                [labels]="conversionGaugeChart.labels!"
+                [legend]="conversionGaugeChart.legend!"
+                [tooltip]="conversionGaugeChart.tooltip!"
+                [stroke]="conversionGaugeChart.stroke!"
+                [dataLabels]="conversionGaugeChart.dataLabels!"
+                [colors]="conversionGaugeChart.colors!"
+                [responsive]="conversionGaugeChart.responsive!"
+                [plotOptions]="conversionGaugeChart.plotOptions!">
+              </apx-chart>
+              <div class="gauge-center-text">
+                <strong>{{ formatDecimal(overview.recommendationConversionRate) }}%</strong>
+                <span>Conversion rate</span>
+              </div>
+            </div>
+            <div class="note-box mt-2">
+              <mat-icon class="material-icons-outlined">trending_up</mat-icon>
+              <p class="mb-0">
+                This gauge estimates how often mothers move from AI recommendation to an active contraception method.
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12 col-xl-7 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Weekly recommendation trend</h3>
+              <p class="text-secondary small mb-0">
+                Area chart showing how recommendation requests evolve over time.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <apx-chart
+              [series]="weeklyTrendChart.series!"
+              [chart]="weeklyTrendChart.chart!"
+              [xaxis]="weeklyTrendChart.xaxis!"
+              [yaxis]="weeklyTrendChart.yaxis!"
+              [stroke]="weeklyTrendChart.stroke!"
+              [tooltip]="weeklyTrendChart.tooltip!"
+              [dataLabels]="weeklyTrendChart.dataLabels!"
+              [fill]="weeklyTrendChart.fill!"
+              [colors]="weeklyTrendChart.colors!">
+            </apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-xl-5 mb-3 mb-lg-4">
+        <mat-card class="panel-card h-100">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Executive insight</h3>
+              <p class="text-secondary small mb-0">
+                Quick interpretation of the most important contraception indicators.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="insight-box mb-3">
+              <mat-icon class="material-icons-outlined">insights</mat-icon>
+              <div>
+                <h4 class="mb-1">Top insight</h4>
+                <p class="mb-0">{{ topInsight }}</p>
+              </div>
+            </div>
+            <div class="insight-box mb-3">
+              <mat-icon class="material-icons-outlined">analytics</mat-icon>
+              <div>
+                <h4 class="mb-1">Conversion insight</h4>
+                <p class="mb-0">{{ conversionInsight }}</p>
+              </div>
+            </div>
+            <div class="mini-kpi-list">
+              <div class="mini-kpi">
+                <span>Total recommendations</span>
+                <strong>{{ overview.totalRecommendations }}</strong>
+              </div>
+              <div class="mini-kpi">
+                <span>Active methods</span>
+                <strong>{{ overview.activeMethodsCount }}</strong>
+              </div>
+              <div class="mini-kpi">
+                <span>Chat messages</span>
+                <strong>{{ overview.totalChatMessages }}</strong>
+              </div>
+              <div class="mini-kpi">
+                <span>Chat sessions</span>
+                <strong>{{ overview.totalChatSessions }}</strong>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="row gx-3 gx-lg-4">
+      <div class="col-12">
+        <mat-card class="panel-card mb-4">
+          <mat-card-header>
+            <div class="w-100">
+              <h3 class="mb-1">Method status table</h3>
+              <p class="text-secondary small mb-0">
+                Detailed method-level breakdown of active, stopped, and changed contraception logs.
+              </p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="table-shell">
+              <table class="analytics-table">
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>Active</th>
+                    <th>Stopped</th>
+                    <th>Changed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of methodStatusMatrix; track row.method) {
+                    <tr>
+                      <td>{{ row.method }}</td>
+                      <td>{{ row.activeCount }}</td>
+                      <td>{{ row.stoppedCount }}</td>
+                      <td>{{ row.changedCount }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

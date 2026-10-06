@@ -1,0 +1,211 @@
+<section class="mother-enrollments">
+  <div class="enroll-wrap">
+    <!-- ── HERO ── -->
+    <div class="enroll-hero">
+      <div class="hero-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="petal petal-1"></div>
+        <div class="petal petal-2"></div>
+      </div>
+
+      <div class="hero-inner">
+        <div class="hero-left">
+          <div class="hero-eyebrow">
+            <span class="eyebrow-dot"></span>
+            Achievement Hub
+            <span class="eyebrow-sep">·</span>
+            Your learning garden
+          </div>
+
+          <div class="hero-title">
+            <span class="title-regular">Cultivate your</span>
+            <span class="title-italic">Knowledge.</span>
+          </div>
+
+          <p class="hero-lead">
+            Your journey is a marathon, not a sprint. Track every milestone with
+            intention and celebrate every step forward.
+          </p>
+
+          <a routerLink="/front/mother/courses" class="hero-cta">
+            Discover New Paths
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="hero-right">
+          <div class="float-wrap">
+            <div class="float-ring float-ring-1"></div>
+            <div class="float-ring float-ring-2"></div>
+            <div class="float-core">
+              <div class="float-emoji">🏆</div>
+              <div class="float-num">{{ enrollments.length }}</div>
+              <div class="float-lbl">Active<br />Pathways</div>
+              <div class="float-chips">
+                <span class="fchip fchip-rose">Live</span>
+                <span class="fchip fchip-gold">Growing</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STATS ── -->
+    <div class="stats-row">
+      <div class="stat-widget">
+        <div class="stat-icon-wrap">📚</div>
+        <div>
+          <div class="stat-lbl">Enrolled</div>
+          <div class="stat-val">{{ enrollments.length }}</div>
+        </div>
+      </div>
+      <div class="stat-widget featured">
+        <div class="stat-icon-wrap">🌱</div>
+        <div>
+          <div class="stat-lbl">Status</div>
+          <div class="stat-val">Growing</div>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="stat-icon-wrap">🎓</div>
+        <div>
+          <div class="stat-lbl">Avg Progress</div>
+          <div class="stat-val">
+            {{
+              enrollments.length
+                ? (getAvgProgress() | number: "1.0-0") + "%"
+                : "—"
+            }}
+          </div>
+        </div>
+      </div>
+      <div class="stat-widget">
+        <div class="stat-icon-wrap">🏅</div>
+        <div>
+          <div class="stat-lbl">Certificates</div>
+          <div class="stat-val">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION META ── -->
+    <div class="section-meta">
+      <span class="section-chip">My Learning Paths</span>
+      <div class="section-line"></div>
+      <span class="result-count">{{ enrollments.length }} pathways</span>
+    </div>
+
+    <!-- ── CARDS ── -->
+    <div class="cards-grid" *ngIf="enrollments.length > 0">
+      <article class="progress-card" *ngFor="let item of enrollments">
+        <div class="card-top">
+          <div>
+            <span class="status-chip">{{ item.status }}</span>
+            <h2 class="card-title">{{ item.courseTitle }}</h2>
+            <div class="card-date">
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              Commenced {{ item.startedAt | date: "longDate" }}
+            </div>
+          </div>
+          <a
+            [routerLink]="['/front/mother/courses', item.courseId]"
+            class="card-link-btn"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M7 17L17 7M17 7H7M17 7v10" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="item.progressPct">
+              <div class="progress-shimmer"></div>
+            </div>
+            <div class="progress-thumb" [style.left.%]="item.progressPct"></div>
+          </div>
+          <div class="progress-labels">
+            <div class="pct-group">
+              <span class="pct-num">{{ item.progressPct }}</span>
+              <span class="pct-unit">% complete</span>
+            </div>
+            <div class="milestone">
+              <span class="milestone-lbl">Next milestone</span>
+              <span class="milestone-val">100% Certificate 🎓</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <div class="bump-group">
+            <button class="bump-btn" (click)="bumpProgress(item, 10)">
+              +10%
+            </button>
+            <button class="bump-btn" (click)="bumpProgress(item, 25)">
+              +25%
+            </button>
+          </div>
+          <button
+            class="btn-finalize"
+            (click)="bumpProgress(item, 100 - item.progressPct)"
+          >
+            Finalize Journey ✨
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <!-- ── EMPTY STATE ── -->
+    <div class="empty-state" *ngIf="enrollments.length === 0">
+      <div class="empty-bloom">🌸</div>
+      <h2 class="empty-title">Your learning garden is empty</h2>
+      <p class="empty-body">
+        Select a course to begin your personalized support journey.
+      </p>
+      <a routerLink="/front/mother/courses" class="btn-browse">
+        Browse Catalog
+        <svg
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
