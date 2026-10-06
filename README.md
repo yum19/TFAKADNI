@@ -1,9 +1,17 @@
+<div align="center">
+
+<img src="assets/logo.png" alt="TFAKADNI logo" width="160"/>
+
 # TFAKADNI
 
 > **From the first cycle to the first cradle.**
 > An AI-powered maternal health platform for Tunisia and the MENA region: one account, one continuous journey, from premarital health to baby's first year.
 
 **Team:** The 7th Layer · ESPRIT · PI-CDIO · May 2026
+
+</div>
+
+---
 
 ## 1. Why TFAKADNI
 
@@ -30,7 +38,32 @@ flowchart LR
 
 Key differentiators: end-to-end journey, Tunisian-first design, **96.9% accuracy** risk model (trained on 12,000 Tunisian mother profiles), partner-inclusive, proactive AI (Cycle Twin, Baby Rhythm, Care Score), multi-AI stack.
 
-## 3. Actors
+## 3. Screenshots
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/screenshot-home.png" alt="Home page with voice commands and accessibility panel"/>
+      <br/><b>Home</b> · welcome page with voice-command accessibility panel
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/screenshot-cycle.png" alt="Cycle tracker"/>
+      <br/><b>Cycle tracker</b> · phases, statistics and next-cycle prediction
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/screenshot-pregnancy.png" alt="My Pregnancy journey page"/>
+      <br/><b>My Pregnancy</b> · weekly journey, risk score and partner sharing
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/screenshot-partner.png" alt="Partner support notes"/>
+      <br/><b>EvoCare (Partner)</b> · support notes between partners
+    </td>
+  </tr>
+</table>
+
+## 4. Actors
 
 | Actor | Role |
 |---|---|
@@ -72,7 +105,7 @@ flowchart LR
     U8 -. requires .-> U7
 ```
 
-## 4. Architecture
+## 5. Architecture
 
 ```mermaid
 flowchart TB
@@ -92,7 +125,7 @@ flowchart TB
     MLF["MLflow · Hugging Face"] --> ML
 ```
 
-## 5. Cloud infrastructure & CI/CD
+## 6. Cloud infrastructure & CI/CD
 
 Multi-region, auto-scaling (100 → 1M+ users), end-to-end encryption, GDPR-aligned, role-based access, local data residency (Tunisia → Maghreb → MENA).
 
@@ -117,7 +150,7 @@ flowchart LR
     PROM --> ALERT["Alertmanager<br/>(auto-remediation)"]
 ```
 
-## 6. Example flow: pregnancy risk alert
+## 7. Example flow: pregnancy risk alert
 
 ```mermaid
 sequenceDiagram
@@ -139,7 +172,7 @@ sequenceDiagram
     end
 ```
 
-## 7. Tech stack
+## 8. Tech stack
 
 | Area | Technologies |
 |---|---|
@@ -151,23 +184,24 @@ sequenceDiagram
 | Cloud & DevOps | OpenStack, Docker, Kubernetes, Ansible, GitHub Actions, Prometheus, Alertmanager |
 | Clinical sources | 9 validated sources (incl. ACOG, ESHRE) |
 
-## 8. SDGs
+## 9. SDGs
 
 SDG 3 Good Health · SDG 4 Education · SDG 5 Gender Equality · SDG 9 Innovation · SDG 10 Reduced Inequalities · SDG 17 Partnerships
 
-## 9. Roadmap
+## 10. Roadmap
 
 **Pilot:** 3 hospitals · 500 mothers · 12 months, then Maghreb → MENA → Francophone Africa.
 
-## 10. Project structure
+## 11. Project structure
 
 ```
 .
+├── assets/     # README images
 ├── frontend/   # Angular app
 └── backend/    # Spring Boot app
 ```
 
-## 11. Getting started
+## 12. Getting started
 
 ```bash
 git clone <REPO_URL>
@@ -180,7 +214,7 @@ cd frontend && npm install && ng serve
 cd backend && ./mvnw spring-boot:run
 ```
 
-## 12. Git workflow
+## 13. Git workflow
 
 ```bash
 git checkout -b your-name/feature-name        # e.g. missaoui/module-7
